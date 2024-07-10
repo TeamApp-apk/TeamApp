@@ -1,0 +1,51 @@
+Spotkanko ustalanie - teamApp
+
+Ogólny zarys aplikacji:
+-lista bliskich wydarzeń / ogłoszeń w odległości od podanego adresu
+
+Możliwe opcje: 
+-aplikacja (lepiej na cv wygl)
+-strona internetowa - (uniwersalne)
+-Strona internetowa bez pełnej funkcjonalności przekierowująca na aplikację
+
+Technologie:
+front i back:
+-kotlin (inna składnia od javy, ułatwienia w pisaniu apek mobilnych)
+-java
+-front kotlin, backend java
+
+baza danych:
+-sql (baza użytkowników)
+
+Komunikacja front - back
+-html json
+
+
+Podział Ról:
+50/50 backend
+1 osoba architektura - postawienie serwera, tokeny, zabezpieczenia
+2 os front
+2 os back
+
+repo github
+foldery:
+front
+back
+sql
+dokumentacja
+
+Dokumentacja
+-rysunki jak ma wyglądać front (projekt front)
+-kto robi co
+-komunikacja front - back
+-co ma zawierać baza danych
+-Idea programu (cały proces tworzenia aplikacji)
+
+Wstępna kolejność pracy:
+-ustalić role
+-repo
+-postawić serwer
+-ogarnąć wybrane technologie
+-Pierwotny zamysł aplikacji (diagramy, opisowo)
+-profile na dalszy plan
+-ustalić co robimy z UI
