@@ -1,0 +1,11 @@
+Roles
+    Backend:
+        Byniuo 
+        ABardWithAWard 
+        Swadz12
+    Front:
+        lukaszs3
+        pszafarowski
+    Architecture:
+        ???
+
