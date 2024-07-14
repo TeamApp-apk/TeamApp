@@ -1,2 +1,2 @@
 # TeamApp
-App which helps people in finding sport partners.
+An application that helps people find sports partners.
