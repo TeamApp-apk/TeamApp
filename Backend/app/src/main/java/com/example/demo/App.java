@@ -19,6 +19,6 @@ public class App {
     @GetMapping("/hello")
     public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
         String userInfo = userService.createAndReturnUserInfo();
-        return String.format("Hello %s! Here huj dupa a user info: %s", name, userInfo);
+        return String.format("Hello %s! Here a user info: %s", name, userInfo);
     }
 }
