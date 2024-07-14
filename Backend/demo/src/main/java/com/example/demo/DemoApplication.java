@@ -11,15 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class DemoApplication {
 
     @Autowired
-    private UserService userService; // Autowired to use UserService
-
+    private UserService userService;
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);
     }
 
     @GetMapping("/hello")
     public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
-        // Use UserService to create a User and return information
         String userInfo = userService.createAndReturnUserInfo();
         return String.format("Hello %s! Here is a user info: %s", name, userInfo);
     }
