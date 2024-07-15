@@ -1,17 +1,23 @@
 package com.example.demo.user;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserService {
-    public User[] users;
+    public ArrayList<User> users;
     public int currAmount;
 
     UserService()
     {
-        users = new User[10];
+        users = new ArrayList<User>();
         for(int i = 0; i < 10; i++)
         {
-            users[i] = new User("John Doe", Integer.toString(i), "password123");
+
+
+            users.add(new User("John Doe", Integer.toString(i), "password123"));
         }
 
         currAmount = 10;
@@ -28,6 +34,16 @@ public class UserService {
             }
         }
         return null;
+    }
+
+
+    public boolean LoginAuth(String login, String password) {
+        User user = find(login);
+        if (user != null) {
+            return user.getPassword().equals(password);
+
+        }
+        return false;
     }
 
     public String createAndReturnUserInfo() {
