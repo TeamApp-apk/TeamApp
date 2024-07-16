@@ -49,3 +49,22 @@ Wstępna kolejność pracy:
 -Pierwotny zamysł aplikacji (diagramy, opisowo)
 -profile na dalszy plan
 -ustalić co robimy z UI
+
+Spotkanie 16.07
+
+!Ustalić jak ma wyglądać baza danych w sql
+
+Front
+-zrobić wszystkie screeny
+-ustawienia użytkownika
+-mock zapytania do backendu
+
+Backend
+-mock zapytania do sql
+-klasa event
+-administracja
+-maszyna wirtualna do serwera (dowiedzieć się co trzeba zainstalować na serwerze aby działał)
+
+wireShark
+
+
