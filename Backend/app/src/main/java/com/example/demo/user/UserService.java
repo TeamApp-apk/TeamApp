@@ -1,6 +1,6 @@
 package com.example.demo.user;
+import com.example.demo.Event.Event;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,20 +8,19 @@ import java.util.List;
 public class UserService {
     public ArrayList<User> users;
     public int currAmount;
-
     UserService()
     {
         users = new ArrayList<User>();
         for(int i = 0; i < 10; i++)
         {
-
-
             users.add(new User("John Doe", Integer.toString(i), "password123"));
         }
-
         currAmount = 10;
     }
-
+    public void addUser(User user) {
+        currAmount++;
+        users.add(user);
+    }
     public String getUserInfo(User user) {
         return "User Info: " + user.toString();
     }
@@ -34,8 +33,6 @@ public class UserService {
         }
         return null;
     }
-
-
     public boolean LoginAuth(String login, String password) {
         User user = find(login);
         if (user != null) {
@@ -44,10 +41,13 @@ public class UserService {
         }
         return false;
     }
-
     public String createAndReturnUserInfo() {
         User user = new User("John Doe", "john.doe@example.com", "password123");
         return user.toString(); // Or return any specific detail
     }
+    public void joinEvent(User user, Event event) {
+        event.addParticipant(user);
+    }
+
 
 }

@@ -1,5 +1,4 @@
 package com.example.demo.user;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,14 +13,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-
     private final UserService userService = new UserService();
-
     @GetMapping("")
     List<User> getUsers() {
         return userService.users;
     }
-
     @GetMapping("/{id}")
     User getUserById(@PathVariable Integer id) {
         return userService.users.get(id);
@@ -31,7 +27,6 @@ public class UserController {
     public boolean verifyUserCredentials(@RequestBody String[] array) {
         String login = array[0];
         String password = array[1];
-
         return userService.LoginAuth(array[0], array[1]);
     }
 
