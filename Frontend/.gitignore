@@ -186,3 +186,4 @@ xcuserdata/
 .idea
 .gradle
 .gradle/
+local.properties
