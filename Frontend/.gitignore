@@ -184,3 +184,5 @@ Temporary Items
 xcuserdata/
 
 .idea
+.gradle
+.gradle/
