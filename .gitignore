@@ -184,3 +184,8 @@ Temporary Items
 xcuserdata/
 
 .idea
+
+.runtimeconfig.json
+.firebase/
+.runtimeconfig.json
+.firebase/

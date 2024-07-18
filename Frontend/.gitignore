@@ -187,3 +187,8 @@ xcuserdata/
 .gradle
 .gradle/
 local.properties
+
+.runtimeconfig.json
+.firebase/
+.runtimeconfig.json
+.firebase/
