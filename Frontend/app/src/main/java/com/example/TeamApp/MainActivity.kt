@@ -1,5 +1,4 @@
 package com.example.TeamApp
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,29 +20,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.FirebaseApp
 
-class MainActivity : ComponentActivity() {
+
+public class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
+        val auth = FirebaseAuth.getInstance()
+        auth.useEmulator("localhost", 9099)
         setContent {
             Column(modifier = Modifier.fillMaxSize()) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 16.dp, top = 16.dp) // Adjust padding for top-right position
+                        .padding(end = 16.dp, top = 16.dp)
                         .wrapContentWidth(Alignment.End)
                 ) {
                     PLFLAG()
-                    Spacer(modifier = Modifier.width(16.dp)) // Adjust spacing between flags
+                    Spacer(modifier = Modifier.width(16.dp))
                     UKFLAG()
                 }
 
-                Spacer(modifier = Modifier.height(336.dp)) // Add spacing between flags and button
+                Spacer(modifier = Modifier.height(336.dp))
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally), // Center horizontally
+                        .wrapContentWidth(Alignment.CenterHorizontally),
                     contentAlignment = Alignment.Center
                 ) {
                     CustomButton(text = "SIGN UP", onClick = { /* TODO */ })

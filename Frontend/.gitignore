@@ -1,3 +1,4 @@
+```plaintext
 # Compiled class file
 *.class
 
@@ -184,11 +185,59 @@ Temporary Items
 xcuserdata/
 
 .idea
-.gradle
-.gradle/
-local.properties
 
 .runtimeconfig.json
 .firebase/
 .runtimeconfig.json
 .firebase/
+
+# Firebase configuration
+**/google-services.json
+**/GoogleService-Info.plist
+**/.firebaserc
+**/firebase.json
+
+# Python virtual environments
+venv/
+**/venv/
+
+# Compiled Python files
+*.pyc
+**/*.pyc
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Node modules
+node_modules/
+
+# Build output
+build/
+**/build/
+
+# Gradle
+.gradle/
+**/.gradle/
+build/
+
+# Local configuration files
+local.properties
+
+# Log files
+*.log
+
+# macOS files
+.DS_Store
+
+# Windows image file caches
+Thumbs.db
+
+# Folder config file
+Desktop.ini
+
+# SSH Keys
+*.pem
+```
