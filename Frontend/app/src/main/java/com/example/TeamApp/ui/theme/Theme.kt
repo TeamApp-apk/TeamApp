@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.example.ui.theme.AppTypography
 
 @Immutable
 data class ExtendedColorScheme(
@@ -287,10 +288,7 @@ val extendedLight = ExtendedColorScheme(
   onTextLight,
   textContainerLight,
   onTextContainerLight,
-  textOnThemeLight,
-  onTextOnThemeLight,
-  textOnThemeContainerLight,
-  onTextOnThemeContainerLight,
+
   ),
   textOnTheme = ColorFamily(
   textOnThemeLight,
@@ -342,10 +340,6 @@ val extendedDark = ExtendedColorScheme(
   onTextDark,
   textContainerDark,
   onTextContainerDark,
-  textOnThemeDark,
-  onTextOnThemeDark,
-  textOnThemeContainerDark,
-  onTextOnThemeContainerDark,
   ),
   textOnTheme = ColorFamily(
   textOnThemeDark,
@@ -397,10 +391,6 @@ val extendedLightMediumContrast = ExtendedColorScheme(
   onTextLightMediumContrast,
   textContainerLightMediumContrast,
   onTextContainerLightMediumContrast,
-  textOnThemeLightMediumContrast,
-  onTextOnThemeLightMediumContrast,
-  textOnThemeContainerLightMediumContrast,
-  onTextOnThemeContainerLightMediumContrast,
   ),
   textOnTheme = ColorFamily(
   textOnThemeLightMediumContrast,
@@ -452,10 +442,6 @@ val extendedLightHighContrast = ExtendedColorScheme(
   onTextLightHighContrast,
   textContainerLightHighContrast,
   onTextContainerLightHighContrast,
-  textOnThemeLightHighContrast,
-  onTextOnThemeLightHighContrast,
-  textOnThemeContainerLightHighContrast,
-  onTextOnThemeContainerLightHighContrast,
   ),
   textOnTheme = ColorFamily(
   textOnThemeLightHighContrast,
@@ -507,10 +493,6 @@ val extendedDarkMediumContrast = ExtendedColorScheme(
   onTextDarkMediumContrast,
   textContainerDarkMediumContrast,
   onTextContainerDarkMediumContrast,
-  textOnThemeDarkMediumContrast,
-  onTextOnThemeDarkMediumContrast,
-  textOnThemeContainerDarkMediumContrast,
-  onTextOnThemeContainerDarkMediumContrast,
   ),
   textOnTheme = ColorFamily(
   textOnThemeDarkMediumContrast,
@@ -562,10 +544,6 @@ val extendedDarkHighContrast = ExtendedColorScheme(
   onTextDarkHighContrast,
   textContainerDarkHighContrast,
   onTextContainerDarkHighContrast,
-  textOnThemeDarkHighContrast,
-  onTextOnThemeDarkHighContrast,
-  textOnThemeContainerDarkHighContrast,
-  onTextOnThemeContainerDarkHighContrast,
   ),
   textOnTheme = ColorFamily(
   textOnThemeDarkHighContrast,
