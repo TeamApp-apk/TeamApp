@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -17,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel) {
@@ -24,6 +27,7 @@ fun LoginScreen(viewModel: LoginViewModel) {
     val username by viewModel.username.observeAsState("")
     val password by viewModel.password.observeAsState("")
     val loginSuccess by viewModel.loginSuccess.observeAsState()
+    val registerSuccess by viewModel.registerSuccess.observeAsState()
 
     Column(
         modifier = Modifier
@@ -86,15 +90,48 @@ fun LoginScreen(viewModel: LoginViewModel) {
         ) {
             Text(text = "Log In")
         }
+        Button(
+            onClick = { viewModel.onRegisterClick() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 4.dp)
+        ) {
+            Text(text = "Register")
+        }
     }
 
     loginSuccess?.let { success ->
-        if (success) {
-            Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
-            // Przejście do innego ekranu po zalogowaniu
-        } else {
-            Toast.makeText(context, "Login Failed", Toast.LENGTH_SHORT).show()
-        }
+        CustomSnackbar(success = success, onDismiss = {},true)
+    }
+    registerSuccess?.let { success ->
+        CustomSnackbar(success = success, onDismiss = {},false)
+    }
+
+}
+@Composable
+fun CustomSnackbar(success: Boolean, onDismiss: () -> Unit, isLogin: Boolean) {
+    Snackbar(
+        action = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    "OK",
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+        },
+        modifier = Modifier.padding(12.dp),
+        shape = RoundedCornerShape(12.dp),
+        containerColor = if (success) Color(0xFF4CAF50) else Color(0xFFF44336),
+        contentColor = Color.White
+    ) {
+        Text(
+            text = if (success) {
+                if (isLogin) "Login Successful" else "Registration Successful"
+            } else {
+                if (isLogin) "Login Failed" else "Registration Failed"
+            },
+            style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
+        )
     }
 }
 

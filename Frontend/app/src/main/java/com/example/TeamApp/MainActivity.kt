@@ -73,10 +73,6 @@ fun TeamApp(loginViewModel: LoginViewModel) {
     )
 }
 
-
-
-
-
 @Preview
 @Composable
 fun MainPreview() {
