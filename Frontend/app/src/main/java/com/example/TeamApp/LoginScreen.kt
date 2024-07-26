@@ -1,14 +1,19 @@
 package com.example.TeamApp
 
-import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -19,7 +24,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel) {
@@ -28,6 +38,17 @@ fun LoginScreen(viewModel: LoginViewModel) {
     val password by viewModel.password.observeAsState("")
     val loginSuccess by viewModel.loginSuccess.observeAsState()
     val registerSuccess by viewModel.registerSuccess.observeAsState()
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
+
+    // Manage Snackbar visibility
+    LaunchedEffect(loginSuccess, registerSuccess) {
+        if (loginSuccess != null || registerSuccess != null) {
+            showSnackbar = true
+            delay(2000) // Delay for 2 seconds
+            showSnackbar = false
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -100,38 +121,43 @@ fun LoginScreen(viewModel: LoginViewModel) {
         }
     }
 
-    loginSuccess?.let { success ->
-        CustomSnackbar(success = success, onDismiss = {},true)
-    }
-    registerSuccess?.let { success ->
-        CustomSnackbar(success = success, onDismiss = {},false)
-    }
-
-}
-@Composable
-fun CustomSnackbar(success: Boolean, onDismiss: () -> Unit, isLogin: Boolean) {
-    Snackbar(
-        action = {
-            TextButton(onClick = onDismiss) {
-                Text(
-                    "OK",
-                    color = MaterialTheme.colorScheme.secondary
-                )
-            }
-        },
-        modifier = Modifier.padding(12.dp),
-        shape = RoundedCornerShape(12.dp),
-        containerColor = if (success) Color(0xFF4CAF50) else Color(0xFFF44336),
-        contentColor = Color.White
-    ) {
-        Text(
-            text = if (success) {
-                if (isLogin) "Login Successful" else "Registration Successful"
-            } else {
-                if (isLogin) "Login Failed" else "Registration Failed"
-            },
-            style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
+    if (showSnackbar) {
+        CustomSnackbar(
+            success = loginSuccess ?: registerSuccess ?: false,
+            onDismiss = { showSnackbar = false },
+            isLogin = loginSuccess != null
         )
     }
 }
+
+@Composable
+fun CustomSnackbar(success: Boolean, onDismiss: () -> Unit, isLogin: Boolean) {
+    Snackbar(
+        modifier = Modifier
+            .padding(80.dp)
+            .wrapContentSize(Alignment.Center),
+        shape = RoundedCornerShape(60.dp),
+        containerColor = if (success) Color(0xFF4CAF50) else Color(0xFFF44336),
+        contentColor = Color.White,
+        action = {
+        }
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (success) {
+                    if (isLogin) "Login Successful" else "Registration Successful"
+                } else {
+                    if (isLogin) "Login Failed" else "Registration Failed"
+                },
+                style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
+            )
+        }
+    }
+}
+
+
 

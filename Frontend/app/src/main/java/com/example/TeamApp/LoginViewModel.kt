@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 
 class LoginViewModel : ViewModel() {
 
@@ -48,21 +50,5 @@ class LoginViewModel : ViewModel() {
             }
     }
 
-    fun onRegisterClick() {
-        val email = _username.value ?: return
-        val password = _password.value ?: return
-
-        Log.d("RegisterAttempt", "Attempting to register with email: $email")
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("Register", "Registration successful")
-                    _registerSuccess.value = true
-                } else {
-                    Log.e("Register", "Registration failed: ${task.exception?.message}")
-                    _registerSuccess.value = false
-                }
-            }
-    }
-
+     
 }
