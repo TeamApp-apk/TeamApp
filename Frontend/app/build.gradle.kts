@@ -68,7 +68,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.runtime) // Use the Compose runtime version you're working with
     implementation(libs.androidx.runtime.livedata) // Ensure it matches the Compose version you're using
-
+    implementation (libs.androidx.material.icons.extended)
 
     // Navigation
     implementation(libs.androidx.navigation.runtime.ktx)
@@ -84,6 +84,7 @@ dependencies {
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.appcompat)
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
     // Testing dependencies
     testImplementation(libs.junit)
