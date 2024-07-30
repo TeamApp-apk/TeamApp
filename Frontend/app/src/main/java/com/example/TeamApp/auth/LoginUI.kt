@@ -1,4 +1,4 @@
-package com.example.TeamApp
+package com.example.TeamApp.auth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,13 +28,12 @@ import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel) {
     val context = LocalContext.current
-    val username by viewModel.username.observeAsState("")
+    val username by viewModel.email.observeAsState("")
     val password by viewModel.password.observeAsState("")
     val loginSuccess by viewModel.loginSuccess.observeAsState()
     val registerSuccess by viewModel.registerSuccess.observeAsState()
@@ -73,7 +72,7 @@ fun LoginScreen(viewModel: LoginViewModel) {
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     if (username.isEmpty()) {
-                        Text("Username", style = TextStyle(color = Color.Gray))
+                        Text("Email", style = TextStyle(color = Color.Gray))
                     }
                     innerTextField()
                 }
@@ -104,7 +103,7 @@ fun LoginScreen(viewModel: LoginViewModel) {
         )
 
         Button(
-            onClick = { viewModel.onLoginClick() },
+            onClick = { viewModel.onLoginClick(context) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp, horizontal = 4.dp)
@@ -112,7 +111,7 @@ fun LoginScreen(viewModel: LoginViewModel) {
             Text(text = "Log In")
         }
         Button(
-            onClick = { viewModel.onRegisterClick() },
+            onClick = { viewModel.onRegisterClick(context) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp, horizontal = 4.dp)
