@@ -41,7 +41,7 @@ fun CreateEventScreen(viewModel: CreateEventViewModel, context: Context) {
                 TextField(
                     value = sport,
                     onValueChange = { viewModel.onSportChange(it) },
-                    label = { Text("Sport") },
+                    label = { Text("Sport*") },
                     readOnly = true,
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
@@ -70,7 +70,7 @@ fun CreateEventScreen(viewModel: CreateEventViewModel, context: Context) {
             TextField(
                 value = address,
                 onValueChange = { viewModel.onAddressChange(it) },
-                label = { Text("Address") },
+                label = { Text("Address*") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
@@ -79,7 +79,7 @@ fun CreateEventScreen(viewModel: CreateEventViewModel, context: Context) {
             TextField(
                 value = limit,
                 onValueChange = { viewModel.onLimitChange(it) },
-                label = { Text("Limit of participants") },
+                label = { Text("Limit of participants*") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
