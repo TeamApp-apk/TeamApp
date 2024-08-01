@@ -9,8 +9,11 @@ import com.example.TeamApp.auth.LoginActivity
 import com.example.TeamApp.auth.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.MutableLiveData
+import com.example.TeamApp.auth.RegisterActivity
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.data.User
+import com.example.TeamApp.profile.ProfileActivity
+import com.example.TeamApp.searchThrough.SearchThroughActivity
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import java.time.LocalDate
@@ -29,6 +32,19 @@ class CreateEventViewModel : ViewModel() {
 
     private val _limit = MutableLiveData<String>()
     val limit: LiveData<String> get() = _limit
+
+    fun navigateToProfile(context: Context){
+        val intent = Intent(context, ProfileActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        context.startActivity(intent)
+    }
+    fun navigateToSearchThrough(context: Context){
+        val intent = Intent(context, SearchThroughActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        context.startActivity(intent)
+    }
 
     fun createEvent(context: Context, sport: String, address: String, limit: String, description: String) {
         if (sport.isEmpty() || address.isEmpty() || limit.isEmpty() || description.isEmpty()) {
@@ -57,7 +73,7 @@ class CreateEventViewModel : ViewModel() {
     //temporary here
     fun logout(context: Context) {
         FirebaseAuth.getInstance().signOut()
-        val intent = Intent(context, LoginActivity::class.java).apply {
+        val intent = Intent(context, RegisterActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         context.startActivity(intent)

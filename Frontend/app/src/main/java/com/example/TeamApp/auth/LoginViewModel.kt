@@ -31,7 +31,7 @@ class LoginViewModel : ViewModel() {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    fun onUsernameChanged(newUsername: String) {
+    fun onEmailChange(newUsername: String) {
         _email.value = newUsername
     }
 
@@ -66,6 +66,13 @@ class LoginViewModel : ViewModel() {
                     _loginSuccess.value = false
                 }
             }
+    }
+
+    fun getToLoginScreen(context: Context){
+        val intent = Intent(context,LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        context.startActivity(intent)
     }
     fun onRegisterClick(context: Context) {
         val email = _email.value ?: return

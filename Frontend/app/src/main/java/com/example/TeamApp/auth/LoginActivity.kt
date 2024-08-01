@@ -25,7 +25,6 @@ import com.google.firebase.initialize
 import android.content.Intent
 import com.example.TeamApp.event.CreateEventActivity
 
-
 class LoginActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
 
@@ -33,18 +32,9 @@ class LoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         Firebase.initialize(this)
-
         //Jesli jeden raz zalogowalismy sie na urzadzeniu, to po zamknieciu aplikacji
         //nie chcemy znowu się logować.
-        val auth = FirebaseAuth.getInstance()
-        if (auth.currentUser != null) {
-            // User is logged in, redirect to CreateEventActivity
-            val intent = Intent(this, CreateEventActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
-            return
-        }
+
         enableEdgeToEdge()
         setContent {
             TeamAppTheme {
@@ -53,8 +43,12 @@ class LoginActivity : ComponentActivity() {
         }
     }
 
-    companion object {
-        private const val TAG = "MainActivity"
+    override fun onBackPressed() {
+        super.onBackPressed()
+        // Przekierowanie z powrotem do ekranu rejestracji
+        val intent = Intent(this, RegisterActivity::class.java)
+        startActivity(intent)
+        finish() // Opcjonalne, aby zamknąć `LoginActivity` i zapobiec wracaniu do niej po naciśnięciu "Back"
     }
 }
 
@@ -70,6 +64,7 @@ fun TeamApp(loginViewModel: LoginViewModel) {
         }
     )
 }
+
 fun checkNetworkConnectivity(context: Context) {
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)

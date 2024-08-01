@@ -26,7 +26,7 @@ fun CreateEventScreen(viewModel: CreateEventViewModel, context: Context) {
 
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().padding(bottom = 15.dp)) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -111,13 +111,13 @@ fun CreateEventScreen(viewModel: CreateEventViewModel, context: Context) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Button(onClick = { /* Navigate to Search */ }) {
+            Button(onClick = { viewModel.navigateToSearchThrough(context) }) {
                 Text(text = "Search")
             }
-            Button(onClick = { /* Navigate to Create */ }) {
+            Button(onClick = {}, colors = ButtonDefaults.buttonColors(Color.Gray)) {
                 Text(text = "Create")
             }
-            Button(onClick = { /* Navigate to Profile */ }) {
+            Button(onClick = { viewModel.navigateToProfile(context) }) {
                 Text(text = "Profile")
             }
         }

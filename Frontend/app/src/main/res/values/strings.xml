@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="title_activity_create_event">CreateEventActivit</string>
+    <string name="title_activity_profile_activity.kt">ProfileActivity.kt</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="title_activity_search_through">SearchThroughActivity</string>
 </resources>

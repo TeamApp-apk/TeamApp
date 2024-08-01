@@ -84,7 +84,9 @@ dependencies {
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.appcompat)
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+    implementation(libs.androidx.constraintlayout.compose)
+    implementation (libs.androidx.material.icons.extended.v100)
+
 
     // Testing dependencies
     testImplementation(libs.junit)

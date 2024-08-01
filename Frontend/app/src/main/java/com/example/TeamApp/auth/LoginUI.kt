@@ -64,7 +64,7 @@ fun LoginScreen(viewModel: LoginViewModel) {
 
         BasicTextField(
             value = username,
-            onValueChange = { viewModel.onUsernameChanged(it) },
+            onValueChange = { viewModel.onEmailChange(it) },
             decorationBox = { innerTextField ->
                 Box(
                     modifier = Modifier
@@ -109,14 +109,6 @@ fun LoginScreen(viewModel: LoginViewModel) {
                 .padding(vertical = 8.dp, horizontal = 4.dp)
         ) {
             Text(text = "Log In")
-        }
-        Button(
-            onClick = { viewModel.onRegisterClick(context) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = 4.dp)
-        ) {
-            Text(text = "Register")
         }
     }
 

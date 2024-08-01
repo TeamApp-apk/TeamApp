@@ -1,4 +1,4 @@
-package com.example.TeamApp
+package com.example.TeamApp.auth
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -33,6 +33,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -54,8 +57,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.compose.primaryLight
 import com.example.compose.secondaryLight
+import com.example.TeamApp.R
 
 @Composable
 fun RegisterScreen() {
@@ -68,7 +73,6 @@ fun RegisterScreen() {
             verticalArrangement = Arrangement.Center
 
             ) {
-
             TextComponentUpper1(value = "Hey there, ")
             TextComponentUpper2(value = "Create an account")
             Spacer(modifier = Modifier.height(30.dp))
@@ -131,46 +135,46 @@ fun PreviewRegisterScreen() {
 @Composable
 fun MyTextField(labelValue: String, painterResource: Painter) {
     val textValue = remember { mutableStateOf("") }
+    val viewModel: LoginViewModel = viewModel()
+    val email by viewModel.email.observeAsState("")
 
     OutlinedTextField(
-        modifier =Modifier.fillMaxWidth()
-            ,
-
+        modifier = Modifier.fillMaxWidth(),
         label = { Text(text = labelValue) },
-        value = textValue.value,
-        onValueChange = { textValue.value = it },
+        value = if (labelValue == "E-mail") email else textValue.value,
+        onValueChange = {
+            if (labelValue == "E-mail") {
+                viewModel.onEmailChange(it)
+            } else {
+                textValue.value = it
+            }
+        },
         keyboardOptions = KeyboardOptions.Default,
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = primaryLight,
             focusedLabelColor = secondaryLight,
             cursorColor = primaryLight,
             containerColor = Color(0xFFE0E0E0)
-
-
-        )
-
-        ,
+        ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription ="" ,
-                modifier = Modifier.size(35.dp))
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier.size(35.dp))
         }
     )
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordTextField(labelValue: String, painterResource: Painter) {
-    val password = remember { mutableStateOf("") }
-    val passwordVisible= remember {
-        mutableStateOf(false)
-    }
+    val viewModel: LoginViewModel = viewModel()
+    val password by viewModel.password.observeAsState("")
+    val passwordVisible = remember { mutableStateOf(false) }
 
     OutlinedTextField(
         modifier =Modifier.fillMaxWidth()
         ,
 
         label = { Text(text = labelValue) },
-        value = password.value,
-        onValueChange = { password.value = it },
+        value = password,
+        onValueChange = { viewModel.onPasswordChanged(it) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = primaryLight,
@@ -235,7 +239,9 @@ fun CheckBox(value: String){
 
 }
 @Composable
+
 fun ClickableTextComponent() {
+
     val initialText = "By continuing you accept our "
     val privacyPolicyText = "Privacy Policy"
     val annotatedString = buildAnnotatedString {
@@ -261,8 +267,10 @@ fun ClickableTextComponent() {
 }
 @Composable
 fun ButtonComponent(value: String) {
+    val viewModel: LoginViewModel = viewModel()
+    val context = LocalContext.current
     Button(
-        onClick = { /*TODO*/ },
+        onClick = { viewModel.onRegisterClick(context) },
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(48.dp),
@@ -314,6 +322,8 @@ fun DividerTextComponent() {
 }
 @Composable
 fun ClickableLoginTextComponent() {
+    val viewModel: LoginViewModel = viewModel()
+    val context = LocalContext.current
     val initialText = "Already have an account?  "
     val loginText = "Log in"
     val annotatedString = buildAnnotatedString {
@@ -327,13 +337,9 @@ fun ClickableLoginTextComponent() {
 
     ClickableText(
         text = annotatedString,
-        onClick = { offset ->
-            annotatedString.getStringAnnotations(start = offset, end = offset).firstOrNull()?.let { annotation ->
-                if (annotation.item == loginText) {
-                    Log.d("ClickableText", "Privacy Policy clicked")
-
-                }
-            }
+        onClick = {
+            viewModel.getToLoginScreen(context)
+            //viewModel.onLoginClick(context)
         }
     )
 }
