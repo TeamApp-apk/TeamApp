@@ -33,7 +33,6 @@ class Event(
         BADMINTON,
         GYM
     }
-
     init {
         this.date = LocalDate.parse(date) // Correct parsing
         this.endDate = LocalDate.parse(endDate)

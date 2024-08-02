@@ -86,6 +86,10 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout.compose)
     implementation (libs.androidx.material.icons.extended.v100)
+    implementation (libs.play.services.auth)
+    implementation (libs.firebase.ui.auth)
+    implementation ("com.google.firebase:firebase-auth:23.0.0")
+
 
 
     // Testing dependencies

@@ -59,7 +59,7 @@ fun TeamApp(loginViewModel: LoginViewModel) {
     Scaffold(
         content = {
             Box(modifier = Modifier.fillMaxSize()) {
-                LoginScreen(loginViewModel)
+                LoginScreen()
             }
         }
     )

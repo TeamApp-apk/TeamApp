@@ -2,6 +2,7 @@
 agp = "8.5.1"
 constraintlayoutCompose = "1.0.1"
 firebaseBom = "33.1.2"
+firebaseUiAuth = "7.2.0"
 kotlin = "1.9.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -21,6 +22,7 @@ materialIconsExtended = "<version>"
 materialIconsExtendedVersion = "1.0.0"
 navigationRuntimeKtx = "2.7.7"
 firebaseFirestore = "25.0.0"
+playServicesAuth = "21.2.0"
 runtime = "1.6.8"
 appcompat = "1.7.0"
 [libraries]
@@ -38,6 +40,7 @@ firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
+firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -57,6 +60,7 @@ firebase-database = { group = "com.google.firebase", name = "firebase-database",
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx", version.ref = "firebaseAnalyticsKtx" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

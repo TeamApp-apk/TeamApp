@@ -36,10 +36,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -64,9 +66,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.compose.primaryLight
 import com.example.compose.secondaryLight
 import com.example.TeamApp.R
+import kotlinx.coroutines.delay
 
 @Composable
 fun RegisterScreen() {
+    val viewModel : LoginViewModel = viewModel()
+    val loginSuccess by viewModel.loginSuccess.observeAsState()
+    val registerSuccess by viewModel.registerSuccess.observeAsState()
+    var showSnackbar by remember { mutableStateOf(false) }
+    LaunchedEffect(loginSuccess, registerSuccess) {
+        if (viewModel.loginSuccess.value != null || viewModel.registerSuccess.value != null) {
+            showSnackbar = true
+            delay(2000) // Delay for 2 seconds
+            showSnackbar = false
+            viewModel.resetLoginRegisterSuccess()
+        }
+    }
     Surface( modifier = Modifier
         .fillMaxSize()
         .padding(28.dp)
@@ -105,7 +120,13 @@ fun RegisterScreen() {
         }
 
     }
-
+    if (showSnackbar) {
+        CustomSnackbar(
+            success = loginSuccess ?: registerSuccess ?: false,
+            onDismiss = { showSnackbar = false },
+            isLogin = loginSuccess != null
+        )
+    }
 }
 @Composable
 fun TextComponentUpper1(value: String){
@@ -183,7 +204,6 @@ fun PasswordTextField(labelValue: String, painterResource: Painter) {
     val viewModel: LoginViewModel = viewModel()
     val password by viewModel.password.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
-
     OutlinedTextField(
         modifier =Modifier.fillMaxWidth()
         ,
@@ -289,31 +309,61 @@ fun ClickableTextComponent() {
 fun ButtonComponent(value: String) {
     val viewModel: LoginViewModel = viewModel()
     val context = LocalContext.current
-    Button(
-        onClick = { viewModel.onRegisterClick(context) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(48.dp),
-        contentPadding = PaddingValues(),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
-    ) {
-        Box(
+    if(value == "Login"){
+        Button(
+            onClick = { viewModel.onLoginClick(context) },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
-                .background(
-                    brush = Brush.horizontalGradient(listOf(primaryLight, secondaryLight)),
-                    shape = RoundedCornerShape(50.dp)
-                ),
-            contentAlignment = Alignment.Center
+                .heightIn(48.dp),
+            contentPadding = PaddingValues(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
         ) {
-            Text(
-                text = value,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold// Adjust the text color as needed
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(listOf(primaryLight, secondaryLight)),
+                        shape = RoundedCornerShape(50.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = value,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold// Adjust the text color as needed
+                )
+            }
         }
     }
+    else{
+        Button(
+            onClick = { viewModel.onRegisterClick(context) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(48.dp),
+            contentPadding = PaddingValues(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .background(
+                        brush = Brush.horizontalGradient(listOf(primaryLight, secondaryLight)),
+                        shape = RoundedCornerShape(50.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = value,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold// Adjust the text color as needed
+                )
+            }
+        }
+    }
+
 }
 @Composable
 fun DividerTextComponent() {
@@ -364,4 +414,5 @@ fun ClickableLoginTextComponent(modifier: Modifier = Modifier) {
         }
     )
 }
+
 

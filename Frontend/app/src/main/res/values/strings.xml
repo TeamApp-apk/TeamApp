@@ -4,4 +4,7 @@
     <string name="title_activity_profile_activity.kt">ProfileActivity.kt</string>
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="title_activity_search_through">SearchThroughActivity</string>
+    <string name="title_activity_setting">SettingActivity</string>
+    <string name="client_id">372737693570-kuaf685hmfk6ngjp0j1ffrgcaebfofjd.apps.googleusercontent.com</string>
+
 </resources>

@@ -8,12 +8,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventActivity
+import com.example.TeamApp.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.tasks.Task
 
 class LoginViewModel : ViewModel() {
-
     private val _email = MutableLiveData("")
     val email: LiveData<String> = _email
 
@@ -23,11 +28,11 @@ class LoginViewModel : ViewModel() {
     private val _username = MutableLiveData("")
     val username: LiveData<String> = _username
 
-    private val _loginSuccess = MutableLiveData<Boolean>()
-    val loginSuccess: LiveData<Boolean> = _loginSuccess
+    private val _loginSuccess = MutableLiveData<Boolean?>(null)
+    val loginSuccess: LiveData<Boolean?> = _loginSuccess
 
-    private val _registerSuccess = MutableLiveData<Boolean>()
-    val registerSuccess: LiveData<Boolean> = _registerSuccess
+    private val _registerSuccess = MutableLiveData<Boolean?>(null)
+    val registerSuccess: LiveData<Boolean?> = _registerSuccess
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
@@ -38,6 +43,7 @@ class LoginViewModel : ViewModel() {
     fun onPasswordChanged(newPassword: String) {
         _password.value = newPassword
     }
+
     fun logout(context: Context) {
         FirebaseAuth.getInstance().signOut()
         val intent = Intent(context, LoginActivity::class.java).apply {
@@ -57,7 +63,7 @@ class LoginViewModel : ViewModel() {
                 if (task.isSuccessful) {
                     Log.d("Login", "Login successful")
                     _loginSuccess.value = true
-                    val intent = Intent(context, CreateEventActivity::class.java).apply{
+                    val intent = Intent(context, CreateEventActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     }
                     context.startActivity(intent)
@@ -68,16 +74,38 @@ class LoginViewModel : ViewModel() {
             }
     }
 
-    fun getToLoginScreen(context: Context){
-        val intent = Intent(context,LoginActivity::class.java).apply {
+
+    fun signInWithGoogle(context: Context) {
+        val signInRequest = BeginSignInRequest.builder()
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    // Your server's client ID, not your Android client ID.
+                    .setServerClientId(context.getString(R.string.client_id))
+                    // Only show accounts previously used to sign in.
+                    .setFilterByAuthorizedAccounts(true)
+                    .build())
+            .build()
+    }
+
+    fun getToLoginScreen(context: Context) {
+        val intent = Intent(context, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         context.startActivity(intent)
     }
+
+    fun getToRegisterScreen(context: Context){
+        val intent = Intent(context, RegisterActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        context.startActivity(intent)
+    }
+
     fun onRegisterClick(context: Context) {
         val email = _email.value ?: return
         val password = _password.value ?: return
-        //Tymczasowo, niedodana implementacja rejestracji z loginem
+        // Tymczasowo, niedodana implementacja rejestracji z loginem
         val username = "xyz"
 
         val db = Firebase.firestore
@@ -96,5 +124,10 @@ class LoginViewModel : ViewModel() {
                     _registerSuccess.value = false
                 }
             }
+    }
+
+    fun resetLoginRegisterSuccess() {
+        _loginSuccess.value = null
+        _registerSuccess.value = null
     }
 }

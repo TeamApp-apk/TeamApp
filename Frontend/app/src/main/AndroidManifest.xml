@@ -16,6 +16,11 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".settings.SettingActivity"
+            android:exported="false"
+            android:label="@string/title_activity_setting"
+            android:theme="@style/Theme.MyApplication" />
+        <activity
             android:name=".searchThrough.SearchThroughActivity"
             android:exported="false"
             android:label="@string/title_activity_search_through"
@@ -32,11 +37,6 @@
             android:theme="@style/Theme.MyApplication" />
         <activity
             android:name=".event.CreateEventActivity"
-            android:exported="false"
-            android:label="@string/title_activity_create_event"
-            android:theme="@style/Theme.MyApplication" />
-        <activity
-            android:name=".CreateEventActivit"
             android:exported="false"
             android:label="@string/title_activity_create_event"
             android:theme="@style/Theme.MyApplication" />

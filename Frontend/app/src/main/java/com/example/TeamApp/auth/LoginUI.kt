@@ -33,13 +33,12 @@ import androidx.compose.runtime.setValue
 @Composable
 fun LoginScreen(viewModel: LoginViewModel) {
     val context = LocalContext.current
-    val username by viewModel.email.observeAsState("")
+    val email by viewModel.email.observeAsState("")
     val password by viewModel.password.observeAsState("")
     val loginSuccess by viewModel.loginSuccess.observeAsState()
     val registerSuccess by viewModel.registerSuccess.observeAsState()
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
-
     // Manage Snackbar visibility
     LaunchedEffect(loginSuccess, registerSuccess) {
         if (loginSuccess != null || registerSuccess != null) {
@@ -63,7 +62,7 @@ fun LoginScreen(viewModel: LoginViewModel) {
         )
 
         BasicTextField(
-            value = username,
+            value = email,
             onValueChange = { viewModel.onEmailChange(it) },
             decorationBox = { innerTextField ->
                 Box(
@@ -71,7 +70,7 @@ fun LoginScreen(viewModel: LoginViewModel) {
                         .background(Color.White, shape = MaterialTheme.shapes.small)
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
-                    if (username.isEmpty()) {
+                    if (email.isEmpty()) {
                         Text("Email", style = TextStyle(color = Color.Gray))
                     }
                     innerTextField()
@@ -121,34 +120,34 @@ fun LoginScreen(viewModel: LoginViewModel) {
     }
 }
 
-@Composable
-fun CustomSnackbar(success: Boolean, onDismiss: () -> Unit, isLogin: Boolean) {
-    Snackbar(
-        modifier = Modifier
-            .padding(80.dp)
-            .wrapContentSize(Alignment.Center),
-        shape = RoundedCornerShape(60.dp),
-        containerColor = if (success) Color(0xFF4CAF50) else Color(0xFFF44336),
-        contentColor = Color.White,
-        action = {
-        }
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = if (success) {
-                    if (isLogin) "Login Successful" else "Registration Successful"
-                } else {
-                    if (isLogin) "Login Failed" else "Registration Failed"
-                },
-                style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
-            )
-        }
-    }
-}
+//@Composable
+//fun CustomSnackbar(success: Boolean, onDismiss: () -> Unit, isLogin: Boolean) {
+//    Snackbar(
+//        modifier = Modifier
+//            .padding(80.dp)
+//            .wrapContentSize(Alignment.Center),
+//        shape = RoundedCornerShape(60.dp),
+//        containerColor = if (success) Color(0xFF4CAF50) else Color(0xFFF44336),
+//        contentColor = Color.White,
+//        action = {
+//        }
+//    ) {
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth(),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            Text(
+//                text = if (success) {
+//                    if (isLogin) "Login Successful" else "Registration Successful"
+//                } else {
+//                    if (isLogin) "Login Failed" else "Registration Failed"
+//                },
+//                style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
+//            )
+//        }
+//    }
+//}
 
 
 

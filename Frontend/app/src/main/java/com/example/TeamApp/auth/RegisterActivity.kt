@@ -28,7 +28,6 @@ import com.example.TeamApp.event.CreateEventActivity
 
 class RegisterActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
