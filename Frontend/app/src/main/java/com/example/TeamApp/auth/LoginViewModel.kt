@@ -19,6 +19,7 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.tasks.Task
 
 class LoginViewModel : ViewModel() {
+    private val googleSignInRequestCode = 234
     private val _email = MutableLiveData("")
     val email: LiveData<String> = _email
 
@@ -75,19 +76,6 @@ class LoginViewModel : ViewModel() {
     }
 
 
-    fun signInWithGoogle(context: Context) {
-        val signInRequest = BeginSignInRequest.builder()
-            .setGoogleIdTokenRequestOptions(
-                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                    .setSupported(true)
-                    // Your server's client ID, not your Android client ID.
-                    .setServerClientId(context.getString(R.string.client_id))
-                    // Only show accounts previously used to sign in.
-                    .setFilterByAuthorizedAccounts(true)
-                    .build())
-            .build()
-    }
-
     fun getToLoginScreen(context: Context) {
         val intent = Intent(context, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -129,5 +117,20 @@ class LoginViewModel : ViewModel() {
     fun resetLoginRegisterSuccess() {
         _loginSuccess.value = null
         _registerSuccess.value = null
+    }
+
+    companion object {
+        fun signInWithGoogle(context: Context) {
+            val signInRequest = BeginSignInRequest.builder()
+                .setGoogleIdTokenRequestOptions(
+                    BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                        .setSupported(true)
+                        // Your server's client ID, not your Android client ID.
+                        .setServerClientId(context.getString(R.string.client_id))
+                        // Only show accounts previously used to sign in.
+                        .setFilterByAuthorizedAccounts(true)
+                        .build())
+                .build()
+        }
     }
 }
