@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,6 +30,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -91,7 +94,14 @@ fun RegisterScreen() {
             Spacer(modifier = Modifier.height(20.dp))
             DividerTextComponent()
             Spacer(modifier = Modifier.height(20.dp))
-            ClickableLoginTextComponent()
+            Row(modifier = Modifier
+                .padding(21.dp)
+                .fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                FaceBookButton()
+                Spacer(modifier = Modifier.width(45.dp))
+                GoogleButton()
+            }
+            ClickableLoginTextComponent(modifier = Modifier.align(Alignment.CenterHorizontally))
         }
 
     }
@@ -139,7 +149,8 @@ fun MyTextField(labelValue: String, painterResource: Painter) {
     val email by viewModel.email.observeAsState("")
 
     OutlinedTextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            ,
         label = { Text(text = labelValue) },
         value = if (labelValue == "E-mail") email else textValue.value,
         onValueChange = {
@@ -153,12 +164,17 @@ fun MyTextField(labelValue: String, painterResource: Painter) {
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = primaryLight,
             focusedLabelColor = secondaryLight,
+
+            unfocusedBorderColor = Color.Gray,
             cursorColor = primaryLight,
-            containerColor = Color(0xFFE0E0E0)
+            containerColor = Color.Transparent,
+
+
         ),
         leadingIcon = {
             Icon(painter = painterResource, contentDescription = "", modifier = Modifier.size(35.dp))
-        }
+        },
+        shape = MaterialTheme.shapes.medium.copy(all= CornerSize(15.dp))
     )
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -180,7 +196,7 @@ fun PasswordTextField(labelValue: String, painterResource: Painter) {
             focusedBorderColor = primaryLight,
             focusedLabelColor = secondaryLight,
             cursorColor = primaryLight,
-            containerColor = Color(0xFFE0E0E0)
+            containerColor = Color.Transparent
 
 
         )
@@ -190,6 +206,8 @@ fun PasswordTextField(labelValue: String, painterResource: Painter) {
             Icon(painter = painterResource, contentDescription ="" ,
                 modifier = Modifier.size(35.dp))
         },
+        shape = MaterialTheme.shapes.medium.copy(all= CornerSize(15.dp)),
+
         trailingIcon = {
             val iconImage= if(passwordVisible.value){
                 Icons.Filled.Visibility
@@ -219,24 +237,26 @@ fun PasswordTextField(labelValue: String, painterResource: Painter) {
 
 }
 @Composable
-fun CheckBox(value: String){
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .heightIn(56.dp)
-    , verticalAlignment =Alignment.CenterVertically ) {
-        val checkedState= remember {
-            mutableStateOf(false)
-        }
-        Checkbox(checked = checkedState.value, onCheckedChange ={
-            checkedState.value!=checkedState.value
-        }
+fun CheckBox(value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(56.dp)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val checkedState = remember { mutableStateOf(false) }
+        Checkbox(
+            checked = checkedState.value,
+            onCheckedChange = {
+                checkedState.value = it
+            }
         )
 
-       ClickableTextComponent()
+        Spacer(modifier = Modifier.width(1.dp))
+
+        ClickableTextComponent()
     }
-
-
-
 }
 @Composable
 
@@ -321,7 +341,7 @@ fun DividerTextComponent() {
     }
 }
 @Composable
-fun ClickableLoginTextComponent() {
+fun ClickableLoginTextComponent(modifier: Modifier = Modifier) {
     val viewModel: LoginViewModel = viewModel()
     val context = LocalContext.current
     val initialText = "Already have an account?  "
@@ -337,6 +357,7 @@ fun ClickableLoginTextComponent() {
 
     ClickableText(
         text = annotatedString,
+        modifier=modifier,
         onClick = {
             viewModel.getToLoginScreen(context)
             //viewModel.onLoginClick(context)
