@@ -183,6 +183,9 @@ fun FaceBookButton() {
 @Composable
 fun GoogleButton(){
 
+    val viewModel: LoginViewModel = viewModel()
+    val context = LocalContext.current
+
     val image: Painter = painterResource(id = R.drawable.googlelogo)
 
     Box(
@@ -194,7 +197,7 @@ fun GoogleButton(){
                 color = Color.Gray,
                 shape = RoundedCornerShape(14.dp)
             ) // Border with color and shape
-            .clickable { /* Handle click event */ } // Clickable functionality
+            .clickable {viewModel.signInWithGoogle(context) } // Clickable functionality
             .background(Color.White)
     ) {
         Image(

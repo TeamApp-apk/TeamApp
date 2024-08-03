@@ -3,6 +3,7 @@ package com.example.TeamApp.auth
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -73,19 +74,25 @@ class LoginViewModel : ViewModel() {
                 }
             }
     }
-
-
     fun signInWithGoogle(context: Context) {
         val signInRequest = BeginSignInRequest.builder()
             .setGoogleIdTokenRequestOptions(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
-                    // Your server's client ID, not your Android client ID.
                     .setServerClientId(context.getString(R.string.client_id))
-                    // Only show accounts previously used to sign in.
-                    .setFilterByAuthorizedAccounts(true)
-                    .build())
+                    .setFilterByAuthorizedAccounts(false)
+                    .build()
+            )
             .build()
+
+        Identity.getSignInClient(context).beginSignIn(signInRequest)
+            .addOnSuccessListener { result ->
+                val intent = result.pendingIntent.intentSender
+                (context as RegisterActivity).signInLauncher.launch(IntentSenderRequest.Builder(intent).build())
+            }
+            .addOnFailureListener { e ->
+                Log.e("LoginViewModel", "Google Sign-In failed", e)
+            }
     }
 
     fun getToLoginScreen(context: Context) {
