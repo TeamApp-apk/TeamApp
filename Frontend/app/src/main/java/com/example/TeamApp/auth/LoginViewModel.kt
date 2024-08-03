@@ -3,6 +3,7 @@ package com.example.TeamApp.auth
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -58,22 +59,30 @@ class LoginViewModel : ViewModel() {
         val email = _email.value ?: return
         val password = _password.value ?: return
 
-        Log.d("LoginAttempt", "Attempting to log in with email: $email")
+        if (email.isNotEmpty() && password.isNotEmpty()) {
 
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("Login", "Login successful")
-                    _loginSuccess.value = true
-                    val intent = Intent(context, CreateEventActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            Log.d("LoginAttempt", "Attempting to log in with email: $email")
+
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d("Login", "Login successful")
+                        _loginSuccess.value = true
+                        val intent = Intent(context, CreateEventActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                        context.startActivity(intent)
+                    } else {
+                        Log.e("Login", "Login failed: ${task.exception?.message}")
+                        _loginSuccess.value = false
                     }
-                    context.startActivity(intent)
-                } else {
-                    Log.e("Login", "Login failed: ${task.exception?.message}")
-                    _loginSuccess.value = false
                 }
-            }
+        }
+       else
+       {
+           //Pole hasla i loginu nie moga byc puste
+           Log.d("LoginAttempt", "email or password are null")
+       }
     }
 
 
@@ -123,25 +132,31 @@ class LoginViewModel : ViewModel() {
     fun onRegisterClick(context: Context) {
         val email = _email.value ?: return
         val password = _password.value ?: return
-        // Tymczasowo, niedodana implementacja rejestracji z loginem
-        val username = "xyz"
+        if (email.isNotEmpty() && password.isNotEmpty()) {
+            // Tymczasowo, niedodana implementacja rejestracji z loginem
+            val username = "xyz"
 
-        val db = Firebase.firestore
+            val db = Firebase.firestore
 
-        val user = User(name = username, email = email)
+            val user = User(name = username, email = email)
 
-        Log.d("RegisterAttempt", "Attempting to register with email: $email")
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    db.collection("users").add(user)
-                    Log.d("Register", "Registration successful")
-                    _registerSuccess.value = true
-                } else {
-                    Log.e("Register", "Registration failed: ${task.exception?.message}")
-                    _registerSuccess.value = false
+            Log.d("RegisterAttempt", "Attempting to register with email: $email")
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        db.collection("users").add(user)
+                        Log.d("Register", "Registration successful")
+                        _registerSuccess.value = true
+                    } else {
+                        Log.e("Register", "Registration failed: ${task.exception?.message}")
+                        _registerSuccess.value = false
+                    }
                 }
-            }
+        }
+        else
+        {
+            Log.d("Register", "input field/s are empty")
+        }
     }
 
     fun resetLoginRegisterSuccess() {

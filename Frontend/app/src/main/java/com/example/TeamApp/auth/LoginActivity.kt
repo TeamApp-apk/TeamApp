@@ -25,6 +25,7 @@ import com.google.firebase.initialize
 import android.content.Intent
 import com.example.TeamApp.event.CreateEventActivity
 
+
 class LoginActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
 
