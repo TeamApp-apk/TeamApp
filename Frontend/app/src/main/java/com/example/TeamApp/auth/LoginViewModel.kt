@@ -17,6 +17,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 
 class LoginViewModel : ViewModel() {
@@ -74,26 +75,36 @@ class LoginViewModel : ViewModel() {
                 }
             }
     }
+
+
     fun signInWithGoogle(context: Context) {
+        val clientId = context.getString(R.string.client_id)
+        Log.d("LoginViewModel", "Client ID: $clientId")
+
         val signInRequest = BeginSignInRequest.builder()
             .setGoogleIdTokenRequestOptions(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
-                    .setServerClientId(context.getString(R.string.client_id))
-                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(clientId)
+                    .setFilterByAuthorizedAccounts(false) // Allow all accounts
                     .build()
             )
             .build()
 
         Identity.getSignInClient(context).beginSignIn(signInRequest)
             .addOnSuccessListener { result ->
+                Log.d("LoginViewModel", "Google Sign-In success: ${result.pendingIntent}")
                 val intent = result.pendingIntent.intentSender
                 (context as RegisterActivity).signInLauncher.launch(IntentSenderRequest.Builder(intent).build())
             }
             .addOnFailureListener { e ->
                 Log.e("LoginViewModel", "Google Sign-In failed", e)
+                if (e is ApiException) {
+                    Log.e("LoginViewModel", "Status Code: ${e.statusCode}")
+                }
             }
     }
+
 
     fun getToLoginScreen(context: Context) {
         val intent = Intent(context, LoginActivity::class.java).apply {

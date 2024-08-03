@@ -21,7 +21,9 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.example.TeamApp.event.CreateEventActivity
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.initialize
 
 class RegisterActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
@@ -30,6 +32,7 @@ class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
+        Firebase.initialize(this)
         oneTapClient = Identity.getSignInClient(this)
 
         val auth = FirebaseAuth.getInstance()

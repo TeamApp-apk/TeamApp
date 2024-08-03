@@ -182,7 +182,6 @@ fun FaceBookButton() {
 
 @Composable
 fun GoogleButton(){
-
     val viewModel: LoginViewModel = viewModel()
     val context = LocalContext.current
 
