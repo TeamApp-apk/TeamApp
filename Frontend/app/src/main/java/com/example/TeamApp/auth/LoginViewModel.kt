@@ -122,7 +122,7 @@ class LoginViewModel : ViewModel() {
 
     fun signInWithFacebook(context: Context) {
         val callbackManager = CallbackManager.Factory.create()
-
+        LoginManager.getInstance().logOut()
         LoginManager.getInstance().logInWithReadPermissions(
             context as Activity,
             listOf("public_profile", "email")
