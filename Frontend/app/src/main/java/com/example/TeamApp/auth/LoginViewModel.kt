@@ -3,6 +3,7 @@ package com.example.TeamApp.auth
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
 import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.LiveData
@@ -17,7 +18,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.facebook.CallbackManager
@@ -28,6 +28,7 @@ import com.facebook.login.LoginResult
 import android.app.Activity
 
 class LoginViewModel : ViewModel() {
+    lateinit var signInLauncher: ActivityResultLauncher<IntentSenderRequest>
     private val _email = MutableLiveData("")
     val email: LiveData<String> = _email
 
@@ -91,7 +92,6 @@ class LoginViewModel : ViewModel() {
        }
     }
 
-
     fun signInWithGoogle(context: Context) {
         val clientId = context.getString(R.string.client_id)
         Log.d("LoginViewModel", "Client ID: $clientId")
@@ -110,7 +110,7 @@ class LoginViewModel : ViewModel() {
             .addOnSuccessListener { result ->
                 Log.d("LoginViewModel", "Google Sign-In success: ${result.pendingIntent}")
                 val intent = result.pendingIntent.intentSender
-                (context as RegisterActivity).signInLauncher.launch(IntentSenderRequest.Builder(intent).build())
+                signInLauncher.launch(IntentSenderRequest.Builder(intent).build())
             }
             .addOnFailureListener { e ->
                 Log.e("LoginViewModel", "Google Sign-In failed", e)

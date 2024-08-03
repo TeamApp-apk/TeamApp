@@ -1,34 +1,31 @@
 package com.example.TeamApp.auth
 
+import SignInLauncher
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
-import com.example.compose.TeamAppTheme
-import com.google.firebase.Firebase
-import com.google.firebase.FirebaseApp
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.initialize
-import android.content.Intent
 import com.example.TeamApp.event.CreateEventActivity
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.initialize
 import com.facebook.FacebookSdk
 
 
-class LoginActivity : ComponentActivity() {
+class LoginActivity : ComponentActivity(), SignInLauncher {
     private val loginViewModel: LoginViewModel by viewModels()
+    private lateinit var oneTapClient: SignInClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,54 +34,78 @@ class LoginActivity : ComponentActivity() {
         FacebookSdk.sdkInitialize(applicationContext)
         //Jesli jeden raz zalogowalismy sie na urzadzeniu, to po zamknieciu aplikacji
         //nie chcemy znowu się logować.
+        oneTapClient = Identity.getSignInClient(this)
 
-        enableEdgeToEdge()
+        val auth = FirebaseAuth.getInstance()
+        if (auth.currentUser != null) {
+            val intent = Intent(this, CreateEventActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+            return
+        }
         setContent {
-            TeamAppTheme {
-                TeamApp(loginViewModel)
+            LoginScreen()
+        }
+
+        loginViewModel.signInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                handleSignInResult(data)
+            } else {
+                Log.e("LoginActivity", "Google Sign-In failed")
             }
         }
+    }
+
+    private fun handleSignInResult(data: Intent?) {
+        try {
+            val credential = oneTapClient.getSignInCredentialFromIntent(data)
+            val idToken = credential.googleIdToken
+            if (idToken != null) {
+                val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+                FirebaseAuth.getInstance().signInWithCredential(firebaseCredential)
+                    .addOnCompleteListener(this) { task ->
+                        if (task.isSuccessful) {
+                            Log.d("LoginActivity", "signInWithCredential:success")
+                            val user = FirebaseAuth.getInstance().currentUser
+                            updateUI(user)
+                        } else {
+                            Log.w(
+                                "LoginActivity",
+                                "signInWithCredential:failure",
+                                task.exception
+                            )
+                            updateUI(null)
+                        }
+                    }
+            } else {
+                Log.d("LoginActivity", "No ID token!")
+            }
+        } catch (e: ApiException) {
+            Log.e("LoginActivity", "Google Sign-In failed", e)
+        }
+    }
+
+    private fun updateUI(user: FirebaseUser?) {
+        if (user != null) {
+            val intent = Intent(this, CreateEventActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        } else {
+            Log.e("LoginActivity", "Sign-in failed")
+        }
+    }
+
+    override fun launchSignIn(intent: IntentSenderRequest) {
+        loginViewModel.signInLauncher.launch(intent)
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
-        // Przekierowanie z powrotem do ekranu rejestracji
         val intent = Intent(this, RegisterActivity::class.java)
         startActivity(intent)
-        finish() // Opcjonalne, aby zamknąć `LoginActivity` i zapobiec wracaniu do niej po naciśnięciu "Back"
-    }
-}
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
-fun TeamApp(loginViewModel: LoginViewModel) {
-    val navController = rememberNavController()
-    Scaffold(
-        content = {
-            Box(modifier = Modifier.fillMaxSize()) {
-                LoginScreen()
-            }
-        }
-    )
-}
-
-fun checkNetworkConnectivity(context: Context) {
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-    val isConnected = networkCapabilities != null && networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-
-    if (isConnected) {
-        Toast.makeText(context, "Network is available", Toast.LENGTH_SHORT).show()
-    } else {
-        Toast.makeText(context, "Network is not available", Toast.LENGTH_SHORT).show()
-    }
-}
-
-@Preview
-@Composable
-fun MainPreview() {
-    val loginViewModel: LoginViewModel = viewModel()
-    TeamAppTheme {
-        TeamApp(loginViewModel)
+        finish()
     }
 }

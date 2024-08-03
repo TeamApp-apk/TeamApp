@@ -1,11 +1,13 @@
 package com.example.TeamApp.auth
 
+import SignInLauncher
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
@@ -25,7 +27,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.initialize
 
-class RegisterActivity : ComponentActivity() {
+class RegisterActivity : ComponentActivity(), SignInLauncher {
     private val loginViewModel: LoginViewModel by viewModels()
     private lateinit var oneTapClient: SignInClient
 
@@ -48,10 +50,8 @@ class RegisterActivity : ComponentActivity() {
                 RegisterScreen()
             }
         }
-    }
 
-    val signInLauncher =
-        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        loginViewModel.signInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val data = result.data
                 handleSignInResult(data)
@@ -59,6 +59,7 @@ class RegisterActivity : ComponentActivity() {
                 Log.e("RegisterActivity", "Google Sign-In failed")
             }
         }
+    }
 
     private fun handleSignInResult(data: Intent?) {
         try {
@@ -98,6 +99,10 @@ class RegisterActivity : ComponentActivity() {
         } else {
             Log.e("RegisterActivity", "Sign-in failed")
         }
+    }
+
+    override fun launchSignIn(intent: IntentSenderRequest) {
+        loginViewModel.signInLauncher.launch(intent)
     }
 
     companion object {
