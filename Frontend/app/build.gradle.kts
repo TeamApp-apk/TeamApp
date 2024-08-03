@@ -89,6 +89,7 @@ dependencies {
     implementation (libs.play.services.auth)
     implementation (libs.firebase.ui.auth)
     implementation ("com.google.firebase:firebase-auth:23.0.0")
+    implementation ("com.facebook.android:facebook-android-sdk:latest.release")
 
 
 

@@ -156,9 +156,10 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier) {
 }
 @Composable
 fun FaceBookButton() {
+    val viewModel: LoginViewModel = viewModel()
     // Replace with your image resource ID
     val image: Painter = painterResource(id = R.drawable.facebooklogo)
-
+    val context = LocalContext.current
     Box(
         modifier = Modifier
             .size(60.dp) // Adjusted size of the button
@@ -169,7 +170,7 @@ fun FaceBookButton() {
                 color = Color.Gray,
                 shape = RoundedCornerShape(12.dp)
             ) // Border with color and shape
-            .clickable { /* Handle click event */ } // Clickable functionality
+            .clickable { viewModel.signInWithFacebook(context) } // Clickable functionality
             .padding(8.dp) // Padding inside the button
     ) {
         Image(

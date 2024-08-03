@@ -24,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.initialize
 import android.content.Intent
 import com.example.TeamApp.event.CreateEventActivity
+import com.facebook.FacebookSdk
 
 
 class LoginActivity : ComponentActivity() {
@@ -33,6 +34,7 @@ class LoginActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         Firebase.initialize(this)
+        FacebookSdk.sdkInitialize(applicationContext)
         //Jesli jeden raz zalogowalismy sie na urzadzeniu, to po zamknieciu aplikacji
         //nie chcemy znowu się logować.
 

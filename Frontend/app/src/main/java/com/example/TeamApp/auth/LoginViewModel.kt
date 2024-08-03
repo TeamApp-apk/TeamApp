@@ -20,6 +20,12 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
+import android.app.Activity
 
 class LoginViewModel : ViewModel() {
     private val _email = MutableLiveData("")
@@ -112,6 +118,34 @@ class LoginViewModel : ViewModel() {
                     Log.e("LoginViewModel", "Status Code: ${e.statusCode}")
                 }
             }
+    }
+
+    fun signInWithFacebook(context: Context) {
+        val callbackManager = CallbackManager.Factory.create()
+
+        LoginManager.getInstance().logInWithReadPermissions(
+            context as Activity,
+            listOf("public_profile", "email")
+        )
+
+        LoginManager.getInstance().registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
+            override fun onSuccess(loginResult: LoginResult) {
+                //Handle successful login
+                Log.d("FacebookLogin", "Success: ${loginResult.accessToken}")
+                val accessToken = loginResult.accessToken
+                // Use the access token to retrieve user data or perform other actions
+            }
+
+            override fun onCancel() {
+                // Handle login cancellation
+                Log.d("FacebookLogin", "Cancelled")
+            }
+
+            override fun onError(error: FacebookException) {
+                // Handle login error
+                Log.d("FacebookLogin", "Error: ${error.message}")
+            }
+        })
     }
 
 
