@@ -12,18 +12,17 @@ import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventActivity
 import com.example.TeamApp.R
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
 
 class LoginViewModel : ViewModel() {
     lateinit var signInLauncher: ActivityResultLauncher<IntentSenderRequest>
     private val _email = MutableLiveData("")
     val email: LiveData<String> = _email
+
 
     private val _password = MutableLiveData("")
     val password: LiveData<String> = _password
@@ -36,6 +35,9 @@ class LoginViewModel : ViewModel() {
 
     private val _registerSuccess = MutableLiveData<Boolean?>(null)
     val registerSuccess: LiveData<Boolean?> = _registerSuccess
+
+    private val _emailSent = MutableLiveData<Boolean?>(null)
+    val emailSent: LiveData<Boolean?> = _emailSent
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
@@ -118,6 +120,12 @@ class LoginViewModel : ViewModel() {
         }
         context.startActivity(intent)
     }
+    fun getToCreateEventScreen(context: Context){
+        val intent = Intent(context, CreateEventActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        context.startActivity(intent)
+    }
 
     fun onRegisterClick(context: Context) {
         val email = _email.value ?: return
@@ -136,6 +144,7 @@ class LoginViewModel : ViewModel() {
                     db.collection("users").add(user)
                     Log.d("Register", "Registration successful")
                     _registerSuccess.value = true
+                    getToCreateEventScreen(context)
                 } else {
                     Log.e("Register", "Registration failed: ${task.exception?.message}")
                     _registerSuccess.value = false
@@ -143,8 +152,50 @@ class LoginViewModel : ViewModel() {
             }
     }
 
-    fun resetLoginRegisterSuccess() {
-        _loginSuccess.value = null
-        _registerSuccess.value = null
+    fun resetSuccess() {
+        _loginSuccess.postValue(null)
+        _registerSuccess.postValue(null)
+        _emailSent.postValue(null)
     }
+
+    fun onForgotPasswordClick() {
+        val email = _email.value
+        if (email.isNullOrEmpty()) {
+            Log.e("LoginViewModel", "Email is empty")
+            _emailSent.value = false // Indicate that the operation was unsuccessful
+            return
+        }
+
+        Log.d("LoginViewModel", "Checking if email exists in Firestore: $email")
+
+        val db = Firebase.firestore
+        db.collection("users")
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty) {
+                    // Email exists in the database, proceed with password reset
+                    auth.sendPasswordResetEmail(email)
+                        .addOnCompleteListener { sendTask ->
+                            if (sendTask.isSuccessful) {
+                                _emailSent.value = true
+                                Log.d("LoginViewModel", "Password reset email sent.")
+                            } else {
+                                _emailSent.value = false
+                                Log.e("LoginViewModel", "Failed to send password reset email.", sendTask.exception)
+                            }
+                        }
+                } else {
+                    // Email does not exist in the database
+                    _emailSent.value = false
+                    Log.e("LoginViewModel", "Email not found in the database.")
+                }
+            }
+            .addOnFailureListener { exception ->
+                _emailSent.value = false
+                Log.e("LoginViewModel", "Error checking email in the database.", exception)
+            }
+    }
+
+
 }

@@ -73,13 +73,28 @@ fun RegisterScreen() {
     val viewModel : LoginViewModel = viewModel()
     val loginSuccess by viewModel.loginSuccess.observeAsState()
     val registerSuccess by viewModel.registerSuccess.observeAsState()
+    val emailSent by viewModel.emailSent.observeAsState()
     var showSnackbar by remember { mutableStateOf(false) }
-    LaunchedEffect(loginSuccess, registerSuccess) {
-        if (viewModel.loginSuccess.value != null || viewModel.registerSuccess.value != null) {
-            showSnackbar = true
-            delay(2000) // Delay for 2 seconds
-            showSnackbar = false
-            viewModel.resetLoginRegisterSuccess()
+    var snackbarMessage by remember { mutableStateOf("") }
+    var snackbarSuccess by remember { mutableStateOf(false) }
+
+    LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
+        when {
+            emailSent != null -> {
+                snackbarMessage = "Email"
+                snackbarSuccess = emailSent ?: false
+                showSnackbar = true
+            }
+            loginSuccess != null -> {
+                snackbarMessage = "login"
+                snackbarSuccess = loginSuccess ?: false
+                showSnackbar = true
+            }
+            registerSuccess != null -> {
+                snackbarMessage = "register"
+                snackbarSuccess = registerSuccess ?: false
+                showSnackbar = true
+            }
         }
     }
     Surface( modifier = Modifier
@@ -122,9 +137,12 @@ fun RegisterScreen() {
     }
     if (showSnackbar) {
         CustomSnackbar(
-            success = loginSuccess ?: registerSuccess ?: false,
-            onDismiss = { showSnackbar = false },
-            isLogin = loginSuccess != null
+            success = snackbarSuccess,
+            type = snackbarMessage,
+            onDismiss = {
+                showSnackbar = false
+                viewModel.resetSuccess()
+            }
         )
     }
 }

@@ -10,6 +10,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventActivity
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -19,6 +20,7 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.initialize
 
 class LoginActivity : ComponentActivity(), SignInLauncher {
@@ -42,7 +44,7 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         setContent {
             LoginScreen()
         }
-
+        Log.d("LoginActivity", "signInWithCredential:success")
         loginViewModel.signInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val data = result.data
@@ -52,7 +54,6 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
             }
         }
     }
-
     private fun handleSignInResult(data: Intent?) {
         try {
             val credential = oneTapClient.getSignInCredentialFromIntent(data)
@@ -65,12 +66,29 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
                             Log.d("LoginActivity", "signInWithCredential:success")
                             val user = FirebaseAuth.getInstance().currentUser
                             updateUI(user)
+                            val db = com.google.firebase.ktx.Firebase.firestore
+                            user?.let { firebaseUser ->
+                                val email = firebaseUser.email
+                                if (email != null) {
+                                    db.collection("users")
+                                        .whereEqualTo("email", email)
+                                        .get()
+                                        .addOnSuccessListener { documents ->
+                                            if (documents.isEmpty) {
+                                                db.collection("users").add(User(name = "xyz", email = email))
+                                            } else {
+                                                Log.d("LoginActivity", "Email already exists in the database.")
+                                            }
+                                        }
+                                        .addOnFailureListener { exception ->
+                                            Log.e("LoginActivity", "Error checking email in the database.", exception)
+                                        }
+                                } else {
+                                    Log.w("LoginActivity", "User email is null")
+                                }
+                            }
                         } else {
-                            Log.w(
-                                "LoginActivity",
-                                "signInWithCredential:failure",
-                                task.exception
-                            )
+                            Log.w("LoginActivity", "signInWithCredential:failure", task.exception)
                             updateUI(null)
                         }
                     }

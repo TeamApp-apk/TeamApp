@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.TeamApp.data.User
 import com.example.compose.TeamAppTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -25,6 +26,7 @@ import com.google.android.gms.common.api.ApiException
 import com.example.TeamApp.event.CreateEventActivity
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.initialize
 
 class RegisterActivity : ComponentActivity(), SignInLauncher {
@@ -70,23 +72,42 @@ class RegisterActivity : ComponentActivity(), SignInLauncher {
                 FirebaseAuth.getInstance().signInWithCredential(firebaseCredential)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
-                            Log.d("RegisterActivity", "signInWithCredential:success")
+                            Log.d("LoginActivity", "signInWithCredential:success")
                             val user = FirebaseAuth.getInstance().currentUser
                             updateUI(user)
+                            val db = com.google.firebase.ktx.Firebase.firestore
+                            user?.let { firebaseUser ->
+                                val email = firebaseUser.email
+                                if (email != null) {
+                                    db.collection("users")
+                                        .whereEqualTo("email", email)
+                                        .get()
+                                        .addOnSuccessListener { documents ->
+                                            if (documents.isEmpty) {
+                                                // Email does not exist, add to database
+                                                db.collection("users").add(User(name = "xyz", email = email))
+                                            } else {
+                                                // Email exists, log a message
+                                                Log.d("LoginActivity", "Email already exists in the database.")
+                                            }
+                                        }
+                                        .addOnFailureListener { exception ->
+                                            Log.e("LoginActivity", "Error checking email in the database.", exception)
+                                        }
+                                } else {
+                                    Log.w("LoginActivity", "User email is null")
+                                }
+                            }
                         } else {
-                            Log.w(
-                                "RegisterActivity",
-                                "signInWithCredential:failure",
-                                task.exception
-                            )
+                            Log.w("LoginActivity", "signInWithCredential:failure", task.exception)
                             updateUI(null)
                         }
                     }
             } else {
-                Log.d("RegisterActivity", "No ID token!")
+                Log.d("LoginActivity", "No ID token!")
             }
         } catch (e: ApiException) {
-            Log.e("RegisterActivity", "Google Sign-In failed", e)
+            Log.e("LoginActivity", "Google Sign-In failed", e)
         }
     }
 

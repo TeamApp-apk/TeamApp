@@ -53,44 +53,66 @@ import com.example.TeamApp.R
 import kotlinx.coroutines.delay
 
 @Composable
-fun LoginScreen(){
-    val viewModel : LoginViewModel = viewModel()
+fun LoginScreen() {
+    val viewModel: LoginViewModel = viewModel()
     var showSnackbar by remember { mutableStateOf(false) }
     val loginSuccess by viewModel.loginSuccess.observeAsState()
     val registerSuccess by viewModel.registerSuccess.observeAsState()
-    LaunchedEffect(loginSuccess, registerSuccess) {
-        if (viewModel.loginSuccess.value != null || viewModel.registerSuccess.value != null) {
-            showSnackbar = true
-            delay(2000) // Delay for 2 seconds
-            showSnackbar = false
-            viewModel.resetLoginRegisterSuccess()
+    val emailSent by viewModel.emailSent.observeAsState()
+    var snackbarMessage by remember { mutableStateOf("") }
+    var snackbarSuccess by remember { mutableStateOf(false) }
+
+    LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
+        when {
+            emailSent != null -> {
+                snackbarMessage = "Email"
+                snackbarSuccess = emailSent ?: false
+                showSnackbar = true
+            }
+            loginSuccess != null -> {
+                snackbarMessage = "login"
+                snackbarSuccess = loginSuccess ?: false
+                showSnackbar = true
+            }
+            registerSuccess != null -> {
+                snackbarMessage = "register"
+                snackbarSuccess = registerSuccess ?: false
+                showSnackbar = true
+            }
         }
     }
-    Surface( modifier = Modifier
-        .fillMaxSize()
-        .padding(27.dp)
-        .background(Color.White))
-    {
-        Column(modifier = Modifier
-            .fillMaxSize(),
-            verticalArrangement = Arrangement.Center
-            ) {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(27.dp)
+            .background(Color.White)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             TextComponentUpper1(value = "")
             TextComponentUpper2(value = "Welcome back")
             Spacer(modifier = Modifier.height(23.dp))
-            MyTextField(labelValue = "E-mail", painterResource(id = R.drawable.emailicon) )
+            MyTextField(labelValue = "E-mail", painterResource(id = R.drawable.emailicon))
             Spacer(modifier = Modifier.height(12.dp))
-            PasswordTextField(labelValue = "Password", painterResource(id = R.drawable.passwordicon) )
+            PasswordTextField(labelValue = "Password", painterResource(id = R.drawable.passwordicon))
             Spacer(modifier = Modifier.height(31.dp))
-            TextComponentUnderLined(value = "Forgot your password?")
+            TextComponentUnderLined(value = "Forgot your password?") {
+                // Handle forgot password click
+                viewModel.onForgotPasswordClick()
+            }
             Spacer(modifier = Modifier.height(15.dp))
             ButtonComponent(value = "Login")
             Spacer(modifier = Modifier.height(21.dp))
             DividerTextComponent()
             Spacer(modifier = Modifier.height(21.dp))
-            Row(modifier = Modifier
-                .padding(21.dp)
-                .fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            Row(
+                modifier = Modifier
+                    .padding(21.dp)
+                    .fillMaxWidth(), horizontalArrangement = Arrangement.Center
+            ) {
                 FaceBookButton()
                 Spacer(modifier = Modifier.width(45.dp))
                 GoogleButton()
@@ -100,36 +122,44 @@ fun LoginScreen(){
         }
     }
     if (showSnackbar) {
-        CustomSnackbar(
-            success = loginSuccess ?: registerSuccess ?: false,
-            onDismiss = { showSnackbar = false },
-            isLogin = loginSuccess != null
-        )
+        CustomSnackbar(success = snackbarSuccess, type = snackbarMessage) {
+            showSnackbar = false
+            viewModel.resetSuccess()  // Reset the success states after snackbar is dismissed
+        }
     }
-
 }
 
 @Preview
 @Composable
-fun LoginScreenPreview(){
+fun LoginScreenPreview() {
     LoginScreen()
-
 }
+
 @Composable
-fun TextComponentUnderLined(value: String){
-    Text(text = value,
+fun TextComponentUnderLined(value: String, onClick: () -> Unit) {
+    val annotatedString = buildAnnotatedString {
+        pushStringAnnotation(tag = "URL", annotation = "forgot_password")
+        withStyle(style = SpanStyle(color = Color.Gray, textDecoration = TextDecoration.Underline)) {
+            append(value)
+        }
+        pop()
+    }
+
+    ClickableText(
+        text = annotatedString,
         modifier = Modifier
             .fillMaxWidth()
-
             .heightIn(min = 40.dp)
-        ,style= TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal, fontStyle = FontStyle.Normal),
-        color = Color.Gray,
-        textAlign = TextAlign.Center,
-        textDecoration = TextDecoration.Underline
-
+            .wrapContentSize(Alignment.Center),  // This centers the text
+        style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal, fontStyle = FontStyle.Normal),
+        onClick = { offset ->
+            annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset).firstOrNull()?.let {
+                onClick()
+            }
+        }
     )
-
 }
+
 @Composable
 fun ClickableRegisterComponent(modifier: Modifier = Modifier) {
     val viewModel: LoginViewModel = viewModel()
@@ -147,13 +177,14 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier) {
 
     ClickableText(
         text = annotatedString,
-        modifier=modifier,
+        modifier = modifier,
         onClick = {
             viewModel.getToRegisterScreen(context)
             //viewModel.onLoginClick(context)
         }
     )
 }
+
 @Composable
 fun FaceBookButton() {
     // Replace with your image resource ID
@@ -181,7 +212,7 @@ fun FaceBookButton() {
 }
 
 @Composable
-fun GoogleButton(){
+fun GoogleButton() {
     val viewModel: LoginViewModel = viewModel()
     val context = LocalContext.current
 
@@ -196,7 +227,7 @@ fun GoogleButton(){
                 color = Color.Gray,
                 shape = RoundedCornerShape(14.dp)
             ) // Border with color and shape
-            .clickable {viewModel.signInWithGoogle(context) } // Clickable functionality
+            .clickable { viewModel.signInWithGoogle(context) } // Clickable functionality
             .background(Color.White)
     ) {
         Image(
@@ -206,8 +237,15 @@ fun GoogleButton(){
         )
     }
 }
+
 @Composable
-fun CustomSnackbar(success: Boolean, onDismiss: () -> Unit, isLogin: Boolean) {
+fun CustomSnackbar(success: Boolean, type: String, onDismiss: () -> Unit) {
+    LaunchedEffect(Unit) {
+        delay(2000)
+        onDismiss()
+        LoginViewModel().resetSuccess()
+    }
+
     Snackbar(
         modifier = Modifier
             .padding(80.dp)
@@ -215,8 +253,7 @@ fun CustomSnackbar(success: Boolean, onDismiss: () -> Unit, isLogin: Boolean) {
         shape = RoundedCornerShape(60.dp),
         containerColor = if (success) Color(0xFF4CAF50) else Color(0xFFF44336),
         contentColor = Color.White,
-        action = {
-        }
+        action = {}
     ) {
         Box(
             modifier = Modifier
@@ -225,18 +262,20 @@ fun CustomSnackbar(success: Boolean, onDismiss: () -> Unit, isLogin: Boolean) {
         ) {
             Text(
                 text = if (success) {
-                    if (isLogin) "Login Successful" else "Registration Successful"
+                    when (type) {
+                        "login" -> "Login Successful"
+                        "Email" -> "Email Sent"
+                        else -> "Registration Successful"
+                    }
                 } else {
-                    if (isLogin) "Login Failed" else "Registration Failed"
+                    when (type) {
+                        "login" -> "Login Failed"
+                        "Email" -> "Email not registered"
+                        else -> "Registration Failed"
+                    }
                 },
                 style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
             )
         }
     }
 }
-
-
-
-
-
-
