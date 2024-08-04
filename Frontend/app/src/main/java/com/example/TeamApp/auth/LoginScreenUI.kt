@@ -1,5 +1,6 @@
 package com.example.TeamApp.auth
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -61,7 +62,7 @@ fun LoginScreen() {
     val emailSent by viewModel.emailSent.observeAsState()
     var snackbarMessage by remember { mutableStateOf("") }
     var snackbarSuccess by remember { mutableStateOf(false) }
-
+    val context = LocalContext.current
     LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
         when {
             emailSent != null -> {
@@ -100,8 +101,10 @@ fun LoginScreen() {
             PasswordTextField(labelValue = "Password", painterResource(id = R.drawable.passwordicon))
             Spacer(modifier = Modifier.height(31.dp))
             TextComponentUnderLined(value = "Forgot your password?") {
-                // Handle forgot password click
-                viewModel.onForgotPasswordClick()
+                val intent : Intent = Intent(context, ForgotPasswordActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                context.startActivity(intent)
             }
             Spacer(modifier = Modifier.height(15.dp))
             ButtonComponent(value = "Login")
@@ -187,9 +190,10 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier) {
 
 @Composable
 fun FaceBookButton() {
+    val viewModel: LoginViewModel = viewModel()
     // Replace with your image resource ID
     val image: Painter = painterResource(id = R.drawable.facebooklogo)
-
+    val context = LocalContext.current
     Box(
         modifier = Modifier
             .size(60.dp) // Adjusted size of the button
@@ -200,7 +204,7 @@ fun FaceBookButton() {
                 color = Color.Gray,
                 shape = RoundedCornerShape(12.dp)
             ) // Border with color and shape
-            .clickable { /* Handle click event */ } // Clickable functionality
+            .clickable { viewModel.signInWithFacebook(context) } // Clickable functionality
             .padding(8.dp) // Padding inside the button
     ) {
         Image(

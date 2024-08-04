@@ -22,6 +22,8 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.initialize
+import com.facebook.FacebookSdk
+
 
 class LoginActivity : ComponentActivity(), SignInLauncher {
     private val loginViewModel: LoginViewModel by viewModels()
@@ -31,6 +33,9 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         Firebase.initialize(this)
+        FacebookSdk.sdkInitialize(applicationContext)
+        //Jesli jeden raz zalogowalismy sie na urzadzeniu, to po zamknieciu aplikacji
+        //nie chcemy znowu się logować.
         oneTapClient = Identity.getSignInClient(this)
 
         val auth = FirebaseAuth.getInstance()
