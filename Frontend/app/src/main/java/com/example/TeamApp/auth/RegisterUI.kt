@@ -216,64 +216,7 @@ fun MyTextField(labelValue: String, painterResource: Painter) {
         shape = MaterialTheme.shapes.medium.copy(all= CornerSize(15.dp))
     )
 }
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordTextField(labelValue: String, painterResource: Painter) {
-    val viewModel: LoginViewModel = viewModel()
-    val password by viewModel.password.observeAsState("")
-    val passwordVisible = remember { mutableStateOf(false) }
-    OutlinedTextField(
-        modifier =Modifier.fillMaxWidth()
-        ,
 
-        label = { Text(text = labelValue) },
-        value = password,
-        onValueChange = { viewModel.onPasswordChanged(it) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedBorderColor = primaryLight,
-            focusedLabelColor = secondaryLight,
-            cursorColor = primaryLight,
-            containerColor = Color.Transparent
-
-
-        )
-
-        ,
-        leadingIcon = {
-            Icon(painter = painterResource, contentDescription ="" ,
-                modifier = Modifier.size(35.dp))
-        },
-        shape = MaterialTheme.shapes.medium.copy(all= CornerSize(15.dp)),
-
-        trailingIcon = {
-            val iconImage= if(passwordVisible.value){
-                Icons.Filled.Visibility
-
-            }
-            else{
-                Icons.Filled.VisibilityOff
-            }
-            var description=if(passwordVisible.value){
-                "Hide password"
-            }
-            else{
-                "Show password"
-            }
-
-            IconButton(onClick ={
-                passwordVisible.value=!passwordVisible.value
-            } ){
-                Icon(imageVector = iconImage, contentDescription = "")
-
-            }
-
-        },
-        visualTransformation = if(passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
-
-    )
-
-}
 @Composable
 fun CheckBox(value: String) {
     Row(
@@ -383,54 +326,6 @@ fun ButtonComponent(value: String) {
     }
 
 }
-@Composable
-fun DividerTextComponent() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Divider(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
-            color = secondaryLight,
-            thickness = 1.dp
-        )
-        Text(text = "or", fontSize = 14.sp)
-        Divider(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp),
-            color = secondaryLight,
-            thickness = 1.dp
-        )
-    }
-}
-@Composable
-fun ClickableLoginTextComponent(modifier: Modifier = Modifier) {
-    val viewModel: LoginViewModel = viewModel()
-    val context = LocalContext.current
-    val initialText = "Already have an account?  "
-    val loginText = "Log in"
-    val annotatedString = buildAnnotatedString {
-        append(initialText)
-        pushStringAnnotation(tag = "logintext", annotation = loginText)
-        withStyle(style = SpanStyle(color = Color.Blue)) {
-            append(loginText)
-        }
-        pop()
-    }
 
-    ClickableText(
-        text = annotatedString,
-        modifier=modifier,
-        onClick = {
-            viewModel.getToLoginScreen(context)
-            //viewModel.onLoginClick(context)
-        }
-    )
-}
 
 
