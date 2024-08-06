@@ -98,15 +98,7 @@ Surface(modifier = Modifier.fillMaxSize()) {
         .padding(horizontal = 28.dp) ){
         Column {
             Spacer(modifier = Modifier.height(20.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.End),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Image( painterResource(id = R.drawable.arrow), contentDescription ="arrow", modifier = Modifier
-                    .clickable { }
-                    .size(22.dp) )
 
-            }
             Spacer(modifier = Modifier.height(32.dp))
             UpperTextField(value = "Dołącz!")
             Spacer(modifier = Modifier.height(24.dp))
@@ -187,7 +179,9 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter) {
 
         ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription = "", modifier = Modifier.size(35.dp))
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier.padding(1.dp)
+                .width(22.dp)
+                .height(22.dp))
         },
         shape = MaterialTheme.shapes.medium.copy(all = CornerSize(15.dp))
     )
@@ -218,7 +212,9 @@ fun PasswordTextField(labelValue: String, painterResource: Painter) {
         ,
         leadingIcon = {
             Icon(painter = painterResource, contentDescription ="" ,
-                modifier = Modifier.size(35.dp))
+                modifier = Modifier.padding(1.dp)
+                    .width(22.dp)
+                    .height(22.dp))
         },
         shape = MaterialTheme.shapes.medium.copy(all= CornerSize(15.dp)),
 
@@ -275,7 +271,9 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
         ,
         leadingIcon = {
             Icon(painter = painterResource, contentDescription ="" ,
-                modifier = Modifier.size(35.dp))
+                modifier = Modifier.padding(1.dp)
+                    .width(22.dp)
+                    .height(22.dp))
         },
         shape = MaterialTheme.shapes.medium.copy(all= CornerSize(15.dp)),
 
