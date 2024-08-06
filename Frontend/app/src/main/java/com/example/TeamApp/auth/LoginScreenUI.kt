@@ -163,30 +163,7 @@ fun TextComponentUnderLined(value: String, onClick: () -> Unit) {
     )
 }
 
-@Composable
-fun ClickableRegisterComponent(modifier: Modifier = Modifier) {
-    val viewModel: LoginViewModel = viewModel()
-    val context = LocalContext.current
-    val initialText = "Don't have an account yet?  "
-    val loginText = "Register"
-    val annotatedString = buildAnnotatedString {
-        append(initialText)
-        pushStringAnnotation(tag = "logintext", annotation = loginText)
-        withStyle(style = SpanStyle(color = Color.Blue)) {
-            append(loginText)
-        }
-        pop()
-    }
 
-    ClickableText(
-        text = annotatedString,
-        modifier = modifier,
-        onClick = {
-            viewModel.getToRegisterScreen(context)
-            //viewModel.onLoginClick(context)
-        }
-    )
-}
 
 @Composable
 fun FaceBookButton() {

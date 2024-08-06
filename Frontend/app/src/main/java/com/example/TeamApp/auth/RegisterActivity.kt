@@ -3,10 +3,13 @@ package com.example.TeamApp.auth
 import SignInLauncher
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -15,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
 import com.example.TeamApp.data.User
 import com.example.compose.TeamAppTheme
 import com.google.firebase.FirebaseApp
@@ -34,6 +38,10 @@ class RegisterActivity : ComponentActivity(), SignInLauncher {
     private lateinit var oneTapClient: SignInClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT,Color.TRANSPARENT),
+            SystemBarStyle.auto(Color.TRANSPARENT,Color.TRANSPARENT)
+        )
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         Firebase.initialize(this)

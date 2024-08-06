@@ -9,13 +9,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -66,11 +69,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.compose.primaryLight
 import com.example.compose.secondaryLight
 import com.example.TeamApp.R
+import com.example.TeamApp.auth.ui.theme.TeamAppTheme
 import kotlinx.coroutines.delay
 
 @Composable
 fun RegisterScreen() {
-    val viewModel : LoginViewModel = viewModel()
+    val viewModel: LoginViewModel = viewModel()
     val loginSuccess by viewModel.loginSuccess.observeAsState()
     val registerSuccess by viewModel.registerSuccess.observeAsState()
     val emailSent by viewModel.emailSent.observeAsState()
@@ -85,11 +89,13 @@ fun RegisterScreen() {
                 snackbarSuccess = emailSent ?: false
                 showSnackbar = true
             }
+
             loginSuccess != null -> {
                 snackbarMessage = "login"
                 snackbarSuccess = loginSuccess ?: false
                 showSnackbar = true
             }
+
             registerSuccess != null -> {
                 snackbarMessage = "register"
                 snackbarSuccess = registerSuccess ?: false
@@ -97,53 +103,63 @@ fun RegisterScreen() {
             }
         }
     }
-    Surface( modifier = Modifier
-        .fillMaxSize()
-        .padding(28.dp)
-        .background(Color.White))
+    TeamAppTheme {
+
+
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(28.dp)
+                .background(Color.White)
+        )
+
         {
-        Column(modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center
 
             ) {
-            TextComponentUpper1(value = "Hey there, ")
-            TextComponentUpper2(value = "Create an account")
-            Spacer(modifier = Modifier.height(30.dp))
-            MyTextField(labelValue = "Name", painterResource(id =R.drawable.usericon ))
-            Spacer(modifier = Modifier.height(15.dp))
-            MyTextField(labelValue = "E-mail", painterResource(id =R.drawable.emailicon ))
-            Spacer(modifier = Modifier.height(15.dp))
-            PasswordTextField(
-                labelValue = "Password",
-                painterResource = painterResource(id = R.drawable.passwordicon )
-            )
-            Spacer(modifier = Modifier.height(15.dp))
-            CheckBox(value = "Terms and conditions")
-            Spacer(modifier = Modifier.height(110.dp))
-            ButtonComponent(value = "Register")
-            Spacer(modifier = Modifier.height(20.dp))
-            DividerTextComponent()
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(modifier = Modifier
-                .padding(21.dp)
-                .fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                FaceBookButton()
-                Spacer(modifier = Modifier.width(45.dp))
-                GoogleButton()
+                TextComponentUpper1(value = "Hey there, ")
+                TextComponentUpper2(value = "Create an account")
+                Spacer(modifier = Modifier.height(30.dp))
+                MyTextField(labelValue = "Name", painterResource(id = R.drawable.usericon))
+                Spacer(modifier = Modifier.height(15.dp))
+                MyTextField(labelValue = "E-mail", painterResource(id = R.drawable.emailicon))
+                Spacer(modifier = Modifier.height(15.dp))
+                PasswordTextField(
+                    labelValue = "Password",
+                    painterResource = painterResource(id = R.drawable.passwordicon)
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                CheckBox(value = "Terms and conditions")
+                Spacer(modifier = Modifier.height(110.dp))
+                ButtonComponent(value = "Register")
+                Spacer(modifier = Modifier.height(20.dp))
+                DividerTextComponent()
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(
+                    modifier = Modifier
+                        .padding(21.dp)
+                        .fillMaxWidth(), horizontalArrangement = Arrangement.Center
+                ) {
+                    FaceBookButton()
+                    Spacer(modifier = Modifier.width(45.dp))
+                    GoogleButton()
+                }
+                ClickableLoginTextComponent(modifier = Modifier.align(Alignment.CenterHorizontally))
             }
-            ClickableLoginTextComponent(modifier = Modifier.align(Alignment.CenterHorizontally))
-        }
 
-    }
-    if (showSnackbar) {
-        CustomSnackbar(
-            success = snackbarSuccess,
-            type = snackbarMessage,
-            onDismiss = {
-                showSnackbar = false
-                viewModel.resetSuccess()
-            }
-        )
+        }
+        if (showSnackbar) {
+            CustomSnackbar(
+                success = snackbarSuccess,
+                type = snackbarMessage,
+                onDismiss = {
+                    showSnackbar = false
+                    viewModel.resetSuccess()
+                }
+            )
+        }
     }
 }
 @Composable
