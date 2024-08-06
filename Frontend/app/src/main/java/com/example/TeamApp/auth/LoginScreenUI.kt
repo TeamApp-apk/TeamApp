@@ -1,31 +1,41 @@
 package com.example.TeamApp.auth
-
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -33,230 +43,330 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.TeamApp.R
-import kotlinx.coroutines.delay
+import com.example.TeamApp.auth.ui.theme.TeamAppTheme
 
 @Composable
-fun LoginScreen() {
-    val viewModel: LoginViewModel = viewModel()
-    var showSnackbar by remember { mutableStateOf(false) }
-    val loginSuccess by viewModel.loginSuccess.observeAsState()
-    val registerSuccess by viewModel.registerSuccess.observeAsState()
-    val emailSent by viewModel.emailSent.observeAsState()
-    var snackbarMessage by remember { mutableStateOf("") }
-    var snackbarSuccess by remember { mutableStateOf(false) }
-    val context = LocalContext.current
-    LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
-        when {
-            emailSent != null -> {
-                snackbarMessage = "Email"
-                snackbarSuccess = emailSent ?: false
-                showSnackbar = true
-            }
-            loginSuccess != null -> {
-                snackbarMessage = "login"
-                snackbarSuccess = loginSuccess ?: false
-                showSnackbar = true
-            }
-            registerSuccess != null -> {
-                snackbarMessage = "register"
-                snackbarSuccess = registerSuccess ?: false
-                showSnackbar = true
-            }
-        }
-    }
-    Surface(
-        modifier = Modifier
+fun LoginScreen(){
+    val gradientColors= listOf(
+        Color(0xFFE8E8E8)
+        ,Color(0xFF007BFF)
+    )
+TeamAppTheme {
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier
+
             .fillMaxSize()
-            .padding(27.dp)
-            .background(Color.White)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TextComponentUpper1(value = "")
-            TextComponentUpper2(value = "Welcome back")
-            Spacer(modifier = Modifier.height(23.dp))
-            MyTextField(labelValue = "E-mail", painterResource(id = R.drawable.emailicon))
-            Spacer(modifier = Modifier.height(12.dp))
-            PasswordTextField(labelValue = "Password", painterResource(id = R.drawable.passwordicon))
-            Spacer(modifier = Modifier.height(31.dp))
-            TextComponentUnderLined(value = "Forgot your password?") {
-                val intent : Intent = Intent(context, ForgotPasswordActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
-                context.startActivity(intent)
-            }
-            Spacer(modifier = Modifier.height(15.dp))
-            ButtonComponent(value = "Login")
-            Spacer(modifier = Modifier.height(21.dp))
-            DividerTextComponent()
-            Spacer(modifier = Modifier.height(21.dp))
+            .background(brush = Brush.linearGradient(colors = gradientColors))
+            .padding(horizontal = 28.dp)){
+        Column {
+            Spacer(modifier = Modifier.height(53.dp))
             Row(
-                modifier = Modifier
-                    .padding(21.dp)
-                    .fillMaxWidth(), horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.End),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                FaceBookButton()
-                Spacer(modifier = Modifier.width(45.dp))
-                GoogleButton()
+                Image(painterResource(id = R.drawable.arrow),
+                    contentDescription = "arrow",
+                    modifier = Modifier
+                        .clickable { }
+                        .size(22.dp))
+
             }
-            Spacer(modifier = Modifier.height(21.dp))
+            Spacer(modifier = Modifier.height(160.dp))
+            UpperTextField(value = "Witaj ponownie!")
+            Spacer(modifier = Modifier.height(28.dp))
+            EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.message) )
+            Spacer(modifier = Modifier.height(20.dp))
+            PasswordTextFieldForLogin(labelValue ="Hasło" , painterResource (id = R.drawable.lock) )
+            Spacer(modifier = Modifier.height(20.dp))
+            Row(horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()) {
+                Spacer(modifier = Modifier.width(8.dp))
+                RememberMeTextField()
+                Spacer(modifier = Modifier.width(64.dp))
+                ForgotPasswordTextField()
+            }
+            Spacer(modifier = Modifier.height(36.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.Center) // Center horizontally
+            ) {
+                ButtonSignIN()
+
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            DividerTextComponent()
+            Spacer(modifier = Modifier.height(24.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.Center) // Center horizontally
+            ) {
+                GoogleLoginButton()
+
+            }
+            Spacer(modifier = Modifier.height(24.dp))
             ClickableRegisterComponent(modifier = Modifier.align(Alignment.CenterHorizontally))
+
         }
-    }
-    if (showSnackbar) {
-        CustomSnackbar(success = snackbarSuccess, type = snackbarMessage) {
-            showSnackbar = false
-            viewModel.resetSuccess()  // Reset the success states after snackbar is dismissed
+
         }
+
     }
 }
 
-@Preview
+}
 @Composable
-fun LoginScreenPreview() {
+@Preview
+fun LoginScreenPreview(){
     LoginScreen()
 }
+@Composable
+fun ToggleSwitch(){
+
+        var isChecked by remember {
+            mutableStateOf(false)
+        }
+        Switch(checked =isChecked , onCheckedChange ={isChecked=it},
+            colors = SwitchDefaults.colors(
+                checkedTrackColor = Color(0xFF0056B3)
+            )
+         , modifier = Modifier
+                .width(32.3.dp)
+                .height(19.dp)
+
+
+        )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EmailBoxForLogin(labelValue: String, painterResource: Painter) {
+    val textValue = remember { mutableStateOf("") }
+    val viewModel: LoginViewModel = viewModel()
+    val email by viewModel.email.observeAsState("")
+
+    TextField(
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text(text = labelValue) },
+        value = if (labelValue == "Your Email") email else textValue.value,
+        onValueChange = {
+            if (labelValue == "Your Email") {
+                viewModel.onEmailChange(it)
+            } else {
+                textValue.value = it
+            }
+        },
+        keyboardOptions = KeyboardOptions.Default,
+        colors = TextFieldDefaults.textFieldColors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            containerColor = Color.White
+
+        ),
+        leadingIcon = {
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier
+                .padding(1.dp)
+                .width(22.dp)
+                .height(22.dp))
+        },
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(15.dp))
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PasswordTextFieldForLogin(labelValue: String, painterResource: Painter) {
+    val viewModel: LoginViewModel = viewModel()
+    val password by viewModel.password.observeAsState("")
+    val passwordVisible = remember { mutableStateOf(false) }
+    TextField(
+        modifier =Modifier.fillMaxWidth()
+        ,
+
+        label = { Text(text = labelValue) },
+        value = password,
+        onValueChange = { viewModel.onPasswordChanged(it) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        colors = TextFieldDefaults.textFieldColors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            containerColor = Color.White
+        )
+
+        ,
+        leadingIcon = {
+            Icon(painter = painterResource, contentDescription ="" ,
+                modifier = Modifier
+                    .padding(1.dp)
+                    .width(22.dp)
+                    .height(22.dp))
+        },
+        shape = MaterialTheme.shapes.medium.copy(all= CornerSize(15.dp)),
+
+        trailingIcon = {
+            val iconImage= if(passwordVisible.value){
+                Icons.Filled.Visibility
+
+            }
+            else{
+                Icons.Filled.VisibilityOff
+            }
+            var description=if(passwordVisible.value){
+                "Hide password"
+            }
+            else{
+                "Show password"
+            }
+
+            IconButton(onClick ={
+                passwordVisible.value=!passwordVisible.value
+            } ){
+                Icon(imageVector = iconImage, contentDescription = "")
+            }
+
+        },
+        visualTransformation = if(passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
+
+    )
+}
+@Composable
+fun ForgotPasswordTextField(){
+    Text(modifier = Modifier
+        .clickable {/*TODO
+          */
+        }
+        ,
+
+        text = "Zapomniałeś hasła?",
+        style = TextStyle(
+            fontSize = 14.sp,
+            lineHeight = 23.sp,
+            fontFamily = FontFamily(Font(R.font.robotoregular)),
+            fontWeight = FontWeight(400),
+            color = Color(0xFF003366),
+            textAlign = TextAlign.Right,
+        )
+    )
+}
 
 @Composable
-fun TextComponentUnderLined(value: String, onClick: () -> Unit) {
+fun RememberMeTextField() {
+    Row(
+        modifier = Modifier.padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ToggleSwitch()
+        Spacer(modifier = Modifier.width(24.dp))
+        Text(
+            modifier = Modifier
+                ,
+            text = "Zapamiętaj mnie",
+            style = TextStyle(
+                fontSize = 14.sp,
+                lineHeight = 23.sp,
+                fontFamily = FontFamily(Font(R.font.robotoregular)), // Ensure R.font.robotoregular is a valid reference
+                fontWeight = FontWeight(400),
+                color = Color(0xFF003366),
+                textAlign = TextAlign.Right
+            )
+        )
+    }
+}
+@Composable
+fun ButtonSignIN() {
+    val textValue = remember { mutableStateOf("") }
+    val viewModel: LoginViewModel = viewModel()
+    val context = LocalContext.current
+    Button(onClick = { viewModel.onLoginClick(context) }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
+        shape = RoundedCornerShape(10.dp),
+        modifier = Modifier
+            .width(300.dp)
+            .height(58.dp)
+            .shadow(
+                elevation = 35.dp,
+                spotColor = Color(0x406F7EC9),
+                ambientColor = Color(0x406F7EC9)
+            )
+
+            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(10.dp))
+            .padding(0.dp)
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f) // Take up remaining space on the left
+                    .wrapContentWidth(align = Alignment.CenterHorizontally)
+            ) {
+                Text(
+                    text = "Zaloguj się",
+
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily(Font(R.font.robotobold)),
+                    fontWeight = FontWeight(500),
+                    color = Color(0xFF003366),
+                    textAlign = TextAlign.Center,
+                    letterSpacing = 1.sp
+
+                )
+            }
+            Image(painter = painterResource(id = R.drawable.send), contentDescription = "Send", contentScale = ContentScale.Fit,
+                modifier = Modifier.size(28.dp))
+        }
+    }
+
+}
+@Composable
+fun ClickableRegisterComponent(modifier: Modifier = Modifier) {
+    val viewModel: LoginViewModel = viewModel()
+    val context = LocalContext.current
+    val initialText = "Nie masz jeszcze konta?  "
+    val loginText = "Zarejestruj się!"
     val annotatedString = buildAnnotatedString {
-        pushStringAnnotation(tag = "URL", annotation = "forgot_password")
-        withStyle(style = SpanStyle(color = Color.Gray, textDecoration = TextDecoration.Underline)) {
-            append(value)
+        append(initialText)
+        pushStringAnnotation(tag = "logintext", annotation = loginText)
+        withStyle(style = SpanStyle(color = Color.Blue)) {
+            append(loginText)
         }
         pop()
     }
 
     ClickableText(
         text = annotatedString,
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 40.dp)
-            .wrapContentSize(Alignment.Center),  // This centers the text
-        style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal, fontStyle = FontStyle.Normal),
-        onClick = { offset ->
-            annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset).firstOrNull()?.let {
-                onClick()
-            }
+        modifier = modifier,
+        onClick = {
+            viewModel.getToRegisterScreen(context)
+            //viewModel.onLoginClick(context)
         }
     )
-}
-
-
-
-@Composable
-fun FaceBookButton() {
-    val viewModel: LoginViewModel = viewModel()
-    // Replace with your image resource ID
-    val image: Painter = painterResource(id = R.drawable.facebooklogo)
-    val context = LocalContext.current
-    Box(
-        modifier = Modifier
-            .size(60.dp) // Adjusted size of the button
-            .clip(RoundedCornerShape(14.dp)) // Rounded corners with 12 dp radius
-            .background(Color.White)
-            .border(
-                width = 2.dp,
-                color = Color.Gray,
-                shape = RoundedCornerShape(12.dp)
-            ) // Border with color and shape
-            .clickable { viewModel.signInWithFacebook(context) } // Clickable functionality
-            .padding(8.dp) // Padding inside the button
-    ) {
-        Image(
-            painter = image,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-}
-
-@Composable
-fun GoogleButton() {
-    val viewModel: LoginViewModel = viewModel()
-    val context = LocalContext.current
-
-    val image: Painter = painterResource(id = R.drawable.googlelogo)
-
-    Box(
-        modifier = Modifier
-            .size(60.dp) // Size of the button
-            .clip(RoundedCornerShape(14.dp)) // Rounded corners with 24 dp radius
-            .border(
-                width = 2.dp,
-                color = Color.Gray,
-                shape = RoundedCornerShape(14.dp)
-            ) // Border with color and shape
-            .clickable { viewModel.signInWithGoogle(context) } // Clickable functionality
-            .background(Color.White)
-    ) {
-        Image(
-            painter = image,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-}
-
-@Composable
-fun CustomSnackbar(success: Boolean, type: String, onDismiss: () -> Unit) {
-    LaunchedEffect(Unit) {
-        delay(2000)
-        onDismiss()
-        LoginViewModel().resetSuccess()
-    }
-
-    Snackbar(
-        modifier = Modifier
-            .padding(80.dp)
-            .wrapContentSize(Alignment.Center),
-        shape = RoundedCornerShape(60.dp),
-        containerColor = if (success) Color(0xFF4CAF50) else Color(0xFFF44336),
-        contentColor = Color.White,
-        action = {}
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = if (success) {
-                    when (type) {
-                        "login" -> "Login Successful"
-                        "Email" -> "Email Sent"
-                        else -> "Registration Successful"
-                    }
-                } else {
-                    when (type) {
-                        "login" -> "Login Failed"
-                        "Email" -> "Email not registered"
-                        else -> "Registration Failed"
-                    }
-                },
-                style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
-            )
-        }
-    }
 }

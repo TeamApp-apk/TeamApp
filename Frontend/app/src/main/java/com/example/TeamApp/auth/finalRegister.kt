@@ -255,7 +255,6 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
     TextField(
         modifier =Modifier.fillMaxWidth()
         ,
-
         label = { Text(text = labelValue) },
         value = password,
         onValueChange = { viewModel.onPasswordChanged(it) },
@@ -408,7 +407,8 @@ fun ClickableLoginTextComponent(modifier: Modifier = Modifier) {
 fun GoogleLoginButton() {
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
-    Button(onClick = { viewModel.onForgotPasswordClick() }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+    val context = LocalContext.current
+    Button(onClick = { viewModel.signInWithGoogle(context) }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
