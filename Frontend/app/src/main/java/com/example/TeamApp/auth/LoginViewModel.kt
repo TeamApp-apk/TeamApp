@@ -71,21 +71,27 @@ class LoginViewModel : ViewModel() {
         val password = _password.value ?: return
 
         Log.d("LoginAttempt", "Attempting to log in with email: $email")
-
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("Login", "Login successful")
-                    _loginSuccess.value = true
-                    val intent = Intent(context, CreateEventActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        if (email.isNotEmpty() && password.isNotEmpty())
+        {
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Log.d("Login", "Login successful")
+                        _loginSuccess.value = true
+                        val intent = Intent(context, CreateEventActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                        context.startActivity(intent)
+                    } else {
+                        Log.e("Login", "Login failed: ${task.exception?.message}")
+                        _loginSuccess.value = false
                     }
-                    context.startActivity(intent)
-                } else {
-                    Log.e("Login", "Login failed: ${task.exception?.message}")
-                    _loginSuccess.value = false
                 }
-            }
+        }
+        else
+        {
+            Log.d("LoginAttempt", "Login failed: empty fields")
+        }
     }
 
     fun signInWithGoogle(context: Context) {
@@ -169,6 +175,8 @@ class LoginViewModel : ViewModel() {
 
         val user = User(name = username, email = email)
 
+    if (password.isNotEmpty() && email.isNotEmpty())
+    {
         Log.d("RegisterAttempt", "Attempting to register with email: $email")
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
@@ -181,6 +189,12 @@ class LoginViewModel : ViewModel() {
                     _registerSuccess.value = false
                 }
             }
+    }
+        else
+    {
+        Log.d("RegisterAttempt", "Register failed: empty fields")
+    }
+
     }
 
     fun resetSuccess() {
