@@ -196,7 +196,7 @@ fun GoogleButton() {
     val viewModel: LoginViewModel = viewModel()
     val context = LocalContext.current
 
-    val image: Painter = painterResource(id = R.drawable.googlelogo)
+    val image: Painter = painterResource(id = R.drawable.googleicon)
 
     Box(
         modifier = Modifier

@@ -1,11 +1,12 @@
 package com.example.TeamApp.auth
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-
+import androidx.activity.result.IntentSenderRequest
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -70,6 +71,8 @@ import com.example.TeamApp.auth.ui.theme.TeamAppTheme
 
 @Composable
 fun LoginScreen(){
+    val context = LocalContext.current
+    val viewModel: LoginViewModel = viewModel()
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
@@ -90,16 +93,16 @@ TeamAppTheme {
                 Image(painterResource(id = R.drawable.arrow),
                     contentDescription = "arrow",
                     modifier = Modifier
-                        .clickable { }
+                        .clickable {viewModel.getToRegisterScreen(context) }
                         .size(22.dp))
 
             }
             Spacer(modifier = Modifier.height(160.dp))
             UpperTextField(value = "Witaj ponownie!")
             Spacer(modifier = Modifier.height(28.dp))
-            EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.message) )
+            EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.mail_icon) )
             Spacer(modifier = Modifier.height(20.dp))
-            PasswordTextFieldForLogin(labelValue ="Hasło" , painterResource (id = R.drawable.lock) )
+            PasswordTextFieldForLogin(labelValue ="password" , painterResource (id = R.drawable.lock_icon) )
             Spacer(modifier = Modifier.height(20.dp))
             Row(horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
@@ -116,7 +119,6 @@ TeamAppTheme {
                     .wrapContentSize(Alignment.Center) // Center horizontally
             ) {
                 ButtonSignIN()
-
             }
             Spacer(modifier = Modifier.height(24.dp))
             DividerTextComponent()
@@ -163,30 +165,26 @@ fun ToggleSwitch(){
         )
 }
 
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailBoxForLogin(labelValue: String, painterResource: Painter) {
-    val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
     val email by viewModel.email.observeAsState("")
 
     TextField(
         modifier = Modifier.fillMaxWidth(),
         label = { Text(text = labelValue) },
-        value = if (labelValue == "Your Email") email else textValue.value,
+        value = email,
         onValueChange = {
-            if (labelValue == "Your Email") {
-                viewModel.onEmailChange(it)
-            } else {
-                textValue.value = it
-            }
+            viewModel.onEmailChange(it)
         },
         keyboardOptions = KeyboardOptions.Default,
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             containerColor = Color.White
-
         ),
         leadingIcon = {
             Icon(painter = painterResource, contentDescription = "", modifier = Modifier
@@ -204,64 +202,56 @@ fun PasswordTextFieldForLogin(labelValue: String, painterResource: Painter) {
     val viewModel: LoginViewModel = viewModel()
     val password by viewModel.password.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
-    TextField(
-        modifier =Modifier.fillMaxWidth()
-        ,
 
+    TextField(
+        modifier = Modifier.fillMaxWidth(),
         label = { Text(text = labelValue) },
         value = password,
-        onValueChange = { viewModel.onPasswordChanged(it) },
+        onValueChange = {
+            viewModel.onPasswordChanged(it)
+        },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             containerColor = Color.White
-        )
-
-        ,
+        ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription ="" ,
-                modifier = Modifier
-                    .padding(1.dp)
-                    .width(22.dp)
-                    .height(22.dp))
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier
+                .padding(1.dp)
+                .width(22.dp)
+                .height(22.dp))
         },
-        shape = MaterialTheme.shapes.medium.copy(all= CornerSize(15.dp)),
-
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(15.dp)),
         trailingIcon = {
-            val iconImage= if(passwordVisible.value){
+            val iconImage = if (passwordVisible.value) {
                 Icons.Filled.Visibility
-
-            }
-            else{
+            } else {
                 Icons.Filled.VisibilityOff
             }
-            var description=if(passwordVisible.value){
+            val description = if (passwordVisible.value) {
                 "Hide password"
-            }
-            else{
+            } else {
                 "Show password"
             }
-
-            IconButton(onClick ={
-                passwordVisible.value=!passwordVisible.value
-            } ){
-                Icon(imageVector = iconImage, contentDescription = "")
+            IconButton(onClick = {
+                passwordVisible.value = !passwordVisible.value
+            }) {
+                Icon(imageVector = iconImage, contentDescription = description)
             }
-
         },
-        visualTransformation = if(passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
-
+        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
     )
 }
 @Composable
 fun ForgotPasswordTextField(){
+    val viewModel : LoginViewModel = viewModel()
+    val context = LocalContext.current
     Text(modifier = Modifier
-        .clickable {/*TODO
-          */
+        .clickable {
+            viewModel.getToChangePasswordScreen(context)
         }
         ,
-
         text = "Zapomniałeś hasła?",
         style = TextStyle(
             fontSize = 14.sp,
@@ -273,7 +263,6 @@ fun ForgotPasswordTextField(){
         )
     )
 }
-
 @Composable
 fun RememberMeTextField() {
     Row(
@@ -360,13 +349,11 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier) {
         }
         pop()
     }
-
     ClickableText(
         text = annotatedString,
         modifier = modifier,
         onClick = {
             viewModel.getToRegisterScreen(context)
-            //viewModel.onLoginClick(context)
         }
     )
 }
