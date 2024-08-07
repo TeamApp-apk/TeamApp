@@ -60,12 +60,12 @@ class RegisterActivity : ComponentActivity(), SignInLauncher {
             finish()
             return
         }
+        enableEdgeToEdge()
         setContent {
-            TeamAppTheme {
-                RegisterScreen()
-            }
-        }
 
+                FinalRegisterScreen()
+
+        }
         loginViewModel.signInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val data = result.data
@@ -75,7 +75,6 @@ class RegisterActivity : ComponentActivity(), SignInLauncher {
             }
         }
     }
-
     private fun handleSignInResult(data: Intent?) {
         try {
             val credential = oneTapClient.getSignInCredentialFromIntent(data)

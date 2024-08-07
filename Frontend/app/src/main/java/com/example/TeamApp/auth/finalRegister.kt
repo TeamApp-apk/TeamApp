@@ -98,17 +98,16 @@ Surface(modifier = Modifier.fillMaxSize()) {
         .padding(horizontal = 28.dp) ){
         Column {
             Spacer(modifier = Modifier.height(20.dp))
-
             Spacer(modifier = Modifier.height(32.dp))
             UpperTextField(value = "Dołącz!")
             Spacer(modifier = Modifier.height(24.dp))
-            NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.profile) )
+            NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.user_icon))
             Spacer(modifier = Modifier.height(20.dp))
-            NameAndEmailBox(labelValue = "E-mail", painterResource (id = R.drawable.message) )
+            NameAndEmailBox(labelValue = "E-mail", painterResource (id = R.drawable.mail_icon) )
             Spacer(modifier = Modifier.height(20.dp))
-            PasswordTextField(labelValue ="Hasło" , painterResource (id=R.drawable.lock) )
+            PasswordTextField(labelValue ="Hasło" , painterResource (id=R.drawable.lock_icon) )
             Spacer(modifier = Modifier.height(20.dp))
-            PasswordTextFieldRepeatPassword(labelValue ="Powtórz hasło" , painterResource (id=R.drawable.lock) )
+            PasswordTextFieldRepeatPassword(labelValue ="Powtórz hasło" , painterResource (id=R.drawable.lock_icon) )
             Spacer(modifier = Modifier.height(40.dp))
             Box(
                 modifier = Modifier
@@ -130,19 +129,8 @@ Surface(modifier = Modifier.fillMaxSize()) {
 
             }
             Spacer(modifier = Modifier.height(20.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize(Alignment.Center) // Center horizontally
-            ) {
-                FacebookLoginButton()
-
-            }
-            Spacer(modifier = Modifier.height(20.dp))
             ClickableLoginTextComponent(modifier = Modifier.align(Alignment.CenterHorizontally))
         }
-
-
 
         }
 
@@ -163,9 +151,9 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter) {
     TextField(
         modifier = Modifier.fillMaxWidth(),
         label = { Text(text = labelValue) },
-        value = if (labelValue == "Your Email") email else textValue.value,
+        value = if (labelValue == "E-mail") email else textValue.value,
         onValueChange = {
-            if (labelValue == "Your Email") {
+            if (labelValue == "E-mail") {
                 viewModel.onEmailChange(it)
             } else {
                 textValue.value = it
@@ -193,10 +181,9 @@ fun PasswordTextField(labelValue: String, painterResource: Painter) {
     val viewModel: LoginViewModel = viewModel()
     val password by viewModel.password.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
-    TextField(
-        modifier =Modifier.fillMaxWidth()
-        ,
 
+    TextField(
+        modifier = Modifier.fillMaxWidth(),
         label = { Text(text = labelValue) },
         value = password,
         onValueChange = { viewModel.onPasswordChanged(it) },
@@ -205,110 +192,81 @@ fun PasswordTextField(labelValue: String, painterResource: Painter) {
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             containerColor = Color.White
-
-
-        )
-
-        ,
+        ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription ="" ,
-                modifier = Modifier.padding(1.dp)
-                    .width(22.dp)
-                    .height(22.dp))
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier.padding(1.dp).width(22.dp).height(22.dp))
         },
-        shape = MaterialTheme.shapes.medium.copy(all= CornerSize(15.dp)),
-
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(15.dp)),
         trailingIcon = {
-            val iconImage= if(passwordVisible.value){
+            val iconImage = if (passwordVisible.value) {
                 Icons.Filled.Visibility
-
-            }
-            else{
+            } else {
                 Icons.Filled.VisibilityOff
             }
-            var description=if(passwordVisible.value){
+            val description = if (passwordVisible.value) {
                 "Hide password"
-            }
-            else{
+            } else {
                 "Show password"
             }
-
-            IconButton(onClick ={
-                passwordVisible.value=!passwordVisible.value
-            } ){
-                Icon(imageVector = iconImage, contentDescription = "")
-
+            IconButton(onClick = {
+                passwordVisible.value = !passwordVisible.value
+            }) {
+                Icon(imageVector = iconImage, contentDescription = description)
             }
-
         },
-        visualTransformation = if(passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
-
+        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
     )
-
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter) {
     val viewModel: LoginViewModel = viewModel()
-    val password by viewModel.password.observeAsState("")
+    val confirmPassword by viewModel.confirmPassword.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
+
     TextField(
-        modifier =Modifier.fillMaxWidth()
-        ,
+        modifier = Modifier.fillMaxWidth(),
         label = { Text(text = labelValue) },
-        value = password,
-        onValueChange = { viewModel.onPasswordChanged(it) },
+        value = confirmPassword,
+        onValueChange = { viewModel.onConfirmPasswordChanged(it) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             containerColor = Color.White
-
-
-        )
-
-        ,
+        ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription ="" ,
-                modifier = Modifier.padding(1.dp)
-                    .width(22.dp)
-                    .height(22.dp))
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier.padding(1.dp).width(22.dp).height(22.dp))
         },
-        shape = MaterialTheme.shapes.medium.copy(all= CornerSize(15.dp)),
-
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(15.dp)),
         trailingIcon = {
-            val iconImage= if(passwordVisible.value){
+            val iconImage = if (passwordVisible.value) {
                 Icons.Filled.Visibility
-
-            }
-            else{
+            } else {
                 Icons.Filled.VisibilityOff
             }
-            var description=if(passwordVisible.value){
+            val description = if (passwordVisible.value) {
                 "Hide password"
-            }
-            else{
+            } else {
                 "Show password"
             }
-
-            IconButton(onClick ={
-                passwordVisible.value=!passwordVisible.value
-            } ){
-                Icon(imageVector = iconImage, contentDescription = "")
-
+            IconButton(onClick = {
+                passwordVisible.value = !passwordVisible.value
+            }) {
+                Icon(imageVector = iconImage, contentDescription = description)
             }
-
         },
-        visualTransformation = if(passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
-
+        visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
     )
-
 }
+
 @Composable
 fun ButtonSignUP() {
+    val context = LocalContext.current
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
-    Button(onClick = { viewModel.onForgotPasswordClick() }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+    Button(onClick = { viewModel.onRegisterClick(context) }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
@@ -429,7 +387,7 @@ fun GoogleLoginButton() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Image(painter = painterResource(id = R.drawable.google), contentDescription = "googleRegister", contentScale = ContentScale.Fit,
+            Image(painter = painterResource(id = R.drawable.googleicon), contentDescription = "googleRegister", contentScale = ContentScale.Fit,
                 modifier = Modifier.size(28.dp))
             Box(
                 modifier = Modifier
@@ -454,53 +412,3 @@ fun GoogleLoginButton() {
 
 }
 
-@Composable
-fun FacebookLoginButton() {
-    val textValue = remember { mutableStateOf("") }
-    val viewModel: LoginViewModel = viewModel()
-    Button(onClick = { viewModel.onForgotPasswordClick() }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(10.dp),
-        modifier = Modifier
-            .shadow(
-                elevation = 30.dp,
-                spotColor = Color(0x40D3D4E2),
-                ambientColor = Color(0x40D3D4E2)
-            )
-
-            .padding(0.5.dp)
-            .width(300.dp)
-            .height(56.dp)
-            .background(color = Color.White, shape = RoundedCornerShape(size = 12.dp))
-    ) {
-
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Image(painter = painterResource(id = R.drawable.facebook), contentDescription = "facebook", contentScale = ContentScale.Fit,
-                modifier = Modifier.size(28.dp))
-            Box(
-                modifier = Modifier
-                    .weight(1f) // Take up remaining space on the left
-                    .wrapContentWidth(align = Alignment.CenterHorizontally)
-                    .padding(horizontal = 3.dp)
-            ) {
-                Text(
-                    text = "Zaloguj się przez Facebook",
-
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.robotoregular)),
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF003366),
-                    textAlign = TextAlign.Center,
-                    letterSpacing = 1.sp
-
-                )
-            }
-
-        }
-    }
-
-}

@@ -18,7 +18,7 @@ import com.example.compose.TeamAppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(viewModel: ProfileViewModel, context: Context) {
-    Box(modifier = Modifier.fillMaxSize().padding(bottom = 60.dp)){
+    Box(modifier = Modifier.fillMaxSize().padding(bottom = 60.dp)) {
         Row(
             horizontalArrangement = Arrangement.SpaceAround,
             modifier = Modifier
@@ -32,13 +32,22 @@ fun ProfileScreen(viewModel: ProfileViewModel, context: Context) {
             Button(onClick = { viewModel.navigateToCreateEvent(context) }) {
                 Text(text = "Create")
             }
-            Button(onClick = {  }, colors = ButtonDefaults.buttonColors(Color.Gray)){
+            Button(onClick = { }, colors = ButtonDefaults.buttonColors(Color.Gray)) {
                 Text(text = "Profile")
             }
         }
-
+        Spacer(modifier = Modifier.height(50.dp)) // Adjust the height as needed
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(15.dp)
+        ) {
+            Spacer(modifier = Modifier.height(50.dp)) // Adjust the height as needed
+            Button(
+                onClick = { viewModel.navitagateToSettings(context) },
+            ) {
+                Text(text = "Ustawienia")
+            }
+        }
     }
-
-
-
 }

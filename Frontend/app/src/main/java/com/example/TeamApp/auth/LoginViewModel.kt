@@ -38,9 +38,15 @@ class LoginViewModel : ViewModel() {
     private val _username = MutableLiveData("")
     val username: LiveData<String> = _username
 
+    private val _confirmPassword = MutableLiveData<String>()
+    val confirmPassword: LiveData<String> = _confirmPassword
 
     private val _loginSuccess = MutableLiveData<Boolean?>(null)
     val loginSuccess: LiveData<Boolean?> = _loginSuccess
+
+    fun onConfirmPasswordChanged(newConfirmPassword: String) {
+        _confirmPassword.value = newConfirmPassword
+    }
 
     private val _registerSuccess = MutableLiveData<Boolean?>(null)
     val registerSuccess: LiveData<Boolean?> = _registerSuccess
@@ -88,9 +94,12 @@ class LoginViewModel : ViewModel() {
                     }
                 }
         }
-        else
+        else if(email.isEmpty())
         {
-            Log.d("LoginAttempt", "Login failed: empty fields")
+            Log.d("LoginAttempt", "Login failed: empty email field")
+        }
+        else{
+            Log.d("LoginAttempt", "Login failed: empty password field")
         }
     }
 
@@ -164,10 +173,17 @@ class LoginViewModel : ViewModel() {
         }
         context.startActivity(intent)
     }
+    fun getToChangePasswordScreen(context: Context){
+        val intent = Intent(context, ForgotPasswordActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        context.startActivity(intent)
+    }
 
     fun onRegisterClick(context: Context) {
         val email = _email.value ?: return
         val password = _password.value ?: return
+        val confirmPassword = _confirmPassword.value ?: return
         // Tymczasowo, niedodana implementacja rejestracji z loginem
         val username = "xyz"
 
@@ -175,27 +191,33 @@ class LoginViewModel : ViewModel() {
 
         val user = User(name = username, email = email)
 
-    if (password.isNotEmpty() && email.isNotEmpty())
-    {
-        Log.d("RegisterAttempt", "Attempting to register with email: $email")
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    db.collection("users").add(user)
-                    Log.d("Register", "Registration successful")
-                    _registerSuccess.value = true
-                } else {
-                    Log.e("Register", "Registration failed: ${task.exception?.message}")
-                    _registerSuccess.value = false
+        if (password != confirmPassword) {
+            Log.d("RegisterAttempt", "Register failed: passwords do not match")
+            return
+        }
+
+        if (password.isNotEmpty() && email.isNotEmpty()) {
+            Log.d("RegisterAttempt", "Attempting to register with email: $email")
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        db.collection("users").add(user)
+                        Log.d("Register", "Registration successful")
+                        _registerSuccess.value = true
+                        val intent = Intent(context, CreateEventActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                        context.startActivity(intent)
+                    } else {
+                        Log.e("Register", "Registration failed: ${task.exception?.message}")
+                        _registerSuccess.value = false
+                    }
                 }
-            }
-    }
-        else
-    {
-        Log.d("RegisterAttempt", "Register failed: empty fields")
+        } else if (email.isEmpty()) {
+            Log.d("RegisterAttempt", "Register failed: empty email field")
+        }
     }
 
-    }
 
     fun resetSuccess() {
         _loginSuccess.postValue(null)
