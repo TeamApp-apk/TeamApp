@@ -68,6 +68,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.TeamApp.R
 import com.example.compose.primaryLight
 import com.example.compose.secondaryLight
+import com.example.ui.theme.fontFamily
 import kotlinx.coroutines.delay
 @Composable
 fun ForgotPasswordUI(){
@@ -148,10 +149,13 @@ val gradientColors= listOf(
 }
 @Composable
 fun UpperTextField(value: String){
-    Text(text = value, modifier = Modifier
-        .width(186.dp)
-        .height(28.dp), style = TextStyle(fontSize = 24.sp, fontFamily =
-    FontFamily(Font(R.font.robotobold)), fontWeight = FontWeight(500), color = Color.Black
+    Text(
+        text = value,
+        modifier = Modifier.width(186.dp).height(28.dp),
+        style = TextStyle(fontSize = 24.sp,
+            fontFamily = fontFamily,
+            fontWeight = FontWeight(500),
+            color = Color.Black
     )
     )
 

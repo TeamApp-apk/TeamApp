@@ -2,6 +2,7 @@ package com.example.TeamApp.auth
 
 import SignInLauncher
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -32,8 +33,13 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.initialize
+import kotlinx.coroutines.CoroutineExceptionHandler
 
 class RegisterActivity : ComponentActivity(), SignInLauncher {
+    val handler = CoroutineExceptionHandler { _, throwable ->
+        // process the Throwable
+        Log.e(TAG, "There has been an issue: ", throwable)
+    }
     private val loginViewModel: LoginViewModel by viewModels()
     private lateinit var oneTapClient: SignInClient
 
@@ -46,7 +52,6 @@ class RegisterActivity : ComponentActivity(), SignInLauncher {
         FirebaseApp.initializeApp(this)
         Firebase.initialize(this)
         oneTapClient = Identity.getSignInClient(this)
-
         val auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
             val intent = Intent(this, CreateEventActivity::class.java)

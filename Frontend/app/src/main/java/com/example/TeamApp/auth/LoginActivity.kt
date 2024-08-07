@@ -2,6 +2,7 @@ package com.example.TeamApp.auth
 
 import SignInLauncher
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -23,9 +24,14 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.initialize
 import com.facebook.FacebookSdk
+import kotlinx.coroutines.CoroutineExceptionHandler
 
 
 class LoginActivity : ComponentActivity(), SignInLauncher {
+    val handler = CoroutineExceptionHandler { _, throwable ->
+        // process the Throwable
+        Log.e(TAG, "There has been an issue: ", throwable)
+    }
     private val loginViewModel: LoginViewModel by viewModels()
     private lateinit var oneTapClient: SignInClient
 
@@ -37,7 +43,6 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         //Jesli jeden raz zalogowalismy sie na urzadzeniu, to po zamknieciu aplikacji
         //nie chcemy znowu się logować.
         oneTapClient = Identity.getSignInClient(this)
-
         val auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
             val intent = Intent(this, CreateEventActivity::class.java)

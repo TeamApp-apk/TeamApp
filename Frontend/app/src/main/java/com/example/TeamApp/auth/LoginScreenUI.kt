@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.TeamApp.R
 import com.example.TeamApp.auth.ui.theme.TeamAppTheme
+import com.example.ui.theme.fontFamily
 
 @Composable
 fun LoginScreen(){
@@ -95,7 +96,9 @@ TeamAppTheme {
 
             }
             Spacer(modifier = Modifier.height(160.dp))
-            UpperTextField(value = "Witaj ponownie!")
+            UpperTextField(
+                value = "Witaj ponownie!",
+            )
             Spacer(modifier = Modifier.height(28.dp))
             EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.message) )
             Spacer(modifier = Modifier.height(20.dp))
@@ -289,8 +292,7 @@ fun RememberMeTextField() {
             style = TextStyle(
                 fontSize = 14.sp,
                 lineHeight = 23.sp,
-                fontFamily = FontFamily(Font(R.font.robotoregular)), // Ensure R.font.robotoregular is a valid reference
-                fontWeight = FontWeight(400),
+                fontFamily = fontFamily, // Ensure R.font.robotoregular is a valid reference
                 color = Color(0xFF003366),
                 textAlign = TextAlign.Right
             )
