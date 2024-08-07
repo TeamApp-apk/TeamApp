@@ -50,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -71,9 +72,13 @@ import com.example.compose.secondaryLight
 import com.example.TeamApp.R
 import com.example.TeamApp.auth.ui.theme.TeamAppTheme
 import kotlinx.coroutines.delay
+import androidx.compose.ui.unit.*
 
 @Composable
 fun RegisterScreen() {
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     val viewModel: LoginViewModel = viewModel()
     val loginSuccess by viewModel.loginSuccess.observeAsState()
     val registerSuccess by viewModel.registerSuccess.observeAsState()
@@ -109,7 +114,7 @@ fun RegisterScreen() {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(28.dp)
+                .padding(width * 0.075f )
                 .background(Color.White)
         )
 
@@ -121,29 +126,29 @@ fun RegisterScreen() {
             ) {
                 TextComponentUpper1(value = "Hey there, ")
                 TextComponentUpper2(value = "Create an account")
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(height * 0.018f))
                 MyTextField(labelValue = "Name", painterResource(id = R.drawable.usericon))
-                Spacer(modifier = Modifier.height(15.dp))
+                Spacer(modifier = Modifier.height(height * 0.018f))
                 MyTextField(labelValue = "E-mail", painterResource(id = R.drawable.emailicon))
-                Spacer(modifier = Modifier.height(15.dp))
+                Spacer(modifier = Modifier.height(height * 0.018f))
                 PasswordTextField(
                     labelValue = "Password",
                     painterResource = painterResource(id = R.drawable.passwordicon)
                 )
-                Spacer(modifier = Modifier.height(15.dp))
+                Spacer(modifier = Modifier.height(height * 0.018f))
                 CheckBox(value = "Terms and conditions")
-                Spacer(modifier = Modifier.height(110.dp))
+                Spacer(modifier = Modifier.height(height * 0.135f))
                 ButtonComponent(value = "Register")
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(height * 0.025f))
                 DividerTextComponent()
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(height * 0.025f))
                 Row(
                     modifier = Modifier
-                        .padding(21.dp)
+                        .padding(width * 0.056f)
                         .fillMaxWidth(), horizontalArrangement = Arrangement.Center
                 ) {
                     FaceBookButton()
-                    Spacer(modifier = Modifier.width(45.dp))
+                    Spacer(modifier = Modifier.width(width * 0.12f))
                     GoogleButton()
                 }
                 ClickableLoginTextComponent(modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -164,12 +169,15 @@ fun RegisterScreen() {
 }
 @Composable
 fun TextComponentUpper1(value: String){
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     Text(text = value,
         modifier = Modifier
             .fillMaxWidth()
 
-            .heightIn(min = 40.dp)
-        ,style= TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Normal, fontStyle = FontStyle.Normal),
+            .heightIn(min = height * 0.05f),
+        style= TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Normal, fontStyle = FontStyle.Normal),
         textAlign = TextAlign.Center
 
     )
@@ -177,16 +185,14 @@ fun TextComponentUpper1(value: String){
 }
 @Composable
 fun TextComponentUpper2(value:String){
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     Text(text = value,
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn()
-            ,
+        modifier = Modifier.fillMaxWidth().heightIn(),
         style = TextStyle(fontStyle =FontStyle.Normal, fontWeight = FontWeight.Bold, fontSize = 30.sp ),
         textAlign = TextAlign.Center
-
     )
-
 }
 
 
@@ -199,13 +205,15 @@ fun PreviewRegisterScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTextField(labelValue: String, painterResource: Painter) {
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
     val email by viewModel.email.observeAsState("")
 
     OutlinedTextField(
-        modifier = Modifier.fillMaxWidth()
-            ,
+        modifier = Modifier.fillMaxWidth(),
         label = { Text(text = labelValue) },
         value = if (labelValue == "E-mail") email else textValue.value,
         onValueChange = {
@@ -219,27 +227,30 @@ fun MyTextField(labelValue: String, painterResource: Painter) {
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = primaryLight,
             focusedLabelColor = secondaryLight,
-
             unfocusedBorderColor = Color.Gray,
             cursorColor = primaryLight,
             containerColor = Color.Transparent,
-
-
         ),
         leadingIcon = {
+            //Not sure if I need to change this value to percentages.
+            //Is it width? Height? Diagonal?
             Icon(painter = painterResource, contentDescription = "", modifier = Modifier.size(35.dp))
         },
+        // Same here
         shape = MaterialTheme.shapes.medium.copy(all= CornerSize(15.dp))
     )
 }
 
 @Composable
 fun CheckBox(value: String) {
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(56.dp)
-            .padding(10.dp),
+            .heightIn(height * 0.07f)
+            .padding(width * 0.027f),
         verticalAlignment = Alignment.CenterVertically
     ) {
         val checkedState = remember { mutableStateOf(false) }
@@ -250,7 +261,7 @@ fun CheckBox(value: String) {
             }
         )
 
-        Spacer(modifier = Modifier.width(1.dp))
+        Spacer(modifier = Modifier.width(width * 0.0027f))
 
         ClickableTextComponent()
     }
@@ -258,7 +269,9 @@ fun CheckBox(value: String) {
 @Composable
 
 fun ClickableTextComponent() {
-
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     val initialText = "By continuing you accept our "
     val privacyPolicyText = "Privacy Policy"
     val annotatedString = buildAnnotatedString {
@@ -284,6 +297,9 @@ fun ClickableTextComponent() {
 }
 @Composable
 fun ButtonComponent(value: String) {
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     val viewModel: LoginViewModel = viewModel()
     val context = LocalContext.current
     if(value == "Login"){
@@ -291,17 +307,17 @@ fun ButtonComponent(value: String) {
             onClick = { viewModel.onLoginClick(context) },
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(48.dp),
+                .heightIn(height * 0.06f),
             contentPadding = PaddingValues(),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(height * 0.06f)
                     .background(
                         brush = Brush.horizontalGradient(listOf(primaryLight, secondaryLight)),
-                        shape = RoundedCornerShape(50.dp)
+                        shape = RoundedCornerShape(50.dp) //Diagonal? Width? Height?
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -318,17 +334,17 @@ fun ButtonComponent(value: String) {
             onClick = { viewModel.onRegisterClick(context) },
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(48.dp),
+                .heightIn(height * 0.06f),
             contentPadding = PaddingValues(),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(height * 0.06f)
                     .background(
                         brush = Brush.horizontalGradient(listOf(primaryLight, secondaryLight)),
-                        shape = RoundedCornerShape(50.dp)
+                        shape = RoundedCornerShape(50.dp) //Same here
                     ),
                 contentAlignment = Alignment.Center
             ) {
