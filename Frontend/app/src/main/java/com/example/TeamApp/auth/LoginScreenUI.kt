@@ -1,4 +1,5 @@
 package com.example.TeamApp.auth
+import android.app.Activity
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -48,8 +50,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -65,6 +69,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.TeamApp.R
 import com.example.TeamApp.auth.ui.theme.TeamAppTheme
@@ -78,7 +83,6 @@ fun LoginScreen(){
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
     )
-TeamAppTheme {
     Surface(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier
 
@@ -142,7 +146,7 @@ TeamAppTheme {
         }
 
     }
-}
+
 
 }
 @Composable

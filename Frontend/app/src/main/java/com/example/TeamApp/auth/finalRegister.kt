@@ -1,5 +1,6 @@
 package com.example.TeamApp.auth
 
+import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,6 +43,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -53,8 +55,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -71,12 +75,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.compose.primaryLight
 import com.example.compose.secondaryLight
 import com.example.TeamApp.R
 import kotlinx.coroutines.delay
 import java.util.jar.Attributes.Name
+
 
 /*
 do oifowania powtorzenie hasla sa dwie oddzielne funkcje
@@ -86,6 +92,13 @@ Ten remember password pamieta dwa te same pola chacik pisze ze cos we viewmodel
  */
 @Composable
 fun FinalRegisterScreen(){
+    val context = LocalContext.current
+    val view = LocalView.current
+    SideEffect {
+        val window = (context as? Activity)?.window ?: return@SideEffect
+        window.statusBarColor = Color.Transparent.toArgb()
+        WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = true
+    }
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)

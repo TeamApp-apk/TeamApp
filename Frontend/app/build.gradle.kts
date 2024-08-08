@@ -88,9 +88,10 @@ dependencies {
     implementation (libs.androidx.material.icons.extended.v100)
     implementation (libs.play.services.auth)
     implementation (libs.firebase.ui.auth)
-    implementation ("com.google.firebase:firebase-auth:23.0.0")
-    implementation ("com.facebook.android:facebook-android-sdk:latest.release")
+    implementation (libs.firebase.auth.v2300)
+    implementation (libs.facebook.android.sdk.vlatestrelease)
     implementation (libs.com.facebook.android.facebook.android.sdk)
+    implementation (libs.androidx.navigation.compose.v253)
 
 
 
@@ -106,6 +107,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     //fonts
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.8")
+    implementation(libs.androidx.ui.text.google.fonts)
 
 }

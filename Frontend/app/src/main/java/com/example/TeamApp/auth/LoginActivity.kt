@@ -4,6 +4,7 @@ import SignInLauncher
 import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -13,6 +14,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventActivity
 import com.google.firebase.FirebaseApp
@@ -27,6 +31,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.initialize
 import com.facebook.FacebookSdk
 import kotlinx.coroutines.CoroutineExceptionHandler
+import com.example.TeamApp.utils.SystemUiUtils
 
 
 class LoginActivity : ComponentActivity(), SignInLauncher {
@@ -41,7 +46,6 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         Firebase.initialize(this)
-        FacebookSdk.sdkInitialize(applicationContext)
         //Jesli jeden raz zalogowalismy sie na urzadzeniu, to po zamknieciu aplikacji
         //nie chcemy znowu się logować.
         oneTapClient = Identity.getSignInClient(this)
@@ -55,6 +59,8 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         }
         enableEdgeToEdge()
         setContent {
+            //wymusza jasny motyw systemu dzieki czemu status bar jest widoczny
+            SystemUiUtils.configureSystemUi(this)
             LoginScreen()
         }
         Log.d("LoginActivity", "signInWithCredential:success")

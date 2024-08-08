@@ -1,7 +1,9 @@
 [versions]
 agp = "8.5.1"
 constraintlayoutCompose = "1.0.1"
+facebookAndroidSdk = "latest.release"
 facebookFacebookAndroidSdkVersion = "[LATEST_VERSION]"
+firebaseAuthVersion = "23.0.0"
 firebaseBom = "33.1.2"
 firebaseUiAuth = "7.2.0"
 kotlin = "1.9.0"
@@ -21,11 +23,13 @@ googleGmsGoogleServices = "4.4.2"
 lifecycleViewmodelCompose = "2.8.3"
 materialIconsExtended = "<version>"
 materialIconsExtendedVersion = "1.0.0"
+navigationComposeVersion = "2.5.3"
 navigationRuntimeKtx = "2.7.7"
 firebaseFirestore = "25.0.0"
 playServicesAuth = "21.2.0"
 runtime = "1.6.8"
 appcompat = "1.7.0"
+uiTextGoogleFonts = "1.6.8"
 [libraries]
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -33,12 +37,16 @@ androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-material-icons-extended-v100 = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtendedVersion" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationRuntimeKtx" }
+androidx-navigation-compose-v253 = { module = "androidx.navigation:navigation-compose", version.ref = "navigationComposeVersion" }
 androidx-navigation-runtime-ktx = { module = "androidx.navigation:navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "runtime" }
 androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtime" }
+androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 com-facebook-android-facebook-android-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookFacebookAndroidSdkVersion" }
+facebook-android-sdk-vlatestrelease = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdk" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
+firebase-auth-v2300 = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuthVersion" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }

@@ -29,6 +29,7 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.example.TeamApp.event.CreateEventActivity
+import com.example.TeamApp.utils.SystemUiUtils
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.ktx.firestore
@@ -62,8 +63,8 @@ class RegisterActivity : ComponentActivity(), SignInLauncher {
         }
         enableEdgeToEdge()
         setContent {
-
-                FinalRegisterScreen()
+            SystemUiUtils.configureSystemUi(this)
+            FinalRegisterScreen()
 
         }
         loginViewModel.signInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
