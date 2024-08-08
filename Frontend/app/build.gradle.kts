@@ -73,6 +73,11 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
+    implementation (libs.google.accompanist.navigation.animation)
+    implementation(libs.accompanist.navigation.animation.v0300)
+
+
+
 
     // Firebase dependencies (using BOM for version management)
     implementation(platform(libs.firebase.bom))

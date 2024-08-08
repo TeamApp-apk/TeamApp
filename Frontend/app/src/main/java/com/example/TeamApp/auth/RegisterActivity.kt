@@ -1,7 +1,6 @@
 package com.example.TeamApp.auth
 
 import SignInLauncher
-import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Color
@@ -14,14 +13,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.view.WindowCompat
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.TeamApp.data.User
-import com.example.compose.TeamAppTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -29,6 +24,7 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.example.TeamApp.event.CreateEventActivity
+import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.utils.SystemUiUtils
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
@@ -64,8 +60,12 @@ class RegisterActivity : ComponentActivity(), SignInLauncher {
         enableEdgeToEdge()
         setContent {
             SystemUiUtils.configureSystemUi(this)
-            FinalRegisterScreen()
-
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = "register") {
+                composable("register") { RegisterScreen(navController) }
+                composable("login") { LoginScreen(navController) }
+                composable("createEvent") { CreateEventScreen(navController) }
+            }
         }
         loginViewModel.signInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {

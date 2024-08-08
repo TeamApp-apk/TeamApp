@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
-import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,19 +12,12 @@ import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventActivity
 import com.example.TeamApp.R
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
-import com.facebook.CallbackManager
-import com.facebook.FacebookCallback
-import com.facebook.FacebookException
-import com.facebook.login.LoginManager
-import com.facebook.login.LoginResult
-import android.app.Activity
+import androidx.navigation.NavController
 
 class LoginViewModel : ViewModel() {
     lateinit var signInLauncher: ActivityResultLauncher<IntentSenderRequest>
@@ -72,33 +64,28 @@ class LoginViewModel : ViewModel() {
         context.startActivity(intent)
     }
 
-    fun onLoginClick(context: Context) {
+    fun onLoginClick(navController: NavController) {
         val email = _email.value ?: return
         val password = _password.value ?: return
 
         Log.d("LoginAttempt", "Attempting to log in with email: $email")
-        if (email.isNotEmpty() && password.isNotEmpty())
-        {
+        if (email.isNotEmpty() && password.isNotEmpty()) {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Log.d("Login", "Login successful")
                         _loginSuccess.value = true
-                        val intent = Intent(context, CreateEventActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        navController.navigate("createEvent") {
+                            popUpTo("login") { inclusive = true }
                         }
-                        context.startActivity(intent)
                     } else {
                         Log.e("Login", "Login failed: ${task.exception?.message}")
                         _loginSuccess.value = false
                     }
                 }
-        }
-        else if(email.isEmpty())
-        {
+        } else if (email.isEmpty()) {
             Log.d("LoginAttempt", "Login failed: empty email field")
-        }
-        else{
+        } else {
             Log.d("LoginAttempt", "Login failed: empty password field")
         }
     }
@@ -131,53 +118,21 @@ class LoginViewModel : ViewModel() {
             }
     }
 
-    fun signInWithFacebook(context: Context) {
-        val callbackManager = CallbackManager.Factory.create()
-        LoginManager.getInstance().logOut()
-        LoginManager.getInstance().logInWithReadPermissions(
-            context as Activity,
-            listOf("public_profile", "email")
-        )
-
-        LoginManager.getInstance().registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
-            override fun onSuccess(loginResult: LoginResult) {
-                //Handle successful login
-                Log.d("FacebookLogin", "Success: ${loginResult.accessToken}")
-                val accessToken = loginResult.accessToken
-                // Use the access token to retrieve user data or perform other actions
-            }
-
-            override fun onCancel() {
-                // Handle login cancellation
-                Log.d("FacebookLogin", "Cancelled")
-            }
-
-            override fun onError(error: FacebookException) {
-                // Handle login error
-                Log.d("FacebookLogin", "Error: ${error.message}")
-            }
-        })
+    fun getToLoginScreen(navController: NavController) {
+        navController.navigate("login") {
+            popUpTo("register") { inclusive = true }
+        }
     }
 
-
-    fun getToLoginScreen(context: Context) {
-        val intent = Intent(context, LoginActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    fun getToRegisterScreen(navController: NavController) {
+        navController.navigate("register") {
+            popUpTo("login") { inclusive = true }
         }
-        context.startActivity(intent)
     }
-
-    fun getToRegisterScreen(context: Context){
-        val intent = Intent(context, RegisterActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    fun getToChangePasswordScreen(navController: NavController){
+        navController.navigate("changePassword") {
+            popUpTo("login") { inclusive = true }
         }
-        context.startActivity(intent)
-    }
-    fun getToChangePasswordScreen(context: Context){
-        val intent = Intent(context, ForgotPasswordActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        context.startActivity(intent)
     }
 
     fun onRegisterClick(context: Context) {

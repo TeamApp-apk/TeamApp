@@ -13,11 +13,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.TeamApp.auth.LoginViewModel
 import com.example.compose.TeamAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateEventScreen(viewModel: CreateEventViewModel, context: Context) {
+fun CreateEventScreen(navController: NavController) {
+    val viewModel: CreateEventViewModel = viewModel()
     val sport by viewModel.sport.observeAsState("")
     val address by viewModel.address.observeAsState("")
     val limit by viewModel.limit.observeAsState("")
@@ -96,7 +99,7 @@ fun CreateEventScreen(viewModel: CreateEventViewModel, context: Context) {
 
             Button(
                 onClick = {
-                    viewModel.createEvent(context, sport, address, limit, description)
+                    //viewModel.createEvent(context, sport, address, limit, description)
                 },
                 modifier = Modifier.padding(vertical = 16.dp)
             ) {
@@ -111,19 +114,19 @@ fun CreateEventScreen(viewModel: CreateEventViewModel, context: Context) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Button(onClick = { viewModel.navigateToSearchThrough(context) }) {
+            Button(onClick = {  }) {
                 Text(text = "Search")
             }
             Button(onClick = {}, colors = ButtonDefaults.buttonColors(Color.Gray)) {
                 Text(text = "Create")
             }
-            Button(onClick = { viewModel.navigateToProfile(context) }) {
+            Button(onClick = {  }) {
                 Text(text = "Profile")
             }
         }
 
         Button(
-            onClick = { viewModel.logout(context) },
+            onClick = { },
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(16.dp)
@@ -133,15 +136,15 @@ fun CreateEventScreen(viewModel: CreateEventViewModel, context: Context) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    TeamAppTheme {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            CreateEventScreen(viewModel = viewModel(), context = LocalContext.current)
-        }
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun DefaultPreview() {
+//    TeamAppTheme {
+//        Surface(color = MaterialTheme.colorScheme.background) {
+//            CreateEventScreen(viewModel = viewModel(), context = LocalContext.current)
+//        }
+//    }
+//}
 
 @Composable
 fun CustomSnackbar(success: Boolean) {

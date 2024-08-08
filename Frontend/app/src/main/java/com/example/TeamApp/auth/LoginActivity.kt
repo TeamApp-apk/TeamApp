@@ -17,8 +17,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventActivity
+import com.example.TeamApp.event.CreateEventScreen
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -61,7 +65,12 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         setContent {
             //wymusza jasny motyw systemu dzieki czemu status bar jest widoczny
             SystemUiUtils.configureSystemUi(this)
-            LoginScreen()
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = "login") {
+                composable("register") { RegisterScreen(navController) }
+                composable("login") { LoginScreen(navController) }
+                composable("createEvent") { CreateEventScreen(navController) }
+            }
         }
         Log.d("LoginActivity", "signInWithCredential:success")
         loginViewModel.signInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->

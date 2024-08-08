@@ -14,10 +14,10 @@ class CreateEventActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            TeamAppTheme {
-                CreateEventScreen(viewModel = createEventViewModel, context = this)
-            }
-        }
+//        setContent {
+//            TeamAppTheme {
+//                CreateEventScreen(viewModel = createEventViewModel, context = this)
+//            }
+//        }
     }
 }

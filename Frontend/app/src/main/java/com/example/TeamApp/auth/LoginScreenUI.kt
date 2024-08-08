@@ -1,13 +1,10 @@
 package com.example.TeamApp.auth
-import android.app.Activity
-import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.activity.result.IntentSenderRequest
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +28,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -38,7 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -50,10 +48,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -66,17 +62,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.TeamApp.R
-import com.example.TeamApp.auth.ui.theme.TeamAppTheme
 import com.example.ui.theme.fontFamily
+import kotlinx.coroutines.delay
 
 @Composable
-fun LoginScreen(){
+fun LoginScreen(navController: NavController){
     val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel()
     val gradientColors= listOf(
@@ -98,7 +93,7 @@ fun LoginScreen(){
                 Image(painterResource(id = R.drawable.arrow),
                     contentDescription = "arrow",
                     modifier = Modifier
-                        .clickable {viewModel.getToRegisterScreen(context) }
+                        .clickable {viewModel.getToRegisterScreen(navController) }
                         .size(22.dp))
 
             }
@@ -117,7 +112,7 @@ fun LoginScreen(){
                 Spacer(modifier = Modifier.width(8.dp))
                 RememberMeTextField()
                 Spacer(modifier = Modifier.width(64.dp))
-                ForgotPasswordTextField()
+                ForgotPasswordTextField(navController)
             }
             Spacer(modifier = Modifier.height(36.dp))
             Box(
@@ -125,7 +120,7 @@ fun LoginScreen(){
                     .fillMaxWidth()
                     .wrapContentSize(Alignment.Center) // Center horizontally
             ) {
-                ButtonSignIN()
+                ButtonSignIN(navController)
             }
             Spacer(modifier = Modifier.height(24.dp))
             DividerTextComponent()
@@ -139,7 +134,7 @@ fun LoginScreen(){
 
             }
             Spacer(modifier = Modifier.height(24.dp))
-            ClickableRegisterComponent(modifier = Modifier.align(Alignment.CenterHorizontally))
+            ClickableRegisterComponent(modifier = Modifier.align(Alignment.CenterHorizontally), navController)
 
         }
 
@@ -149,11 +144,11 @@ fun LoginScreen(){
 
 
 }
-@Composable
-@Preview
-fun LoginScreenPreview(){
-    LoginScreen()
-}
+//@Composable
+//@Preview
+//fun LoginScreenPreview(){
+//    LoginScreen()
+//}
 @Composable
 fun ToggleSwitch(){
 
@@ -251,14 +246,13 @@ fun PasswordTextFieldForLogin(labelValue: String, painterResource: Painter) {
     )
 }
 @Composable
-fun ForgotPasswordTextField(){
-    val viewModel : LoginViewModel = viewModel()
-    val context = LocalContext.current
-    Text(modifier = Modifier
-        .clickable {
-            viewModel.getToChangePasswordScreen(context)
-        }
-        ,
+fun ForgotPasswordTextField(navController: NavController) {
+    val viewModel: LoginViewModel = viewModel()
+    Text(
+        modifier = Modifier
+            .clickable {
+                viewModel.getToChangePasswordScreen(navController)
+            },
         text = "Zapomniałeś hasła?",
         style = TextStyle(
             fontSize = 14.sp,
@@ -293,11 +287,11 @@ fun RememberMeTextField() {
     }
 }
 @Composable
-fun ButtonSignIN() {
-    val textValue = remember { mutableStateOf("") }
+fun ButtonSignIN(navController: NavController) {
     val viewModel: LoginViewModel = viewModel()
-    val context = LocalContext.current
-    Button(onClick = { viewModel.onLoginClick(context) }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+    Button(
+        onClick = { viewModel.onLoginClick(navController) },
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
@@ -308,11 +302,9 @@ fun ButtonSignIN() {
                 spotColor = Color(0x406F7EC9),
                 ambientColor = Color(0x406F7EC9)
             )
-
             .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(10.dp))
             .padding(0.dp)
     ) {
-
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
@@ -325,26 +317,26 @@ fun ButtonSignIN() {
             ) {
                 Text(
                     text = "Zaloguj się",
-
                     fontSize = 16.sp,
                     fontFamily = FontFamily(Font(R.font.robotobold)),
                     fontWeight = FontWeight(500),
                     color = Color(0xFF003366),
                     textAlign = TextAlign.Center,
                     letterSpacing = 1.sp
-
                 )
             }
-            Image(painter = painterResource(id = R.drawable.send), contentDescription = "Send", contentScale = ContentScale.Fit,
-                modifier = Modifier.size(28.dp))
+            Image(
+                painter = painterResource(id = R.drawable.send),
+                contentDescription = "Send",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(28.dp)
+            )
         }
     }
-
 }
 @Composable
-fun ClickableRegisterComponent(modifier: Modifier = Modifier) {
+fun ClickableRegisterComponent(modifier: Modifier = Modifier, navController: NavController) {
     val viewModel: LoginViewModel = viewModel()
-    val context = LocalContext.current
     val initialText = "Nie masz jeszcze konta?  "
     val loginText = "Zarejestruj się!"
     val annotatedString = buildAnnotatedString {
@@ -359,7 +351,48 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier) {
         text = annotatedString,
         modifier = modifier,
         onClick = {
-            viewModel.getToRegisterScreen(context)
+            viewModel.getToRegisterScreen(navController)
         }
     )
+}
+@Composable
+fun CustomSnackbar(success: Boolean, type: String, onDismiss: () -> Unit) {
+    LaunchedEffect(Unit) {
+        delay(2000)
+        onDismiss()
+        LoginViewModel().resetSuccess()
+    }
+
+    Snackbar(
+        modifier = Modifier
+            .padding(80.dp)
+            .wrapContentSize(Alignment.Center),
+        shape = RoundedCornerShape(60.dp),
+        containerColor = if (success) Color(0xFF4CAF50) else Color(0xFFF44336),
+        contentColor = Color.White,
+        action = {}
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (success) {
+                    when (type) {
+                        "login" -> "Login Successful"
+                        "Email" -> "Email Sent"
+                        else -> "Registration Successful"
+                    }
+                } else {
+                    when (type) {
+                        "login" -> "Login Failed"
+                        "Email" -> "Email not registered"
+                        else -> "Registration Failed"
+                    }
+                },
+                style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
+            )
+        }
+    }
 }
