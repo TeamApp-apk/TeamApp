@@ -1,7 +1,12 @@
 package com.example.TeamApp.auth
+import android.app.Activity.RESULT_OK
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,6 +79,17 @@ import kotlinx.coroutines.delay
 fun LoginScreen(navController: NavController){
     val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel()
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            (context as LoginActivity).handleSignInResult(data)
+        } else {
+            Log.e("LoginScreen", "Google Sign-In failed")
+        }
+    }
+    LaunchedEffect(Unit) {
+        viewModel.mySetSignInLauncher(launcher)
+    }
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
@@ -84,59 +100,67 @@ fun LoginScreen(navController: NavController){
             .fillMaxSize()
             .background(brush = Brush.linearGradient(colors = gradientColors))
             .padding(horizontal = 28.dp)){
-        Column {
-            Spacer(modifier = Modifier.height(53.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.End),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Image(painterResource(id = R.drawable.arrow),
-                    contentDescription = "arrow",
+            Column {
+                Spacer(modifier = Modifier.height(53.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.End),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.arrow),
+                        contentDescription = "arrow",
+                        modifier = Modifier
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                viewModel.getToRegisterScreen(navController)
+                            }
+                            .size(22.dp)
+                    )
+
+
+                }
+                Spacer(modifier = Modifier.height(160.dp))
+                UpperTextField(
+                    value = "Witaj ponownie!",
+                )
+                Spacer(modifier = Modifier.height(28.dp))
+                EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.mail_icon) )
+                Spacer(modifier = Modifier.height(20.dp))
+                PasswordTextFieldForLogin(labelValue ="password" , painterResource (id = R.drawable.lock_icon) )
+                Spacer(modifier = Modifier.height(20.dp))
+                Row(horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    RememberMeTextField()
+                    Spacer(modifier = Modifier.width(64.dp))
+                    ForgotPasswordTextField(navController)
+                }
+                Spacer(modifier = Modifier.height(36.dp))
+                Box(
                     modifier = Modifier
-                        .clickable {viewModel.getToRegisterScreen(navController) }
-                        .size(22.dp))
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.Center) // Center horizontally
+                ) {
+                    ButtonSignIN(navController)
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+                DividerTextComponent()
+                Spacer(modifier = Modifier.height(24.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.Center) // Center horizontally
+                ) {
+                    GoogleLoginButton()
+
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+                ClickableRegisterComponent(modifier = Modifier.align(Alignment.CenterHorizontally), navController)
 
             }
-            Spacer(modifier = Modifier.height(160.dp))
-            UpperTextField(
-                value = "Witaj ponownie!",
-            )
-            Spacer(modifier = Modifier.height(28.dp))
-            EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.mail_icon) )
-            Spacer(modifier = Modifier.height(20.dp))
-            PasswordTextFieldForLogin(labelValue ="password" , painterResource (id = R.drawable.lock_icon) )
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()) {
-                Spacer(modifier = Modifier.width(8.dp))
-                RememberMeTextField()
-                Spacer(modifier = Modifier.width(64.dp))
-                ForgotPasswordTextField(navController)
-            }
-            Spacer(modifier = Modifier.height(36.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize(Alignment.Center) // Center horizontally
-            ) {
-                ButtonSignIN(navController)
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            DividerTextComponent()
-            Spacer(modifier = Modifier.height(24.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize(Alignment.Center) // Center horizontally
-            ) {
-                GoogleLoginButton()
-
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            ClickableRegisterComponent(modifier = Modifier.align(Alignment.CenterHorizontally), navController)
-
-        }
 
         }
 
@@ -152,19 +176,19 @@ fun LoginScreen(navController: NavController){
 @Composable
 fun ToggleSwitch(){
 
-        var isChecked by remember {
-            mutableStateOf(false)
-        }
-        Switch(checked =isChecked , onCheckedChange ={isChecked=it},
-            colors = SwitchDefaults.colors(
-                checkedTrackColor = Color(0xFF0056B3)
-            )
-         , modifier = Modifier
-                .width(32.3.dp)
-                .height(19.dp)
-
-
+    var isChecked by remember {
+        mutableStateOf(false)
+    }
+    Switch(checked =isChecked , onCheckedChange ={isChecked=it},
+        colors = SwitchDefaults.colors(
+            checkedTrackColor = Color(0xFF0056B3)
         )
+        , modifier = Modifier
+            .width(32.3.dp)
+            .height(19.dp)
+
+
+    )
 }
 
 
@@ -274,7 +298,7 @@ fun RememberMeTextField() {
         Spacer(modifier = Modifier.width(24.dp))
         Text(
             modifier = Modifier
-                ,
+            ,
             text = "Zapamiętaj mnie",
             style = TextStyle(
                 fontSize = 14.sp,

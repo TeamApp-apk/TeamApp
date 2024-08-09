@@ -22,7 +22,18 @@ import androidx.navigation.NavController
 class LoginViewModel : ViewModel() {
     lateinit var signInLauncher: ActivityResultLauncher<IntentSenderRequest>
     private val _email = MutableLiveData("")
+
     val email: LiveData<String> = _email
+
+    fun mySetSignInLauncher(launcher: ActivityResultLauncher<IntentSenderRequest>) {
+        signInLauncher = launcher
+        if (!::signInLauncher.isInitialized) {
+            Log.e("LoginViewModel", "signInLauncher has not been initialized")
+        }
+        else{
+            Log.d("LoginViewModel", "signInLauncher has been initialized")
+        }
+    }
 
     private val _password = MutableLiveData("")
     val password: LiveData<String> = _password
@@ -56,12 +67,11 @@ class LoginViewModel : ViewModel() {
         _password.value = newPassword
     }
 
-    fun logout(context: Context) {
+    fun logout(navController: NavController) {
         FirebaseAuth.getInstance().signOut()
-        val intent = Intent(context, LoginActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        navController.navigate("register"){
+            popUpTo("createEvent") { inclusive = true }
         }
-        context.startActivity(intent)
     }
 
     fun onLoginClick(navController: NavController) {
@@ -91,6 +101,10 @@ class LoginViewModel : ViewModel() {
     }
 
     fun signInWithGoogle(context: Context) {
+        if (!::signInLauncher.isInitialized) {
+            Log.e("LoginViewModel", "signInLauncher has not been initialized")
+            return
+        }
         val clientId = context.getString(R.string.client_id)
         Log.d("LoginViewModel", "Client ID: $clientId")
 
@@ -118,6 +132,7 @@ class LoginViewModel : ViewModel() {
             }
     }
 
+
     fun getToLoginScreen(navController: NavController) {
         navController.navigate("login") {
             popUpTo("register") { inclusive = true }
@@ -134,7 +149,6 @@ class LoginViewModel : ViewModel() {
             popUpTo("login") { inclusive = true }
         }
     }
-
     fun onRegisterClick(context: Context) {
         val email = _email.value ?: return
         val password = _password.value ?: return

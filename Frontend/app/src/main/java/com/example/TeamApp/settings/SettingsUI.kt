@@ -13,11 +13,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.compose.TeamAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel, context: Context) {
+fun SettingsScreen(navController: NavController) {
+    val viewModel: SettingsViewModel = viewModel()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -31,7 +33,7 @@ fun SettingsScreen(viewModel: SettingsViewModel, context: Context) {
 
         SettingItem(
             title = "Change Password",
-            onClick = { viewModel.navigateToForgotPasswordActivity(context) }
+            onClick = { viewModel.navigateToForgotPasswordActivity(navController) }
         )
 
         SettingItem(
@@ -69,10 +71,10 @@ fun SettingItem(title: String, onClick: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreview() {
-    TeamAppTheme {
-        SettingsScreen(viewModel = SettingsViewModel(), context = LocalContext.current)
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun SettingsScreenPreview() {
+//    TeamAppTheme {
+//        SettingsScreen(viewModel = SettingsViewModel(), context = LocalContext.current)
+//    }
+//}

@@ -7,7 +7,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.TeamApp.auth.ui.theme.TeamAppTheme
+import com.example.TeamApp.event.CreateEventScreen
+import com.example.TeamApp.profile.ProfileScreen
+import com.example.TeamApp.profile.SearchScreen
+import com.example.TeamApp.settings.SettingsScreen
+import com.example.TeamApp.utils.SystemUiUtils
 
 class ForgotPasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,8 +28,15 @@ class ForgotPasswordActivity : ComponentActivity() {
         setEdgeToEdge()
 
         setContent {
-            TeamAppTheme {
-                ForgotPasswordUI()
+            SystemUiUtils.configureSystemUi(this)
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = "changePassword") {
+                composable("changePassword"){ ForgotPasswordUI(navController) }
+                composable("createEvent") { CreateEventScreen(navController) }
+                composable("register") { RegisterScreen(navController) }
+                composable("profile"){ ProfileScreen(navController) }
+                composable("settings"){ SettingsScreen(navController) }
+                composable("search"){ SearchScreen(navController) }
             }
         }
     }

@@ -13,11 +13,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.compose.TeamAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(viewModel: ProfileViewModel, context: Context) {
+fun ProfileScreen(navController: NavController) {
+    val viewModel: ProfileViewModel = viewModel()
     Box(modifier = Modifier.fillMaxSize().padding(bottom = 60.dp)) {
         Row(
             horizontalArrangement = Arrangement.SpaceAround,
@@ -26,10 +28,10 @@ fun ProfileScreen(viewModel: ProfileViewModel, context: Context) {
                 .fillMaxWidth()
                 .padding(10.dp)
         ) {
-            Button(onClick = { viewModel.navigateToSearchThrough(context) }) {
+            Button(onClick = { viewModel.navigateToSearchThrough(navController) }) {
                 Text(text = "Search")
             }
-            Button(onClick = { viewModel.navigateToCreateEvent(context) }) {
+            Button(onClick = { viewModel.navigateToCreateEvent(navController) }) {
                 Text(text = "Create")
             }
             Button(onClick = { }, colors = ButtonDefaults.buttonColors(Color.Gray)) {
@@ -44,7 +46,7 @@ fun ProfileScreen(viewModel: ProfileViewModel, context: Context) {
         ) {
             Spacer(modifier = Modifier.height(50.dp)) // Adjust the height as needed
             Button(
-                onClick = { viewModel.navitagateToSettings(context) },
+                onClick = { viewModel.navitagateToSettings(navController) },
             ) {
                 Text(text = "Ustawienia")
             }

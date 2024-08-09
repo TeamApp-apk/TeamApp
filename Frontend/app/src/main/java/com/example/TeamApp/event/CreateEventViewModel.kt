@@ -9,6 +9,7 @@ import com.example.TeamApp.auth.LoginActivity
 import com.example.TeamApp.auth.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
 import com.example.TeamApp.auth.RegisterActivity
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.data.User
@@ -33,11 +34,10 @@ class CreateEventViewModel : ViewModel() {
     private val _limit = MutableLiveData<String>()
     val limit: LiveData<String> get() = _limit
 
-    fun navigateToProfile(context: Context){
-        val intent = Intent(context, ProfileActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    fun navigateToProfile(navController: NavController){
+        navController.navigate("profile"){
+            popUpTo("createEvent"){inclusive = true}
         }
-        context.startActivity(intent)
     }
     fun navigateToSearchThrough(context: Context){
         val intent = Intent(context, SearchThroughActivity::class.java).apply {
@@ -71,12 +71,11 @@ class CreateEventViewModel : ViewModel() {
     }
 
     //temporary here
-    fun logout(context: Context) {
+    fun logout(navController: NavController) {
         FirebaseAuth.getInstance().signOut()
-        val intent = Intent(context, RegisterActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        navController.navigate("register") {
+            popUpTo("createEvent") { inclusive = true }
         }
-        context.startActivity(intent)
     }
 
     fun onSportChange(newSport: String) {

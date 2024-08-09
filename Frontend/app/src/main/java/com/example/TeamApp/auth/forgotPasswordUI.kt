@@ -65,13 +65,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.compose.primaryLight
 import com.example.compose.secondaryLight
 import com.example.ui.theme.fontFamily
 import kotlinx.coroutines.delay
 @Composable
-fun ForgotPasswordUI(){
+fun ForgotPasswordUI(navController: NavController){
     val viewModel: LoginViewModel = viewModel()
     val loginSuccess by viewModel.loginSuccess.observeAsState()
     val registerSuccess by viewModel.registerSuccess.observeAsState()
@@ -99,10 +100,10 @@ fun ForgotPasswordUI(){
             }
         }
     }
-val gradientColors= listOf(
-    Color(0xFFE8E8E8)
-    ,Color(0xFF007BFF)
-)
+    val gradientColors= listOf(
+        Color(0xFFE8E8E8)
+        ,Color(0xFF007BFF)
+    )
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -117,8 +118,8 @@ val gradientColors= listOf(
             Column(modifier = Modifier
                 .fillMaxSize()
                 .padding(50.dp),
-                     // Center horizontally
-                ) {
+                // Center horizontally
+            ) {
                 UpperTextField(value = "Reset Password")
                 Spacer(modifier = Modifier.height(14.dp))
                 LowerTextField(value =  "Please enter your email address to request a password reset")
@@ -156,7 +157,7 @@ fun UpperTextField(value: String){
             fontFamily = fontFamily,
             fontWeight = FontWeight(500),
             color = Color.Black
-    )
+        )
     )
 
 }
@@ -170,13 +171,13 @@ fun LowerTextField(value: String){
     )
 
 }
-@Preview
-@Composable
+//@Preview
+//@Composable
 
-fun ForgotPasswordUIPreview(){
-    ForgotPasswordUI()
-
-}
+//fun ForgotPasswordUIPreview(){
+//    ForgotPasswordUI()
+//
+//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

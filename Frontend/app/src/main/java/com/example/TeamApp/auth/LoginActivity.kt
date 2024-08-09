@@ -50,20 +50,19 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         Firebase.initialize(this)
-        //Jesli jeden raz zalogowalismy sie na urzadzeniu, to po zamknieciu aplikacji
-        //nie chcemy znowu się logować.
-        oneTapClient = Identity.getSignInClient(this)
-        val auth = FirebaseAuth.getInstance()
-        if (auth.currentUser != null) {
-            val intent = Intent(this, CreateEventActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
+
+        // No need to initialize signInLauncher here
+
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            startActivity(Intent(this, CreateEventActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            })
             finish()
             return
         }
+
         enableEdgeToEdge()
         setContent {
-            //wymusza jasny motyw systemu dzieki czemu status bar jest widoczny
             SystemUiUtils.configureSystemUi(this)
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = "login") {
@@ -72,17 +71,8 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
                 composable("createEvent") { CreateEventScreen(navController) }
             }
         }
-        Log.d("LoginActivity", "signInWithCredential:success")
-        loginViewModel.signInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val data = result.data
-                handleSignInResult(data)
-            } else {
-                Log.e("LoginActivity", "Google Sign-In failed")
-            }
-        }
     }
-    private fun handleSignInResult(data: Intent?) {
+    fun handleSignInResult(data: Intent?) {
         try {
             val credential = oneTapClient.getSignInCredentialFromIntent(data)
             val idToken = credential.googleIdToken
