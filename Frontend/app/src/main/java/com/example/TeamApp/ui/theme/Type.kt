@@ -1,5 +1,6 @@
 package com.example.ui.theme
 
+import android.content.res.Resources
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +24,8 @@ import com.example.TeamApp.R
 import kotlinx.coroutines.CoroutineExceptionHandler
 import androidx.compose.ui.text.googlefonts.Font
 
-
+val metrics = Resources.getSystem().displayMetrics
+val density = metrics.density / 2
 
 val AppTypography = Typography()
 
@@ -42,4 +44,8 @@ val fontFamily = FontFamily(
         weight = FontWeight.Bold,
         style = FontStyle.Italic
     )
+)
+
+val textInBoxes = TextStyle (
+    fontSize = 12.sp * density
 )

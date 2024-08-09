@@ -1,5 +1,6 @@
 package com.example.TeamApp.auth
 
+import android.content.res.Resources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -70,6 +71,7 @@ import com.example.compose.primaryLight
 import com.example.compose.secondaryLight
 import com.example.ui.theme.fontFamily
 import kotlinx.coroutines.delay
+
 @Composable
 fun ForgotPasswordUI(){
     val viewModel: LoginViewModel = viewModel()
@@ -151,8 +153,8 @@ val gradientColors= listOf(
 fun UpperTextField(value: String){
     Text(
         text = value,
-        modifier = Modifier.width(186.dp).height(28.dp),
-        style = TextStyle(fontSize = 24.sp,
+        modifier = Modifier.width(186.dp).height(28.dp * density),
+        style = TextStyle(fontSize = 24.sp * density,
             fontFamily = fontFamily,
             fontWeight = FontWeight(500),
             color = Color.Black

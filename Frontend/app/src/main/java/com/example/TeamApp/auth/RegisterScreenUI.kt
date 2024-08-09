@@ -1,6 +1,8 @@
 package com.example.TeamApp.auth
 
 import android.app.Activity
+import android.content.res.Resources
+import android.util.DisplayMetrics
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -70,6 +73,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.compose.secondaryLight
 import com.example.TeamApp.R
+import com.example.ui.theme.textInBoxes
 
 
 /*
@@ -78,6 +82,12 @@ do oifowania powtorzenie hasla sa dwie oddzielne funkcje
 Ten remember password pamieta dwa te same pola chacik pisze ze cos we viewmodel
 
  */
+
+//height * 0.00625f * n/4, where n is hard coded dpi value
+
+val metrics = Resources.getSystem().displayMetrics
+val density = metrics.density / 2
+
 @Composable
 fun RegisterScreen(navController: NavController){
     val context = LocalContext.current
@@ -87,6 +97,9 @@ fun RegisterScreen(navController: NavController){
         window.statusBarColor = Color.Transparent.toArgb()
         WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = true
     }
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
@@ -96,31 +109,30 @@ Surface(modifier = Modifier.fillMaxSize()) {
 
         .fillMaxSize()
         .background(brush = Brush.linearGradient(colors = gradientColors))
-        .padding(horizontal = 28.dp) ){
+        .padding(horizontal = width * 0.078f) ){
         Column {
-            Spacer(modifier = Modifier.height(20.dp))
-            Spacer(modifier = Modifier.height(32.dp))
-            UpperTextField(value = "Dołącz!")
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(height * 0.00625f * 5))
+            Spacer(modifier = Modifier.height(height * 0.00625f * 8))
+            UpperTextField(value = density.toString())
+            Spacer(modifier = Modifier.height(height * 0.00625f * 6 ))
             NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.user_icon))
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
             NameAndEmailBox(labelValue = "E-mail", painterResource (id = R.drawable.mail_icon) )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
             PasswordTextField(labelValue ="Hasło" , painterResource (id=R.drawable.lock_icon) )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
             PasswordTextFieldRepeatPassword(labelValue ="Powtórz hasło" , painterResource (id=R.drawable.lock_icon) )
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(height * 0.00625f * 8 / density))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentSize(Alignment.Center) // Center horizontally
             ) {
                 ButtonSignUP()
-
             }
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(height * 0.00625f * 9 / density))
             DividerTextComponent()
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(height * 0.00625f * 4))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -129,12 +141,10 @@ Surface(modifier = Modifier.fillMaxSize()) {
                 GoogleLoginButton()
 
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
             ClickableLoginTextComponent(modifier = Modifier.align(Alignment.CenterHorizontally), navController)
         }
-
         }
-
 }
 }
 //@Composable
@@ -148,10 +158,16 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter) {
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
     val email by viewModel.email.observeAsState("")
-
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     TextField(
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text(text = labelValue) },
+        modifier = Modifier.fillMaxWidth()
+        .height(height * 0.00625f * 8 * density ),
+        label = { Text(
+            text = labelValue,
+            style = textInBoxes
+            ) },
         value = if (labelValue == "E-mail") email else textValue.value,
         onValueChange = {
             if (labelValue == "E-mail") {
@@ -172,7 +188,7 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter) {
                 .width(22.dp)
                 .height(22.dp))
         },
-        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(15.dp))
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f))
     )
 }
 
@@ -182,10 +198,17 @@ fun PasswordTextField(labelValue: String, painterResource: Painter) {
     val viewModel: LoginViewModel = viewModel()
     val password by viewModel.password.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
 
     TextField(
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text(text = labelValue) },
+        modifier = Modifier.fillMaxWidth().
+        height(height * 0.00625f * 8 * density ),
+        label = { Text(
+            text = labelValue,
+            style = textInBoxes
+        ) },
         value = password,
         onValueChange = { viewModel.onPasswordChanged(it) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -197,7 +220,7 @@ fun PasswordTextField(labelValue: String, painterResource: Painter) {
         leadingIcon = {
             Icon(painter = painterResource, contentDescription = "", modifier = Modifier.padding(1.dp).width(22.dp).height(22.dp))
         },
-        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(15.dp)),
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f)),
         trailingIcon = {
             val iconImage = if (passwordVisible.value) {
                 Icons.Filled.Visibility
@@ -225,10 +248,16 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
     val viewModel: LoginViewModel = viewModel()
     val confirmPassword by viewModel.confirmPassword.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
-
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     TextField(
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text(text = labelValue) },
+        modifier = Modifier.fillMaxWidth().
+        height(height * 0.00625f * 8 * density ),
+        label = { Text(
+            text = labelValue,
+            style = textInBoxes
+        ) },
         value = confirmPassword,
         onValueChange = { viewModel.onConfirmPasswordChanged(it) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -240,7 +269,7 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
         leadingIcon = {
             Icon(painter = painterResource, contentDescription = "", modifier = Modifier.padding(1.dp).width(22.dp).height(22.dp))
         },
-        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(15.dp)),
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f)),
         trailingIcon = {
             val iconImage = if (passwordVisible.value) {
                 Icons.Filled.Visibility
@@ -267,20 +296,22 @@ fun ButtonSignUP() {
     val context = LocalContext.current
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     Button(onClick = { viewModel.onRegisterClick(context) }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
-            .width(300.dp)
-            .height(58.dp)
+            .width(width * 0.83f * density)
+            .height(height * 0.09f )
             .shadow(
                 elevation = 35.dp,
                 spotColor = Color(0x406F7EC9),
                 ambientColor = Color(0x406F7EC9)
             )
 
-            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(10.dp))
-            .padding(0.dp)
+            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(height * 0.023f))
     ) {
 
         Row(
@@ -313,16 +344,19 @@ fun ButtonSignUP() {
 }
 @Composable
 fun DividerTextComponent() {
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = height * 0.00625f * 2 ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Divider(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = width * 0.02f),
             color = secondaryLight,
             thickness = 1.dp
         )
@@ -330,7 +364,7 @@ fun DividerTextComponent() {
         Divider(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = width * 0.02f),
             color = secondaryLight,
             thickness = 1.dp
         )
@@ -367,6 +401,9 @@ fun GoogleLoginButton() {
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     Button(onClick = { viewModel.signInWithGoogle(context) }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
@@ -377,9 +414,9 @@ fun GoogleLoginButton() {
                 ambientColor = Color(0x40D3D4E2)
             )
 
-            .padding(0.5.dp)
-            .width(300.dp)
-            .height(56.dp)
+            .padding(1.dp)
+            .width(width * 0.83f)
+            .height(height * 0.00625f * 14)
             .background(color = Color.White, shape = RoundedCornerShape(size = 12.dp))
     ) {
 
@@ -404,7 +441,6 @@ fun GoogleLoginButton() {
                     color = Color(0xFF003366),
                     textAlign = TextAlign.Center,
                     letterSpacing = 1.sp
-
                 )
             }
 
