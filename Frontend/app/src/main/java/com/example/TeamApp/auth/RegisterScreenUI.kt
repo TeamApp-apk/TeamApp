@@ -3,6 +3,10 @@ package com.example.TeamApp.auth
 import android.app.Activity
 import android.content.res.Resources
 import android.util.DisplayMetrics
+import android.app.Activity.RESULT_OK
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -92,6 +97,18 @@ val density = metrics.density / 2
 fun RegisterScreen(navController: NavController){
     val context = LocalContext.current
     val view = LocalView.current
+    val viewModel: LoginViewModel = viewModel()
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            (context as LoginActivity).handleSignInResult(data)
+        } else {
+            Log.e("LoginScreen", "Google Sign-In failed")
+        }
+    }
+    LaunchedEffect(Unit) {
+        viewModel.mySetSignInLauncher(launcher)
+    }
     SideEffect {
         val window = (context as? Activity)?.window ?: return@SideEffect
         window.statusBarColor = Color.Transparent.toArgb()
@@ -104,8 +121,8 @@ fun RegisterScreen(navController: NavController){
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
     )
-Surface(modifier = Modifier.fillMaxSize()) {
-    Box(modifier = Modifier
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier
 
         .fillMaxSize()
         .background(brush = Brush.linearGradient(colors = gradientColors))
@@ -396,56 +413,4 @@ fun ClickableLoginTextComponent(modifier: Modifier = Modifier, navController: Na
     )
 }
 
-@Composable
-fun GoogleLoginButton() {
-    val textValue = remember { mutableStateOf("") }
-    val viewModel: LoginViewModel = viewModel()
-    val context = LocalContext.current
-    val configuration = LocalConfiguration.current
-    val height = configuration.screenHeightDp.dp
-    val width = configuration.screenWidthDp.dp
-    Button(onClick = { viewModel.signInWithGoogle(context) }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(10.dp),
-        modifier = Modifier
-            .shadow(
-                elevation = 30.dp,
-                spotColor = Color(0x40D3D4E2),
-                ambientColor = Color(0x40D3D4E2)
-            )
-
-            .padding(1.dp)
-            .width(width * 0.83f)
-            .height(height * 0.00625f * 14)
-            .background(color = Color.White, shape = RoundedCornerShape(size = 12.dp))
-    ) {
-
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Image(painter = painterResource(id = R.drawable.googleicon), contentDescription = "googleRegister", contentScale = ContentScale.Fit,
-                modifier = Modifier.size(28.dp))
-            Box(
-                modifier = Modifier
-                    .weight(1f) // Take up remaining space on the left
-                    .wrapContentWidth(align = Alignment.CenterHorizontally)
-            ) {
-                Text(
-                    text = "Zaloguj się przez Google",
-
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.robotoregular)),
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF003366),
-                    textAlign = TextAlign.Center,
-                    letterSpacing = 1.sp
-                )
-            }
-
-        }
-    }
-
-}
 

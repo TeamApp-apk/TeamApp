@@ -9,6 +9,7 @@ import com.example.TeamApp.auth.LoginActivity
 import com.example.TeamApp.auth.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
 import com.example.TeamApp.auth.RegisterActivity
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.data.User
@@ -22,23 +23,20 @@ import java.time.LocalDate
 
 
 class ProfileViewModel:ViewModel(){
-    fun navigateToCreateEvent(context: Context) {
-        val intent = Intent(context, CreateEventActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    fun navigateToCreateEvent(navController: NavController) {
+        navController.navigate("createEvent"){
+            popUpTo("profile"){inclusive = true}
         }
-        context.startActivity(intent)
     }
-    fun navigateToSearchThrough(context: Context) {
-        val intent = Intent(context, SearchThroughActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    fun navigateToSearchThrough(navController: NavController) {
+        navController.navigate("searchThrough"){
+            popUpTo("profile"){inclusive = true}
         }
-        context.startActivity(intent)
     }
-    fun navitagateToSettings(context: Context) {
-        val intent = Intent(context, SettingActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    fun navitagateToSettings(navController: NavController) {
+        navController.navigate("settings"){
+            popUpTo("profile"){inclusive = true}
         }
-        context.startActivity(intent)
     }
 
 

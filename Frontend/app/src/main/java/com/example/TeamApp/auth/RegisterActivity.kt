@@ -1,6 +1,5 @@
 package com.example.TeamApp.auth
 
-import SignInLauncher
 import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Color
@@ -13,6 +12,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -32,20 +32,27 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.initialize
 import kotlinx.coroutines.CoroutineExceptionHandler
 
-class RegisterActivity : ComponentActivity(), SignInLauncher {
-    val handler = CoroutineExceptionHandler { _, throwable ->
-        // process the Throwable
-        Log.e(TAG, "There has been an issue: ", throwable)
-    }
+class RegisterActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private lateinit var oneTapClient: SignInClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT,Color.TRANSPARENT),
-            SystemBarStyle.auto(Color.TRANSPARENT,Color.TRANSPARENT)
-        )
         super.onCreate(savedInstanceState)
+
+        // Inicjalizuj signInLauncher tutaj
+        loginViewModel.signInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                handleSignInResult(data)
+            } else {
+                Log.e("RegisterActivity", "Google Sign-In failed")
+            }
+        }
+
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
+            SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
+        )
         FirebaseApp.initializeApp(this)
         Firebase.initialize(this)
         oneTapClient = Identity.getSignInClient(this)
@@ -60,22 +67,15 @@ class RegisterActivity : ComponentActivity(), SignInLauncher {
         enableEdgeToEdge()
         setContent {
             SystemUiUtils.configureSystemUi(this)
-            val navController = rememberNavController()
+            val navController = rememberNavController() as NavHostController
             NavHost(navController = navController, startDestination = "register") {
                 composable("register") { RegisterScreen(navController) }
                 composable("login") { LoginScreen(navController) }
                 composable("createEvent") { CreateEventScreen(navController) }
             }
         }
-        loginViewModel.signInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val data = result.data
-                handleSignInResult(data)
-            } else {
-                Log.e("RegisterActivity", "Google Sign-In failed")
-            }
-        }
     }
+
     private fun handleSignInResult(data: Intent?) {
         try {
             val credential = oneTapClient.getSignInCredentialFromIntent(data)
@@ -133,13 +133,5 @@ class RegisterActivity : ComponentActivity(), SignInLauncher {
         } else {
             Log.e("RegisterActivity", "Sign-in failed")
         }
-    }
-
-    override fun launchSignIn(intent: IntentSenderRequest) {
-        loginViewModel.signInLauncher.launch(intent)
-    }
-
-    companion object {
-        private const val RC_SIGN_IN = 9001
     }
 }

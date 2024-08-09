@@ -11,6 +11,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.TeamApp.auth.RegisterScreen
+import com.example.TeamApp.event.CreateEventScreen
+import com.example.TeamApp.settings.SettingsScreen
+import com.example.TeamApp.utils.SystemUiUtils
 import com.example.compose.TeamAppTheme
 
 class ProfileActivity : ComponentActivity() {
@@ -18,8 +25,14 @@ class ProfileActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TeamAppTheme {
-                ProfileScreen(viewModel = ProfileViewModel(), context = this)
+            SystemUiUtils.configureSystemUi(this)
+            val navController = rememberNavController()
+            NavHost(navController = navController, startDestination = "profile") {
+                composable("createEvent") { CreateEventScreen(navController) }
+                composable("register") { RegisterScreen(navController) }
+                composable("profile"){ProfileScreen(navController)}
+                composable("settings"){ SettingsScreen(navController) }
+                composable("search"){SearchScreen(navController)}
             }
         }
     }

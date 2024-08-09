@@ -10,6 +10,7 @@ import com.example.TeamApp.auth.LoginActivity
 import com.example.TeamApp.auth.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
 import com.example.TeamApp.auth.RegisterActivity
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.data.User
@@ -21,17 +22,14 @@ import java.time.LocalDate
 
 class SearchThroughViewModel : ViewModel(){
 
-    fun navigateToProfile(context: Context){
-        val intent = Intent(context, ProfileActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    fun navigateToProfile(navController: NavController){
+        navController.navigate("profile"){
+            popUpTo("searchThrough"){inclusive = true}
         }
-        context.startActivity(intent)
     }
-    fun navigateToCreateEvent(context: Context){
-        val intent = Intent(context, CreateEventActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    fun navigateToCreateEvent(navController: NavController){
+        navController.navigate("createEvent"){
+            popUpTo("searchThrough"){inclusive = true}
         }
-        context.startActivity(intent)
     }
-
 }

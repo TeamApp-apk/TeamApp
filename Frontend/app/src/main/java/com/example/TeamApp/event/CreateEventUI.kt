@@ -126,7 +126,7 @@ fun CreateEventScreen(navController: NavController) {
         }
 
         Button(
-            onClick = { },
+            onClick = { viewModel.logout(navController) },
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(16.dp)

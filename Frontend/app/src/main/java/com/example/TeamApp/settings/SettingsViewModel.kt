@@ -8,6 +8,7 @@ import com.example.TeamApp.auth.LoginActivity
 import com.example.TeamApp.auth.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
 import com.example.TeamApp.auth.ForgotPasswordActivity
 import com.example.TeamApp.auth.RegisterActivity
 import com.example.TeamApp.data.Event
@@ -21,11 +22,8 @@ import com.google.firebase.firestore.firestore
 import java.time.LocalDate
 
 class SettingsViewModel : ViewModel() {
-    fun navigateToForgotPasswordActivity(context: Context) {
-        val intent = Intent(context, ForgotPasswordActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        context.startActivity(intent)
+    fun navigateToForgotPasswordActivity(navController: NavController) {
+
     }
 
 
