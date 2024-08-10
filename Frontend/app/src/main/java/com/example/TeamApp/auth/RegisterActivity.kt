@@ -1,5 +1,6 @@
 package com.example.TeamApp.auth
 
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Color
@@ -12,6 +13,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,29 +37,23 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.example.TeamApp.event.CreateEventActivity
 import com.example.TeamApp.event.CreateEventScreen
+import com.example.TeamApp.ui.LoadingScreen
 import com.example.TeamApp.utils.SystemUiUtils
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.initialize
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.delay
 
 class RegisterActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private lateinit var oneTapClient: SignInClient
+    private var isFirstLaunch by mutableStateOf(true)
 
+    @SuppressLint("UnrememberedMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Inicjalizuj signInLauncher tutaj
-        loginViewModel.signInLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val data = result.data
-                handleSignInResult(data)
-            } else {
-                Log.e("RegisterActivity", "Google Sign-In failed")
-            }
-        }
 
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
@@ -67,16 +73,36 @@ class RegisterActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SystemUiUtils.configureSystemUi(this)
+            var isLoading by remember { mutableStateOf(true) }
+            LaunchedEffect(Unit) {
+                delay(1000)
+                isLoading = false
+            }
             val navController = rememberNavController() as NavHostController
-            NavHost(navController = navController, startDestination = "register") {
-                composable("register") { RegisterScreen(navController) }
-                composable("login") { LoginScreen(navController) }
-                composable("createEvent") { CreateEventScreen(navController) }
+
+            AnimatedVisibility(
+                visible = isLoading,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+            ) {
+                LoadingScreen()
+            }
+
+            AnimatedVisibility(
+                visible = !isLoading,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+            ) {
+                NavHost(navController = navController, startDestination = "register") {
+                    composable("register") { RegisterScreen(navController) }
+                    composable("login") { LoginScreen(navController) }
+                    composable("createEvent") { CreateEventScreen(navController) }
+                }
             }
         }
     }
 
-    private fun handleSignInResult(data: Intent?) {
+    fun handleSignInResult(data: Intent?, navController: NavController) {
         try {
             val credential = oneTapClient.getSignInCredentialFromIntent(data)
             val idToken = credential.googleIdToken
@@ -85,9 +111,9 @@ class RegisterActivity : ComponentActivity() {
                 FirebaseAuth.getInstance().signInWithCredential(firebaseCredential)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
-                            Log.d("LoginActivity", "signInWithCredential:success")
+                            Log.d("RegisterActivity", "signInWithCredential:success")
                             val user = FirebaseAuth.getInstance().currentUser
-                            updateUI(user)
+                            updateUI(user, navController)
                             val db = com.google.firebase.ktx.Firebase.firestore
                             user?.let { firebaseUser ->
                                 val email = firebaseUser.email
@@ -97,10 +123,8 @@ class RegisterActivity : ComponentActivity() {
                                         .get()
                                         .addOnSuccessListener { documents ->
                                             if (documents.isEmpty) {
-                                                // Email does not exist, add to database
                                                 db.collection("users").add(User(name = "xyz", email = email))
                                             } else {
-                                                // Email exists, log a message
                                                 Log.d("LoginActivity", "Email already exists in the database.")
                                             }
                                         }
@@ -113,7 +137,6 @@ class RegisterActivity : ComponentActivity() {
                             }
                         } else {
                             Log.w("LoginActivity", "signInWithCredential:failure", task.exception)
-                            updateUI(null)
                         }
                     }
             } else {
@@ -124,14 +147,12 @@ class RegisterActivity : ComponentActivity() {
         }
     }
 
-    private fun updateUI(user: FirebaseUser?) {
+    private fun updateUI(user: FirebaseUser?, navController: NavController) {
         if (user != null) {
-            val intent = Intent(this, CreateEventActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
+            // Użyj NavController do nawigacji
+            navController.navigate("createEvent")
         } else {
-            Log.e("RegisterActivity", "Sign-in failed")
+            Log.e("LoginActivity", "Sign-in failed")
         }
     }
 }

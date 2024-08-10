@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -82,7 +83,7 @@ fun LoginScreen(navController: NavController){
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
-            (context as LoginActivity).handleSignInResult(data)
+            (context as LoginActivity).handleSignInResult(data, navController)
         } else {
             Log.e("LoginScreen", "Google Sign-In failed")
         }
@@ -107,7 +108,7 @@ fun LoginScreen(navController: NavController){
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.arrow),
+                        painter = painterResource(id = R.drawable.arrow_icon),
                         contentDescription = "arrow",
                         modifier = Modifier
                             .clickable(
@@ -118,8 +119,6 @@ fun LoginScreen(navController: NavController){
                             }
                             .size(22.dp)
                     )
-
-
                 }
                 Spacer(modifier = Modifier.height(160.dp))
                 UpperTextField(
@@ -313,6 +312,8 @@ fun RememberMeTextField() {
 @Composable
 fun ButtonSignIN(navController: NavController) {
     val viewModel: LoginViewModel = viewModel()
+    val isLoading by viewModel.isLoading.observeAsState(false)
+
     Button(
         onClick = { viewModel.onLoginClick(navController) },
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
@@ -334,30 +335,39 @@ fun ButtonSignIN(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f) // Take up remaining space on the left
-                    .wrapContentWidth(align = Alignment.CenterHorizontally)
-            ) {
-                Text(
-                    text = "Zaloguj się",
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.robotobold)),
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF003366),
-                    textAlign = TextAlign.Center,
-                    letterSpacing = 1.sp
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .wrapContentWidth(align = Alignment.CenterHorizontally)
+                ) {
+                    Text(
+                        text = "Zaloguj się",
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily(Font(R.font.robotobold)),
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFF003366),
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 1.sp
+                    )
+                }
+                Image(
+                    painter = painterResource(id = R.drawable.send),
+                    contentDescription = "Send",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(28.dp)
                 )
             }
-            Image(
-                painter = painterResource(id = R.drawable.send),
-                contentDescription = "Send",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(28.dp)
-            )
         }
     }
 }
+
 @Composable
 fun ClickableRegisterComponent(modifier: Modifier = Modifier, navController: NavController) {
     val viewModel: LoginViewModel = viewModel()

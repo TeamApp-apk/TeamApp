@@ -2,6 +2,7 @@ package com.example.TeamApp.auth
 
 import android.content.Context
 import android.content.Intent
+import android.os.Looper
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
@@ -22,9 +23,14 @@ import androidx.navigation.NavController
 class LoginViewModel : ViewModel() {
     lateinit var signInLauncher: ActivityResultLauncher<IntentSenderRequest>
     private val _email = MutableLiveData("")
-
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
     val email: LiveData<String> = _email
 
+    fun setLoading(loading: Boolean) {
+        Log.d("LoginViewModel", "setLoading: $loading")
+        _isLoading.value = loading
+    }
     fun mySetSignInLauncher(launcher: ActivityResultLauncher<IntentSenderRequest>) {
         signInLauncher = launcher
         if (!::signInLauncher.isInitialized) {
@@ -77,28 +83,33 @@ class LoginViewModel : ViewModel() {
     fun onLoginClick(navController: NavController) {
         val email = _email.value ?: return
         val password = _password.value ?: return
-
+        setLoading(true)
         Log.d("LoginAttempt", "Attempting to log in with email: $email")
+
         if (email.isNotEmpty() && password.isNotEmpty()) {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Log.d("Login", "Login successful")
-                        _loginSuccess.value = true
-                        navController.navigate("createEvent") {
-                            popUpTo("login") { inclusive = true }
+                    // Add a delay to simulate loading
+                    android.os.Handler(Looper.getMainLooper()).postDelayed({
+                        setLoading(false)
+                        if (task.isSuccessful) {
+                            Log.d("Login", "Login successful")
+                            _loginSuccess.value = true
+                            navController.navigate("createEvent") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        } else {
+                            Log.e("Login", "Login failed: ${task.exception?.message}")
+                            _loginSuccess.value = false
                         }
-                    } else {
-                        Log.e("Login", "Login failed: ${task.exception?.message}")
-                        _loginSuccess.value = false
-                    }
+                    }, 200) // delay
                 }
-        } else if (email.isEmpty()) {
-            Log.d("LoginAttempt", "Login failed: empty email field")
         } else {
-            Log.d("LoginAttempt", "Login failed: empty password field")
+            Log.d("LoginAttempt", "Login failed: empty email or password field")
+            setLoading(false)
         }
     }
+
 
     fun signInWithGoogle(context: Context) {
         if (!::signInLauncher.isInitialized) {
@@ -134,25 +145,22 @@ class LoginViewModel : ViewModel() {
 
 
     fun getToLoginScreen(navController: NavController) {
-        navController.navigate("login") {
-            popUpTo("register") { inclusive = true }
-        }
+        navController.navigate("login")
     }
 
     fun getToRegisterScreen(navController: NavController) {
-        navController.navigate("register") {
-            popUpTo("login") { inclusive = true }
-        }
+        navController.navigate("register")
     }
     fun getToChangePasswordScreen(navController: NavController){
         navController.navigate("changePassword") {
             popUpTo("login") { inclusive = true }
         }
     }
-    fun onRegisterClick(context: Context) {
+    fun onRegisterClick(navController: NavController) {
         val email = _email.value ?: return
         val password = _password.value ?: return
         val confirmPassword = _confirmPassword.value ?: return
+        setLoading(true)
         // Tymczasowo, niedodana implementacja rejestracji z loginem
         val username = "xyz"
 
@@ -169,19 +177,22 @@ class LoginViewModel : ViewModel() {
             Log.d("RegisterAttempt", "Attempting to register with email: $email")
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
+                    android.os.Handler(Looper.getMainLooper()).postDelayed({
+                        setLoading(false)
+
                     if (task.isSuccessful) {
                         db.collection("users").add(user)
                         Log.d("Register", "Registration successful")
                         _registerSuccess.value = true
-                        val intent = Intent(context, CreateEventActivity::class.java).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        }
-                        context.startActivity(intent)
+                      navController.navigate("CreateEvent") {
+                          popUpTo("register") { inclusive = true }
+                      }
                     } else {
                         Log.e("Register", "Registration failed: ${task.exception?.message}")
                         _registerSuccess.value = false
                     }
-                }
+                }, 200) // delay
+            }
         } else if (email.isEmpty()) {
             Log.d("RegisterAttempt", "Register failed: empty email field")
         }
@@ -203,7 +214,6 @@ class LoginViewModel : ViewModel() {
         }
 
         Log.d("LoginViewModel", "Checking if email exists in Firestore: $email")
-
         val db = Firebase.firestore
         db.collection("users")
             .whereEqualTo("email", email)

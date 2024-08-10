@@ -17,6 +17,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -72,7 +73,7 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
             }
         }
     }
-    fun handleSignInResult(data: Intent?) {
+    fun handleSignInResult(data: Intent?, navController: NavController) {
         try {
             val credential = oneTapClient.getSignInCredentialFromIntent(data)
             val idToken = credential.googleIdToken
@@ -83,7 +84,7 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
                         if (task.isSuccessful) {
                             Log.d("LoginActivity", "signInWithCredential:success")
                             val user = FirebaseAuth.getInstance().currentUser
-                            updateUI(user)
+                            updateUI(user, navController)
                             val db = com.google.firebase.ktx.Firebase.firestore
                             user?.let { firebaseUser ->
                                 val email = firebaseUser.email
@@ -107,7 +108,6 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
                             }
                         } else {
                             Log.w("LoginActivity", "signInWithCredential:failure", task.exception)
-                            updateUI(null)
                         }
                     }
             } else {
@@ -118,12 +118,10 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         }
     }
 
-    private fun updateUI(user: FirebaseUser?) {
+    private fun updateUI(user: FirebaseUser?, navController: NavController) {
         if (user != null) {
-            val intent = Intent(this, CreateEventActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
+            // Użyj NavController do nawigacji
+            navController.navigate("createEvent")
         } else {
             Log.e("LoginActivity", "Sign-in failed")
         }
@@ -133,10 +131,5 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         loginViewModel.signInLauncher.launch(intent)
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        val intent = Intent(this, RegisterActivity::class.java)
-        startActivity(intent)
-        finish()
-    }
+
 }

@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -58,6 +59,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -76,9 +78,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
 import com.example.compose.secondaryLight
 import com.example.TeamApp.R
 import com.example.ui.theme.textInBoxes
+import kotlinx.coroutines.time.delay
 
 
 /*
@@ -101,7 +106,7 @@ fun RegisterScreen(navController: NavController){
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
-            (context as LoginActivity).handleSignInResult(data)
+            (context as RegisterActivity).handleSignInResult(data, navController)
         } else {
             Log.e("LoginScreen", "Google Sign-In failed")
         }
@@ -145,7 +150,7 @@ fun RegisterScreen(navController: NavController){
                     .fillMaxWidth()
                     .wrapContentSize(Alignment.Center) // Center horizontally
             ) {
-                ButtonSignUP()
+                ButtonSignUP(navController)
             }
             Spacer(modifier = Modifier.height(height * 0.00625f * 9 / density))
             DividerTextComponent()
@@ -309,56 +314,68 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
 }
 
 @Composable
-fun ButtonSignUP() {
+fun ButtonSignUP(navController: NavController) {
     val context = LocalContext.current
-    val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
+    val isLoading by viewModel.isLoading.observeAsState(false)
     val configuration = LocalConfiguration.current
+    val density = LocalDensity.current.density // Użycie gęstości dla rozmiarów
     val height = configuration.screenHeightDp.dp
     val width = configuration.screenWidthDp.dp
-    Button(onClick = { viewModel.onRegisterClick(context) }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+
+    Button(
+        onClick = { viewModel.onRegisterClick(navController) }, // Zmieniono navController na context
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
             .width(width * 0.83f * density)
-            .height(height * 0.09f )
+            .height(height * 0.09f)
             .shadow(
                 elevation = 35.dp,
                 spotColor = Color(0x406F7EC9),
                 ambientColor = Color(0x406F7EC9)
             )
-
             .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(height * 0.023f))
     ) {
-
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f) // Take up remaining space on the left
-                    .wrapContentWidth(align = Alignment.CenterHorizontally)
-            ) {
-                Text(
-                    text = "Zarejestruj się!",
-
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.robotobold)),
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF003366),
-                    textAlign = TextAlign.Center,
-                    letterSpacing = 1.sp
-
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .weight(1f) // Take up remaining space on the left
+                        .wrapContentWidth(align = Alignment.CenterHorizontally)
+                ) {
+                    Text(
+                        text = "Zarejestruj się!",
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily(Font(R.font.robotobold)),
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFF003366),
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 1.sp
+                    )
+                }
+                Image(
+                    painter = painterResource(id = R.drawable.send),
+                    contentDescription = "Send",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(28.dp)
                 )
             }
-            Image(painter = painterResource(id = R.drawable.send), contentDescription = "Send", contentScale = ContentScale.Fit,
-                modifier = Modifier.size(28.dp))
         }
     }
-
 }
+
 @Composable
 fun DividerTextComponent() {
     val configuration = LocalConfiguration.current
@@ -412,5 +429,21 @@ fun ClickableLoginTextComponent(modifier: Modifier = Modifier, navController: Na
         }
     )
 }
+@Composable
+fun LoadingSpinner(isLoading: Boolean) {
+    if (isLoading) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize().background(Color(0x80000000))
+        ) {
+            CircularProgressIndicator(
+                color = Color.White,
+                strokeWidth = 4.dp
+            )
+        }
+    }
+}
+
+
 
 
