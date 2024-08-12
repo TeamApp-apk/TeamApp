@@ -55,6 +55,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -78,6 +79,9 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun LoginScreen(navController: NavController){
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel()
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
@@ -120,24 +124,24 @@ fun LoginScreen(navController: NavController){
                             .size(22.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(160.dp))
+                Spacer(modifier = Modifier.height(height * 0.00625f * 8 * density))
                 UpperTextField(
                     value = "Witaj ponownie!",
                 )
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(height * 0.00625f * 8 * density))
                 EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.mail_icon) )
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(height * 0.00625f * 6 / density))
                 PasswordTextFieldForLogin(labelValue ="password" , painterResource (id = R.drawable.lock_icon) )
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(height * 0.00625f * 6 / density))
                 Row(horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp * density))
                     RememberMeTextField()
-                    Spacer(modifier = Modifier.width(64.dp))
+                    Spacer(modifier = Modifier.width(32.dp * density))
                     ForgotPasswordTextField(navController)
                 }
-                Spacer(modifier = Modifier.height(36.dp))
+                Spacer(modifier = Modifier.height(height * 0.00625f * 8 * density))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -145,9 +149,9 @@ fun LoginScreen(navController: NavController){
                 ) {
                     ButtonSignIN(navController)
                 }
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
                 DividerTextComponent()
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -156,7 +160,7 @@ fun LoginScreen(navController: NavController){
                     GoogleLoginButton()
 
                 }
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
                 ClickableRegisterComponent(modifier = Modifier.align(Alignment.CenterHorizontally), navController)
 
             }
@@ -183,8 +187,8 @@ fun ToggleSwitch(){
             checkedTrackColor = Color(0xFF0056B3)
         )
         , modifier = Modifier
-            .width(32.3.dp)
-            .height(19.dp)
+            .width(32.dp)
+            .height(16.dp)
 
 
     )
