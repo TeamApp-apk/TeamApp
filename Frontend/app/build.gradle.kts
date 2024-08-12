@@ -75,6 +75,11 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation (libs.google.accompanist.navigation.animation)
     implementation(libs.accompanist.navigation.animation.v0300)
+    implementation (libs.accompanist.navigation.animation.vversion)
+    implementation (libs.accompanist.navigation.animation )
+    implementation ("com.google.accompanist:accompanist-navigation-animation:0.31.0-alpha")
+    implementation("androidx.compose.foundation:foundation-layout-android:1.6.8")
+
 
 
 

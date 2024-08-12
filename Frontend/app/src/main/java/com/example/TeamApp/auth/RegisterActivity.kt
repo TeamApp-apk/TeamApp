@@ -1,63 +1,71 @@
 package com.example.TeamApp.auth
 
 import android.annotation.SuppressLint
-import android.content.ContentValues.TAG
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.TeamApp.data.User
-import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.common.api.ApiException
 import com.example.TeamApp.event.CreateEventActivity
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.ui.LoadingScreen
 import com.example.TeamApp.utils.SystemUiUtils
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.initialize
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.delay
+
 
 class RegisterActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private lateinit var oneTapClient: SignInClient
     private var isFirstLaunch by mutableStateOf(true)
 
+    @OptIn(ExperimentalAnimationApi::class)
     @SuppressLint("UnrememberedMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
-            SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
+            statusBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+            SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
         )
         FirebaseApp.initializeApp(this)
         Firebase.initialize(this)
@@ -72,35 +80,100 @@ class RegisterActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
         setContent {
+            val gradientColors = listOf(
+                Color(0xFFE8E8E8),
+                Color(0xFF007BFF)
+            )
             SystemUiUtils.configureSystemUi(this)
             var isLoading by remember { mutableStateOf(true) }
+            var showMainContent by remember { mutableStateOf(false) }
+
             LaunchedEffect(Unit) {
-                delay(1000)
+                delay(400) // Simulate loading time
                 isLoading = false
-            }
-            val navController = rememberNavController() as NavHostController
 
-            AnimatedVisibility(
-                visible = isLoading,
-                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-            ) {
-                LoadingScreen()
+                delay(850) // Ensure the loading screen transitions out fully before showing main content
+                showMainContent = true
             }
 
-            AnimatedVisibility(
-                visible = !isLoading,
-                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+            val navController = rememberAnimatedNavController()
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(brush = Brush.linearGradient(colors = gradientColors))
             ) {
-                NavHost(navController = navController, startDestination = "register") {
-                    composable("register") { RegisterScreen(navController) }
-                    composable("login") { LoginScreen(navController) }
-                    composable("createEvent") { CreateEventScreen(navController) }
+                // Loading screen
+                AnimatedVisibility(
+                    visible = isLoading,
+                    enter = slideInVertically(
+                        initialOffsetY = { it },
+                        animationSpec = tween(
+                            durationMillis = 1000,
+                            easing = FastOutSlowInEasing
+                        )
+                    ) + fadeIn(animationSpec = tween(durationMillis = 1000)),
+                    exit = slideOutVertically(
+                        targetOffsetY = { it },
+                        animationSpec = tween(
+                            durationMillis = 1000,
+                            easing = FastOutSlowInEasing
+                        )
+                    ) + fadeOut(animationSpec = tween(durationMillis = 1000))
+                ) {
+                    LoadingScreen()
+                }
+                // Main content
+                AnimatedVisibility(
+                    visible = showMainContent,
+                    enter = slideInVertically(
+                        initialOffsetY = { 4000 },
+                        animationSpec = tween(
+                            durationMillis = 1500,
+                            easing = FastOutSlowInEasing
+                        )
+                    ) + fadeIn(animationSpec = tween(durationMillis = 1200)),
+                    exit = slideOutVertically(
+                        targetOffsetY = { -1000 },
+                        animationSpec = tween(
+                            durationMillis = 1500,
+                            easing = FastOutSlowInEasing
+                        )
+                    ) + fadeOut(animationSpec = tween(durationMillis = 1200))
+                ) {
+                    AnimatedNavHost(
+                        navController = navController,
+                        startDestination = "register",
+                        enterTransition = {
+                            slideInHorizontally(
+                                initialOffsetX = { -1000 },
+                                animationSpec = tween(
+                                    durationMillis = 800,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ) + fadeIn(animationSpec = tween(durationMillis = 800))
+                        },
+                        exitTransition = {
+                            slideOutHorizontally(
+                                targetOffsetX = { -1000 },
+                                animationSpec = tween(
+                                    durationMillis = 800,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ) + fadeOut(animationSpec = tween(durationMillis = 800))
+                        }
+                    ) {
+                        composable("register") { RegisterScreen(navController) }
+                        composable("login") { LoginScreen(navController) }
+                        composable("createEvent") { CreateEventScreen(navController) }
+                        composable("forgotPassword") { ForgotPasswordScreen(navController) }
+                    }
                 }
             }
         }
     }
+
+
 
     fun handleSignInResult(data: Intent?, navController: NavController) {
         try {

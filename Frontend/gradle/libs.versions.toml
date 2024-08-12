@@ -1,5 +1,5 @@
 [versions]
-accompanistNavigationAnimation = "0.30.0"
+accompanistNavigationAnimation = "0.31.0-alpha"
 accompanistNavigationAnimationVersion = "<latest_version>"
 agp = "8.5.1"
 constraintlayoutCompose = "1.0.1"
@@ -8,6 +8,7 @@ facebookFacebookAndroidSdkVersion = "[LATEST_VERSION]"
 firebaseAuthVersion = "23.0.0"
 firebaseBom = "33.1.2"
 firebaseUiAuth = "7.2.0"
+googleAccompanistNavigationAnimation = "<version>"
 kotlin = "1.9.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -33,7 +34,9 @@ runtime = "1.6.8"
 appcompat = "1.7.0"
 uiTextGoogleFonts = "1.6.8"
 [libraries]
+accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation" }
 accompanist-navigation-animation-v0300 = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimation" }
+accompanist-navigation-animation-vversion = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "googleAccompanistNavigationAnimation" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
