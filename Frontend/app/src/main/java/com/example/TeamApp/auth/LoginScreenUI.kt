@@ -273,7 +273,10 @@ fun ForgotPasswordTextField(navController: NavController) {
     val viewModel: LoginViewModel = viewModel()
     Text(
         modifier = Modifier
-            .clickable {
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
                 viewModel.getToChangePasswordScreen(navController)
             },
         text = "Zapomniałeś hasła?",

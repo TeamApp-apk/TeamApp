@@ -152,7 +152,7 @@ class LoginViewModel : ViewModel() {
         navController.navigate("register")
     }
     fun getToChangePasswordScreen(navController: NavController){
-        navController.navigate("changePassword") {
+        navController.navigate("forgotPassword") {
             popUpTo("login") { inclusive = true }
         }
     }

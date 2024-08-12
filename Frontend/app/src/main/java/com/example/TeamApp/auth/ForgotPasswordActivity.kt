@@ -1,7 +1,6 @@
 package com.example.TeamApp.auth
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,7 +9,6 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.TeamApp.auth.ui.theme.TeamAppTheme
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.profile.SearchScreen
@@ -31,7 +29,7 @@ class ForgotPasswordActivity : ComponentActivity() {
             SystemUiUtils.configureSystemUi(this)
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = "changePassword") {
-                composable("changePassword"){ ForgotPasswordUI(navController) }
+                composable("changePassword"){ ForgotPasswordScreen(navController) }
                 composable("createEvent") { CreateEventScreen(navController) }
                 composable("register") { RegisterScreen(navController) }
                 composable("profile"){ ProfileScreen(navController) }
