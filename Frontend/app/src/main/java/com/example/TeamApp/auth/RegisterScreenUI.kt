@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CornerSize
@@ -135,7 +136,7 @@ fun RegisterScreen(navController: NavController){
         Column {
             Spacer(modifier = Modifier.height(height * 0.00625f * 5))
             Spacer(modifier = Modifier.height(height * 0.00625f * 8))
-            UpperTextField(value = density.toString())
+            UpperTextField(value = "Dolacz do nas!")
             Spacer(modifier = Modifier.height(height * 0.00625f * 6 ))
             NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.user_icon))
             Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
@@ -274,8 +275,8 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
     val height = configuration.screenHeightDp.dp
     val width = configuration.screenWidthDp.dp
     TextField(
-        modifier = Modifier.fillMaxWidth().
-        height(height * 0.00625f * 8 * density ),
+        modifier = Modifier.fillMaxWidth()
+            .height(height * 0.00625f * 8 * density),
         label = { Text(
             text = labelValue,
             style = textInBoxes

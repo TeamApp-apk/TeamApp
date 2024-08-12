@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -152,9 +153,12 @@ fun ForgotPasswordUI(navController: NavController){
 }
 @Composable
 fun UpperTextField(value: String){
+    val configuration = LocalConfiguration.current
+    val height = configuration.screenHeightDp.dp
+    val width = configuration.screenWidthDp.dp
     Text(
         text = value,
-        modifier = Modifier.width(186.dp).height(28.dp * density),
+        modifier = Modifier.width(width * 0.83f).height(28.dp * density),
         style = TextStyle(fontSize = 24.sp * density,
             fontFamily = fontFamily,
             fontWeight = FontWeight(500),

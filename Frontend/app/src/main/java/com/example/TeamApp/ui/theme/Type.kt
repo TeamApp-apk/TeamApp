@@ -23,6 +23,9 @@ import androidx.compose.ui.unit.sp
 import com.example.TeamApp.R
 import kotlinx.coroutines.CoroutineExceptionHandler
 import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.style.LineHeightStyle
+import kotlin.math.ceil
+import kotlin.math.floor
 
 val metrics = Resources.getSystem().displayMetrics
 val density = metrics.density / 2
@@ -47,5 +50,6 @@ val fontFamily = FontFamily(
 )
 
 val textInBoxes = TextStyle (
-    fontSize = 12.sp * density
+    fontSize = (12 + (density - 1) * 15 ).sp,
+
 )

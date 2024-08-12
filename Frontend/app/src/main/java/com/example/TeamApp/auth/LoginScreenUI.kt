@@ -124,7 +124,7 @@ fun LoginScreen(navController: NavController){
                             .size(22.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(height * 0.00625f * 8 * density))
+                Spacer(modifier = Modifier.height(height * 0.00625f * 6 * density))
                 UpperTextField(
                     value = "Witaj ponownie!",
                 )
