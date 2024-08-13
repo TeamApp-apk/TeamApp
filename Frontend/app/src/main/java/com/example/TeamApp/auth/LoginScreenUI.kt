@@ -137,8 +137,6 @@ fun LoginScreen(navController: NavController){
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()) {
                     Spacer(modifier = Modifier.width(8.dp * density))
-                    RememberMeTextField()
-                    Spacer(modifier = Modifier.width(32.dp * density))
                     ForgotPasswordTextField(navController)
                 }
                 Spacer(modifier = Modifier.height(height * 0.00625f * 8 * density))
@@ -294,28 +292,8 @@ fun ForgotPasswordTextField(navController: NavController) {
         )
     )
 }
-@Composable
-fun RememberMeTextField() {
-    Row(
-        modifier = Modifier.padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        ToggleSwitch()
-        Spacer(modifier = Modifier.width(24.dp))
-        Text(
-            modifier = Modifier
-            ,
-            text = "Zapamiętaj mnie",
-            style = TextStyle(
-                fontSize = 14.sp,
-                lineHeight = 23.sp,
-                fontFamily = fontFamily, // Ensure R.font.robotoregular is a valid reference
-                color = Color(0xFF003366),
-                textAlign = TextAlign.Right
-            )
-        )
-    }
-}
+
+
 @Composable
 fun ButtonSignIN(navController: NavController) {
     val viewModel: LoginViewModel = viewModel()
