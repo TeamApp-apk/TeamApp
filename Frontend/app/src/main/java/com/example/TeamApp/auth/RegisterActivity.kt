@@ -33,10 +33,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventActivity
 import com.example.TeamApp.event.CreateEventScreen
+import com.example.TeamApp.profile.ProfileScreen
+import com.example.TeamApp.profile.SearchScreen
+import com.example.TeamApp.settings.SettingsScreen
 import com.example.TeamApp.ui.LoadingScreen
 import com.example.TeamApp.utils.SystemUiUtils
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -54,17 +58,16 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.initialize
 import kotlinx.coroutines.delay
 
-
 class RegisterActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private lateinit var oneTapClient: SignInClient
     private var isFirstLaunch by mutableStateOf(true)
-
     @OptIn(ExperimentalAnimationApi::class)
     @SuppressLint("UnrememberedMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        isFirstLaunch = true
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
             SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
@@ -73,13 +76,6 @@ class RegisterActivity : ComponentActivity() {
         Firebase.initialize(this)
         oneTapClient = Identity.getSignInClient(this)
         val auth = FirebaseAuth.getInstance()
-        if (auth.currentUser != null) {
-            val intent = Intent(this, CreateEventActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            finish()
-            return
-        }
         enableEdgeToEdge()
         setContent {
             val gradientColors = listOf(
@@ -103,7 +99,8 @@ class RegisterActivity : ComponentActivity() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(brush = Brush.linearGradient(colors = gradientColors))
+                    .background(brush = Brush.linearGradient(colors = gradientColors)
+                    )
             ) {
                 // Loading screen
                 AnimatedVisibility(
@@ -131,9 +128,9 @@ class RegisterActivity : ComponentActivity() {
                 AnimatedVisibility(
                     visible = showMainContent,
                     enter = slideInVertically(
-                        initialOffsetY = { 2000 },
+                        initialOffsetY = { 1500 },
                         animationSpec = tween(
-                            durationMillis = 800,
+                            durationMillis = 900,
                             easing = FastOutSlowInEasing
                         )
                     ) + fadeIn(animationSpec = tween(durationMillis = 1200)),
@@ -147,30 +144,33 @@ class RegisterActivity : ComponentActivity() {
                 ) {
                     AnimatedNavHost(
                         navController = navController,
-                        startDestination = "register",
+                        startDestination = if (auth.currentUser != null) "createEvent" else "register",
                         enterTransition = {
                             slideInHorizontally(
                                 initialOffsetX = { -1000 },
                                 animationSpec = tween(
-                                    durationMillis = 800,
-                                    easing = FastOutSlowInEasing
+                                    durationMillis = 400,
+
                                 )
-                            ) + fadeIn(animationSpec = tween(durationMillis = 800))
+                            ) + fadeIn(animationSpec = tween(durationMillis = 300))
                         },
                         exitTransition = {
                             slideOutHorizontally(
                                 targetOffsetX = { -1000 },
                                 animationSpec = tween(
-                                    durationMillis = 800,
-                                    easing = FastOutSlowInEasing
+                                    durationMillis = 400,
+
                                 )
-                            ) + fadeOut(animationSpec = tween(durationMillis = 800))
+                            ) + fadeOut(animationSpec = tween(durationMillis = 300))
                         }
                     ) {
                         composable("register") { RegisterScreen(navController) }
                         composable("login") { LoginScreen(navController) }
                         composable("createEvent") { CreateEventScreen(navController) }
                         composable("forgotPassword") { ForgotPasswordScreen(navController) }
+                        composable("search") { SearchScreen(navController) }
+                        composable("profile") { ProfileScreen(navController) }
+                        composable("settings"){ SettingsScreen(navController) }
                     }
                 }
             }

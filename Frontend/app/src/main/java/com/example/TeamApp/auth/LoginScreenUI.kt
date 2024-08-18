@@ -84,10 +84,41 @@ fun LoginScreen(navController: NavController){
     val width = configuration.screenWidthDp.dp
     val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel()
+    val loginSuccess by viewModel.loginSuccess.observeAsState()
+    val registerSuccess by viewModel.registerSuccess.observeAsState()
+    val emailSent by viewModel.emailSent.observeAsState()
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
+    var snackbarSuccess by remember { mutableStateOf(false) }
+    LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
+        when {
+            emailSent != null -> {
+                snackbarMessage = "Email"
+                snackbarSuccess = emailSent ?: false
+                showSnackbar = true
+            }
+            loginSuccess != null -> {
+                snackbarMessage = "login"
+                snackbarSuccess = loginSuccess ?: false
+                showSnackbar = true
+            }
+            registerSuccess != null -> {
+                snackbarMessage = "register"
+                snackbarSuccess = registerSuccess ?: false
+                showSnackbar = true
+            }
+        }
+    }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
-            (context as LoginActivity).handleSignInResult(data, navController)
+            if (context is LoginActivity) {
+                context.handleSignInResult(data, navController)
+            } else if (context is RegisterActivity) {
+                context.handleSignInResult(data, navController)
+            } else {
+                Log.e("LoginScreen", "Unhandled context: ${context::class.java.simpleName}")
+            }
         } else {
             Log.e("LoginScreen", "Google Sign-In failed")
         }
