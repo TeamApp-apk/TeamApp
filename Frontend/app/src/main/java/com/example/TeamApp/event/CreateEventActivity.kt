@@ -29,10 +29,10 @@ class CreateEventActivity : ComponentActivity() {
             NavHost(navController = navController, startDestination = "createEvent") {
                 composable("createEvent") { CreateEventScreen(navController) }
                 composable("register") { RegisterScreen(navController) }
-                composable("profile"){ProfileScreen(navController)}
-                composable("settings"){SettingsScreen(navController)}
-                composable("search"){SearchScreen(navController)}
-                composable("login"){LoginScreen(navController)}
+                composable("profile") { ProfileScreen(navController) }
+                composable("settings") { SettingsScreen(navController) }
+                composable("search") { SearchScreen(navController) }
+                composable("login") { LoginScreen(navController) }
             }
 
         }

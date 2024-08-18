@@ -39,11 +39,10 @@ class CreateEventViewModel : ViewModel() {
             popUpTo("createEvent"){inclusive = true}
         }
     }
-    fun navigateToSearchThrough(context: Context){
-        val intent = Intent(context, SearchThroughActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    fun navigateToSearchThrough(navController: NavController){
+        navController.navigate("search"){
+            popUpTo("createEvent"){inclusive = true}
         }
-        context.startActivity(intent)
     }
 
     fun createEvent(context: Context, sport: String, address: String, limit: String, description: String) {

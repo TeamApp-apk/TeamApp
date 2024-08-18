@@ -114,13 +114,13 @@ fun CreateEventScreen(navController: NavController) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Button(onClick = {  }) {
+            Button(onClick = { viewModel.navigateToSearchThrough(navController)}) {
                 Text(text = "Search")
             }
             Button(onClick = {}, colors = ButtonDefaults.buttonColors(Color.Gray)) {
                 Text(text = "Create")
             }
-            Button(onClick = {  }) {
+            Button(onClick = { viewModel.navigateToProfile(navController) }) {
                 Text(text = "Profile")
             }
         }

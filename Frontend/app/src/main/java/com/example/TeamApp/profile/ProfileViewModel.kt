@@ -29,13 +29,13 @@ class ProfileViewModel:ViewModel(){
         }
     }
     fun navigateToSearchThrough(navController: NavController) {
-        navController.navigate("searchThrough"){
+        navController.navigate("search"){
             popUpTo("profile"){inclusive = true}
         }
     }
     fun navitagateToSettings(navController: NavController) {
         navController.navigate("settings"){
-            popUpTo("profile"){inclusive = true}
+            popUpTo("profile"){inclusive = false}
         }
     }
 
