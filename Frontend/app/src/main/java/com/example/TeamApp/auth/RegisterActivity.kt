@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -124,12 +126,14 @@ class RegisterActivity : ComponentActivity() {
                     LoadingScreen()
                 }
                 // Main content
+                val configuration = LocalConfiguration.current
+                val screenHeight = configuration.screenHeightDp
                 AnimatedVisibility(
                     visible = showMainContent,
                     enter = slideInVertically(
-                        initialOffsetY = { 4000 },
+                        initialOffsetY = { 2000 },
                         animationSpec = tween(
-                            durationMillis = 1500,
+                            durationMillis = 800,
                             easing = FastOutSlowInEasing
                         )
                     ) + fadeIn(animationSpec = tween(durationMillis = 1200)),

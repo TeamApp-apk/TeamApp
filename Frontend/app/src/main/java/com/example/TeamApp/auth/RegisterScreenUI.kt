@@ -367,7 +367,7 @@ fun ButtonSignUP(navController: NavController) {
                     )
                 }
                 Image(
-                    painter = painterResource(id = R.drawable.send),
+                    painter = painterResource(id = R.drawable.arrow_right_icon),
                     contentDescription = "Send",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.size(28.dp)

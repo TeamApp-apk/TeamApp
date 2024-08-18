@@ -111,7 +111,7 @@ fun ForgotPasswordScreen(navController: NavController){
                 Spacer(modifier = Modifier.height(14.dp))
                 LowerTextField(value =  "Please enter your email address to request a password reset")
                 Spacer(modifier = Modifier.height(20.dp))
-                EmailButtonField(labelValue ="Your Email" , painterResource (id=R.drawable.message ))
+                EmailButtonField(labelValue ="Your Email" , painterResource (id=R.drawable.mail_icon ))
                 Spacer(modifier = Modifier.height(54.dp))
                 Box(
                     modifier = Modifier
@@ -245,7 +245,7 @@ fun ButtonWithSend() {
 
                 )
             }
-            Image(painter = painterResource(id = R.drawable.send), contentDescription = "Send", contentScale = ContentScale.Fit,
+            Image(painter = painterResource(id = R.drawable.arrow_right_icon), contentDescription = "Send", contentScale = ContentScale.Fit,
                 modifier = Modifier.size(28.dp))
         }
     }
