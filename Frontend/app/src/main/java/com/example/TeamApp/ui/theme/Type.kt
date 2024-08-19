@@ -53,3 +53,7 @@ val textInBoxes = TextStyle (
     fontSize = (12 + (density - 1) * 15 ).sp,
 
 )
+
+val robotoFontFamily = FontFamily(
+    Font(R.font.robotoblackitalic, FontWeight.Black)
+)

@@ -85,8 +85,8 @@ fun CurrentCity(value : String){
         text = value,
         style = TextStyle(
             fontSize = 26.sp,
-            fontFamily = FontFamily(Font(R.font.robotoitalic)),
-            fontWeight = FontWeight(900),
+            fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
+            fontWeight = FontWeight.Bold,
             fontStyle = FontStyle.Italic,
             color = Color(0xFF003366),
 
