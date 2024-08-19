@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -49,7 +50,7 @@ val currentEventsCounter = 0
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                CurrentCity(value = "Kraków")
+                CurrentCity(value = "KRAKÓW")
 
             }
             if (currentEventsCounter==0){
@@ -86,7 +87,7 @@ fun CurrentCity(value : String){
         style = TextStyle(
             fontSize = 26.sp,
             fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             fontStyle = FontStyle.Italic,
             color = Color(0xFF003366),
 
@@ -99,7 +100,7 @@ fun NoCurrentActivitiesBar(){
     Box(contentAlignment = Alignment.Center,modifier = Modifier
         .width(193.dp)
         .height(40.dp)
-        .background(color = Color(0xFFD9D9D9), shape = RoundedCornerShape(size = 16.dp))){
+        .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 16.dp))){
         Text(
             text = "Brak aktywnośći",
             style = TextStyle(
@@ -118,45 +119,62 @@ fun NoCurrentActivitiesBar(){
 }
 }
 @Composable
-fun BarOnTheBottom(){
-    Row(horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,modifier = Modifier
+fun BarOnTheBottom() {
+    // Główny kontener dla paska
+    Row(
+
+        horizontalArrangement = Arrangement.Center, // Wyśrodkowanie ikonek poziomo
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
             .width(328.dp)
             .height(42.dp)
             .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 73.dp))
-            .padding(start = 42.dp, top = 9.dp, end = 42.dp, bottom = 9.dp)) {
+            .padding(start = 42.dp, top = 9.dp, end = 42.dp, bottom = 9.dp)
+    ) {
+        // Kontener dla ikon
         Row(
-            //horizontalArrangement = Arrangement.spacedBy(70.dp, Alignment.Start),
+            horizontalArrangement = Arrangement.SpaceBetween, // Rozmieszczenie ikon równomiernie
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .width(244.dp)
+                .width(244.dp) // Ustalona szerokość, aby dopasować ikony
                 .height(24.dp)
         ) {
-            IconButton(onClick = { /*TODO*/ }, modifier = Modifier
-                .padding(1.dp)
-                .width(24.dp)
-                .height(24.dp)) {
-                Icon(painterResource(id =R.drawable.pluscircle )  , contentDescription ="circle",Modifier.fillMaxSize() )
-
-
-            }
-            IconButton(onClick = { /*TODO*/ }, modifier = Modifier
-                .padding(1.dp)
-                .width(160.dp)
-                .height(24.dp)) {
-                Icon(painterResource(id =R.drawable.search )  , contentDescription ="search",Modifier.fillMaxSize() )
-
-
-            }
-            IconButton(onClick = { /*TODO*/ }, modifier = Modifier
-                .padding(1.dp)
-                .width(24.dp)
-                .height(24.dp)) {
-                Icon(painterResource(id =R.drawable.user )  , contentDescription ="user",Modifier.fillMaxSize() )
+            IconButton(
+                onClick = { /*TODO*/ },
+                modifier = Modifier
+                    .size(24.dp) // Ustalona wielkość ikony
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.pluscircle),
+                    contentDescription = "circle",
+                    modifier = Modifier.fillMaxSize()
+                )
             }
 
+            IconButton(
+                onClick = { /*TODO*/ },
+                modifier = Modifier
+                    .size(24.dp) // Ustalona wielkość ikony
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.search),
+                    contentDescription = "search",
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
 
+            IconButton(
+                onClick = { /*TODO*/ },
+                modifier = Modifier
+                    .size(24.dp) // Ustalona wielkość ikony
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.user),
+                    contentDescription = "user",
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
-
     }
 }
+
