@@ -1,15 +1,11 @@
-package com.example.TeamApp.auth
-import android.widget.ImageButton
-import androidx.compose.foundation.Image
+package com.example.TeamApp.event
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -130,7 +126,7 @@ fun BarOnTheBottom(){
             .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 73.dp))
             .padding(start = 42.dp, top = 9.dp, end = 42.dp, bottom = 9.dp)) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(86.dp, Alignment.Start),
+            //horizontalArrangement = Arrangement.spacedBy(70.dp, Alignment.Start),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .width(244.dp)
@@ -142,11 +138,11 @@ fun BarOnTheBottom(){
                 .height(24.dp)) {
                 Icon(painterResource(id =R.drawable.pluscircle )  , contentDescription ="circle",Modifier.fillMaxSize() )
 
-                
+
             }
             IconButton(onClick = { /*TODO*/ }, modifier = Modifier
                 .padding(1.dp)
-                .width(24.dp)
+                .width(160.dp)
                 .height(24.dp)) {
                 Icon(painterResource(id =R.drawable.search )  , contentDescription ="search",Modifier.fillMaxSize() )
 
@@ -157,8 +153,6 @@ fun BarOnTheBottom(){
                 .width(24.dp)
                 .height(24.dp)) {
                 Icon(painterResource(id =R.drawable.user )  , contentDescription ="user",Modifier.fillMaxSize() )
-
-
             }
 
 
