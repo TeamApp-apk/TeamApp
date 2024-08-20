@@ -145,7 +145,7 @@ fun ActivityCard(
 @Composable
 fun PreviewActivityCard() {
     ActivityCard(
-        iconResId = R.drawable.dumbbelliconv2,
+        iconResId = R.drawable.dumbbelliconv5,
         date = "23 PAŹDZIERNIKA 12:45",
         activityName = "Skok ze spadochronem",
         currentParticipants = 21,

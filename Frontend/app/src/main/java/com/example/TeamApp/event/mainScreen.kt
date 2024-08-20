@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,15 +37,93 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Event
+import com.example.TeamApp.utils.SystemUiUtils
 
 @Composable
 fun MainScreen(){
+
     val activityList = remember { mutableStateListOf<Event>() }
-val currentEventsCounter = activityList.size
+
+    // Use LaunchedEffect to ensure this block only runs once
+    LaunchedEffect(Unit) {
+        activityList.add(
+            Event(
+                iconResId = R.drawable.dumbbelliconv5,
+                date = "26 PAŹDZIERNIKA 15:30",
+                activityName = "Nowa Aktywność",
+                currentParticipants = 5,
+                maxParticipants = 20,
+                location = "Rynek Główny"
+            )
+        )
+        activityList.add(
+            Event(
+                iconResId = R.drawable.dumbbelliconv5,
+                date = "26 PAŹDZIERNIKA 15:30",
+                activityName = "Nowa Aktywność",
+                currentParticipants = 5,
+                maxParticipants = 20,
+                location = "Rynek Główny"
+            )
+        )
+        activityList.add(
+            Event(
+                iconResId = R.drawable.dumbbelliconv5,
+                date = "26 PAŹDZIERNIKA 15:30",
+                activityName = "Nowa Aktywność",
+                currentParticipants = 5,
+                maxParticipants = 20,
+                location = "Rynek Główny"
+            )
+        )
+        activityList.add(
+            Event(
+                iconResId = R.drawable.dumbbelliconv5,
+                date = "26 PAŹDZIERNIKA 15:30",
+                activityName = "Nowa Aktywność",
+                currentParticipants = 5,
+                maxParticipants = 20,
+                location = "Rynek Główny"
+            )
+        )
+        activityList.add(
+            Event(
+                iconResId = R.drawable.dumbbelliconv5,
+                date = "26 PAŹDZIERNIKA 15:30",
+                activityName = "Nowa Aktywność",
+                currentParticipants = 5,
+                maxParticipants = 20,
+                location = "Rynek Główny"
+            )
+        )
+        activityList.add(
+            Event(
+                iconResId = R.drawable.dumbbelliconv5,
+                date = "26 PAŹDZIERNIKA 15:30",
+                activityName = "Nowa Aktywność",
+                currentParticipants = 5,
+                maxParticipants = 20,
+                location = "Rynek Główny"
+            )
+        )
+        activityList.add(
+            Event(
+                iconResId = R.drawable.dumbbelliconv5,
+                date = "26 PAŹDZIERNIKA 15:30",
+                activityName = "Nowa Aktywność",
+                currentParticipants = 5,
+                maxParticipants = 20,
+                location = "Rynek Główny"
+            )
+        )
+    }
+
+    val currentEventsCounter = activityList.size
     val gradientColors= listOf(
-        Color(0xFFE8E8E8)
-        ,Color(0xFF007BFF)
+        Color(0xFFE8E8E8),
+        Color(0xFF007BFF)
     )
+
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier
             .fillMaxSize()
@@ -63,7 +142,7 @@ val currentEventsCounter = activityList.size
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(4.dp) // Odstęp między elementami
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 if (currentEventsCounter == 0) {
                     item {
@@ -77,10 +156,8 @@ val currentEventsCounter = activityList.size
                 } else {
                     item { Spacer(modifier = Modifier.height(20.dp)) }
 
-                    // Tworzenie listy elementów
                     items(activityList) { activity ->
                         ActivityCard(
-
                             iconResId = activity.iconResId,
                             date = activity.date.toString(),
                             activityName = activity.activityName,
@@ -88,7 +165,7 @@ val currentEventsCounter = activityList.size
                             maxParticipants = activity.maxParticipants,
                             location = activity.location
                         ) {
-                            // Akcja do wykonania przy kliknięciu na kartę
+                            // Action on card click
                         }
                     }
                 }
@@ -96,13 +173,9 @@ val currentEventsCounter = activityList.size
 
             Box(contentAlignment =Alignment.BottomCenter, modifier = Modifier.fillMaxSize() ){
                 BarOnTheBottom()
-
             }
-
         }
-
     }
-
 }
 @Composable
 @Preview(showBackground = false)
