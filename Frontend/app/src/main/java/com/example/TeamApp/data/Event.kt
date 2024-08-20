@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit
 
 class Event(
     var location: String,
+    val iconResId: Int,
     date: String?,
     var time: String,
     var sportDiscipline: SportDiscipline,
@@ -14,6 +15,7 @@ class Event(
     private val creator: String,
     endDate: String?
 ) {
+    lateinit var activityName: String
     var date: LocalDate // Corrected type
         private set
     private val endDate: LocalDate

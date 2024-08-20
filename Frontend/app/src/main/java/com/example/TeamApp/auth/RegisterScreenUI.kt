@@ -50,6 +50,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -104,6 +105,33 @@ fun RegisterScreen(navController: NavController){
     val context = LocalContext.current
     val view = LocalView.current
     val viewModel: LoginViewModel = viewModel()
+    val loginSuccess by viewModel.loginSuccess.observeAsState()
+    val registerSuccess by viewModel.registerSuccess.observeAsState()
+    val emailSent by viewModel.emailSent.observeAsState()
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
+    var snackbarSuccess by remember { mutableStateOf(false) }
+    LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
+        when {
+            emailSent != null -> {
+                snackbarMessage = "Email"
+                snackbarSuccess = emailSent ?: false
+                showSnackbar = true
+            }
+            loginSuccess != null -> {
+                snackbarMessage = "login"
+                snackbarSuccess = loginSuccess ?: false
+                showSnackbar = true
+            }
+            registerSuccess != null -> {
+                snackbarMessage = "register"
+                snackbarSuccess = registerSuccess ?: false
+                showSnackbar = true
+            }
+        }
+        Log.e("RegisterScreen", "loginSuccess: $loginSuccess, registerSuccess: $registerSuccess, emailSent: $emailSent")
+
+    }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
@@ -133,42 +161,52 @@ fun RegisterScreen(navController: NavController){
         .fillMaxSize()
         .background(brush = Brush.linearGradient(colors = gradientColors))
         .padding(horizontal = width * 0.078f) ){
-        Column {
-            Spacer(modifier = Modifier.height(height * 0.00625f * 5))
-            Spacer(modifier = Modifier.height(height * 0.00625f * 8))
-            UpperTextField(value = "Dolacz do nas!")
-            Spacer(modifier = Modifier.height(height * 0.00625f * 6 ))
-            NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.user_icon))
-            Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
-            NameAndEmailBox(labelValue = "E-mail", painterResource (id = R.drawable.mail_icon) )
-            Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
-            PasswordTextField(labelValue ="Hasło" , painterResource (id=R.drawable.lock_icon) )
-            Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
-            PasswordTextFieldRepeatPassword(labelValue ="Powtórz hasło" , painterResource (id=R.drawable.lock_icon) )
-            Spacer(modifier = Modifier.height(height * 0.00625f * 8 / density))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize(Alignment.Center) // Center horizontally
-            ) {
-                ButtonSignUP(navController)
-            }
-            Spacer(modifier = Modifier.height(height * 0.00625f * 9 / density))
-            DividerTextComponent()
-            Spacer(modifier = Modifier.height(height * 0.00625f * 4))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize(Alignment.Center) // Center horizontally
-            ) {
-                GoogleLoginButton()
+            Column {
+                Spacer(modifier = Modifier.height(height * 0.00625f * 5))
+                Spacer(modifier = Modifier.height(height * 0.00625f * 8))
+                UpperTextField(value = "Dolacz do nas!")
+                Spacer(modifier = Modifier.height(height * 0.00625f * 6 ))
+                NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.user_icon))
+                Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
+                NameAndEmailBox(labelValue = "E-mail", painterResource (id = R.drawable.mail_icon) )
+                Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
+                PasswordTextField(labelValue ="Hasło" , painterResource (id=R.drawable.lock_icon) )
+                Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
+                PasswordTextFieldRepeatPassword(labelValue ="Powtórz hasło" , painterResource (id=R.drawable.lock_icon) )
+                Spacer(modifier = Modifier.height(height * 0.00625f * 8 / density))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.Center) // Center horizontally
+                ) {
+                    ButtonSignUP(navController)
+                }
+                Spacer(modifier = Modifier.height(height * 0.00625f * 9 / density))
+                DividerTextComponent()
+                Spacer(modifier = Modifier.height(height * 0.00625f * 4))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentSize(Alignment.Center) // Center horizontally
+                ) {
+                    GoogleLoginButton()
 
+                }
+                Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
+                ClickableLoginTextComponent(modifier = Modifier.align(Alignment.CenterHorizontally), navController)
             }
-            Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
-            ClickableLoginTextComponent(modifier = Modifier.align(Alignment.CenterHorizontally), navController)
         }
-        }
-}
+    }
+    if (showSnackbar) {
+        CustomSnackbar(
+            success = snackbarSuccess,
+            type = snackbarMessage,
+            onDismiss = {
+                showSnackbar = false
+                viewModel.resetSuccess()
+            }
+        )
+    }
 }
 //@Composable
 //@Preview
@@ -444,6 +482,7 @@ fun LoadingSpinner(isLoading: Boolean) {
         }
     }
 }
+
 
 
 

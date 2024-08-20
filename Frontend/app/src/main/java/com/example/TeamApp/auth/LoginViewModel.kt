@@ -106,6 +106,7 @@ class LoginViewModel : ViewModel() {
                 }
         } else {
             Log.d("LoginAttempt", "Login failed: empty email or password field")
+            _loginSuccess.value= false
             setLoading(false)
         }
     }
@@ -157,46 +158,57 @@ class LoginViewModel : ViewModel() {
         }
     }
     fun onRegisterClick(navController: NavController) {
+        Log.e("LoginViewModel", "onRegisterClick")
         val email = _email.value ?: return
         val password = _password.value ?: return
         val confirmPassword = _confirmPassword.value ?: return
-        setLoading(true)
-        // Tymczasowo, niedodana implementacja rejestracji z loginem
+
+        // Temporarily hardcoded username
         val username = "xyz"
-
         val db = Firebase.firestore
-
         val user = User(name = username, email = email)
+//        setLoading(true)
+//        if (password != confirmPassword) {
+//            Log.d("RegisterAttempt", "Register failed: passwords do not match")
+//            _registerSuccess.value = false
+//            setLoading(false)
+//            return
+//        }
+        var arePasswordsDifferent: Boolean = false
+        if (email.isNotEmpty() && password.isNotEmpty()) {
+            setLoading(true)  // Start loading spinner here
+            if (password != confirmPassword) {
+                Log.d("RegisterAttempt", "Register failed: passwords do not match")
+                arePasswordsDifferent = true
 
-        if (password != confirmPassword) {
-            Log.d("RegisterAttempt", "Register failed: passwords do not match")
-            return
-        }
-
-        if (password.isNotEmpty() && email.isNotEmpty()) {
+            }
             Log.d("RegisterAttempt", "Attempting to register with email: $email")
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     android.os.Handler(Looper.getMainLooper()).postDelayed({
-                        setLoading(false)
-
-                    if (task.isSuccessful) {
-                        db.collection("users").add(user)
-                        Log.d("Register", "Registration successful")
-                        _registerSuccess.value = true
-                      navController.navigate("CreateEvent") {
-                          popUpTo("register") { inclusive = true }
-                      }
-                    } else {
-                        Log.e("Register", "Registration failed: ${task.exception?.message}")
-                        _registerSuccess.value = false
-                    }
-                }, 200) // delay
-            }
-        } else if (email.isEmpty()) {
-            Log.d("RegisterAttempt", "Register failed: empty email field")
+                        if (task.isSuccessful && !arePasswordsDifferent) {
+                            Log.d("Register", "Registration successful")
+                            db.collection("users").add(user)
+                            _registerSuccess.value = true
+                            navController.navigate("CreateEvent") {
+                                popUpTo("register") { inclusive = true }
+                            }
+                        } else {
+                            Log.e("Register", "Registration failed: ${task.exception?.message}")
+                            _registerSuccess.value = false
+                        }
+                        setLoading(false) // Stop loading spinner here, after all tasks are done
+                    }, 200) // delay for better UX
+                }
+        } else {
+            Log.d("RegisterAttempt", "Register failed: empty email or password field")
+            _registerSuccess.value = false
+            setLoading(false)
         }
     }
+
+
+
 
 
     fun resetSuccess() {

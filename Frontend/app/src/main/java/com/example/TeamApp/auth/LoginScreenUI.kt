@@ -108,6 +108,8 @@ fun LoginScreen(navController: NavController){
                 showSnackbar = true
             }
         }
+        Log.e("RegisterScreen", "loginSuccess: $loginSuccess, registerSuccess: $registerSuccess, emailSent: $emailSent, showSnackbar:$showSnackbar")
+
     }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
@@ -197,8 +199,16 @@ fun LoginScreen(navController: NavController){
         }
 
     }
-
-
+    if (showSnackbar) {
+        CustomSnackbar(
+            success = snackbarSuccess,
+            type = snackbarMessage,
+            onDismiss = {
+                showSnackbar = false
+                viewModel.resetSuccess()
+            }
+        )
+    }
 }
 //@Composable
 //@Preview
@@ -427,7 +437,9 @@ fun CustomSnackbar(success: Boolean, type: String, onDismiss: () -> Unit) {
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
+            Log.e("LoginScreen","Snackbar")
             Text(
+
                 text = if (success) {
                     when (type) {
                         "login" -> "Login Successful"
