@@ -45,29 +45,30 @@ class CreateEventViewModel : ViewModel() {
         }
     }
 
-    fun createEvent(context: Context, sport: String, address: String, limit: String, description: String) {
-        if (sport.isEmpty() || address.isEmpty() || limit.isEmpty() || description.isEmpty()) {
-            Log.e("CreateEventViewModel", "One or more fields are empty") //do debugu
-            return
-        }
-
-        Log.d("CreateEventViewModel", "createEvent called with sport: $sport, address: $address, limit: $limit, description: $description")
-        val event = Event(
-            location = address,
-            date = LocalDate.now().toString(), // Tymczasowo
-            time = "12:00", // default time
-            sportDiscipline = Event.SportDiscipline.valueOf(sport), // Assuming sport is a valid enum value
-            maxParticipants = limit.toInt(),
-            currentParticipants = 0, // Poczatkowo 0 uczestnikow
-            description = description,
-            creator = "creatorId", // Jakis placeholder
-            endDate = LocalDate.now().plusDays(1).toString() // Tymczasowo
-        )
-        val db = Firebase.firestore
-        db.collection("events").add(event)
-            .addOnSuccessListener { Log.d("CreateEventViewModel", "Event successfully created") }
-            .addOnFailureListener { e -> Log.w("CreateEventViewModel", "Error creating event", e) }
-    }
+//    fun createEvent(context: Context, sport: String, address: String, limit: String, description: String) {
+//        if (sport.isEmpty() || address.isEmpty() || limit.isEmpty() || description.isEmpty()) {
+//            Log.e("CreateEventViewModel", "One or more fields are empty") //do debugu
+//            return
+//        }
+//
+//        Log.d("CreateEventViewModel", "createEvent called with sport: $sport, address: $address, limit: $limit, description: $description")
+//        val event = Event(
+//            location = address,
+//            iconResId = 0,
+//            date = LocalDate.now().toString(),
+//            time = "12:00",
+//            sportDiscipline = Event.SportDiscipline.valueOf(sport),
+//            maxParticipants = limit.toInt(),
+//            currentParticipants = 0,
+//            description = description,
+//            creator = FirebaseAuth.getInstance().currentUser?.uid.toString(),
+//            endDate = LocalDate.now().plusDays(7).toString()
+//        )
+//        val db = Firebase.firestore
+//        db.collection("events").add(event)
+//            .addOnSuccessListener { Log.d("CreateEventViewModel", "Event successfully created") }
+//            .addOnFailureListener { e -> Log.w("CreateEventViewModel", "Error creating event", e) }
+//    }
 
     //temporary here
     fun logout(navController: NavController) {
