@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -32,10 +35,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.TeamApp.R
+import com.example.TeamApp.data.Event
 
 @Composable
 fun MainScreen(){
-val currentEventsCounter = 1
+    val activityList = remember { mutableStateListOf<Event>() }
+val currentEventsCounter = activityList.size
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
@@ -56,42 +61,36 @@ val currentEventsCounter = 1
                 CurrentCity(value = "KRAKÓW")
             }
 
-            Column() {
-                if (currentEventsCounter==0){
-                    Box(modifier =Modifier.fillMaxSize(),  // Pełny rozmiar ekranu
-                        contentAlignment = Alignment.Center ){
-                        NoCurrentActivitiesBar()
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(4.dp) // Odstęp między elementami
+            ) {
+                if (currentEventsCounter == 0) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillParentMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            NoCurrentActivitiesBar()
+                        }
                     }
-                }
-                else{
-                    Spacer(modifier = Modifier.height(20.dp))
-                    ActivityCard(
-                        iconResId = R.drawable.dumbbelliconv2,
-                        date = "23 PAŹDZIERNIKA 12:45",
-                        activityName = "Skok ze spadochronem",
-                        currentParticipants = 21,
-                        maxParticipants = 32,
-                        location = "Beliny-Prażmowskiego",
-                    ) {
+                } else {
+                    item { Spacer(modifier = Modifier.height(20.dp)) }
 
+                    // Tworzenie listy elementów
+                    items(activityList) { activity ->
+                        ActivityCard(
+
+                            iconResId = activity.iconResId,
+                            date = activity.date.toString(),
+                            activityName = activity.activityName,
+                            currentParticipants = activity.currentParticipants,
+                            maxParticipants = activity.maxParticipants,
+                            location = activity.location
+                        ) {
+                            // Akcja do wykonania przy kliknięciu na kartę
+                        }
                     }
-                    ActivityCard(
-                        iconResId = R.drawable.dumbbelliconv2,
-                        date = "23 PAŹDZIERNIKA 12:45",
-                        activityName = "Skok ze spadochronem",
-                        currentParticipants = 21,
-                        maxParticipants = 32,
-                        location = "Beliny-Prażmowskiego",
-                    ) {}
-                    ActivityCard(
-                        iconResId = R.drawable.dumbbelliconv2,
-                        date = "23 PAŹDZIERNIKA 12:45",
-                        activityName = "Skok ze spadochronem",
-                        currentParticipants = 21,
-                        maxParticipants = 32,
-                        location = "Beliny-Prażmowskiego",
-                    ) {}
-
                 }
             }
 
@@ -210,4 +209,3 @@ fun BarOnTheBottom() {
         }
     }
 }
-
