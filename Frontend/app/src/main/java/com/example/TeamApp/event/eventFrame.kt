@@ -34,7 +34,8 @@ fun ActivityCard(
     iconResId: Int,
     date: String,
     activityName: String,
-    participants: String,
+    currentParticipants: Int,
+    maxParticipants: Int,
     location: String,
     onClick: () -> Unit
 ) {
@@ -45,7 +46,7 @@ fun ActivityCard(
                 spotColor = Color(0x12535990),
                 ambientColor = Color(0x12535990)
             )
-            .padding(0.dp)
+            .padding(4.dp)
             .width(348.dp)
             .height(106.dp)
             .background(color = Variables.LightGray, shape = RoundedCornerShape(size = 16.dp))
@@ -79,7 +80,7 @@ fun ActivityCard(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = participants,
+                    text = "$currentParticipants/$maxParticipants",
                     style = TextStyle(
                         fontSize = 12.sp,
                         fontFamily = FontFamily(Font(R.font.robotobold)),
@@ -140,14 +141,15 @@ fun ActivityCard(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = false)
 @Composable
 fun PreviewActivityCard() {
     ActivityCard(
         iconResId = R.drawable.dumbbelliconv2,
         date = "23 PAŹDZIERNIKA 12:45",
         activityName = "Skok ze spadochronem",
-        participants = "22/34",
+        currentParticipants = 21,
+        maxParticipants = 32,
         location = "Beliny-Prażmowskiego",
         onClick = { /* akcja na kliknięcie */ }
     )

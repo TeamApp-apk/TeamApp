@@ -2,12 +2,15 @@ package com.example.TeamApp.event
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,16 +35,16 @@ import com.example.TeamApp.R
 
 @Composable
 fun MainScreen(){
-val currentEventsCounter = 0
+val currentEventsCounter = 1
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
     )
     Surface(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier
+        Column(modifier = Modifier
             .fillMaxSize()
             .background(brush = Brush.linearGradient(colors = gradientColors))
-            .padding(horizontal = 28.dp)
+            .padding(horizontal = 20.dp)
             .padding(vertical = 50.dp)){
 
             Row(modifier = Modifier
@@ -51,17 +54,47 @@ val currentEventsCounter = 0
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 CurrentCity(value = "KRAKÓW")
-
             }
-            if (currentEventsCounter==0){
-                Box(modifier =Modifier.fillMaxSize(),  // Pełny rozmiar ekranu
-                    contentAlignment = Alignment.Center ){
-                NoCurrentActivitiesBar()
+
+            Column() {
+                if (currentEventsCounter==0){
+                    Box(modifier =Modifier.fillMaxSize(),  // Pełny rozmiar ekranu
+                        contentAlignment = Alignment.Center ){
+                        NoCurrentActivitiesBar()
                     }
-            }
-            else{
+                }
+                else{
+                    Spacer(modifier = Modifier.height(20.dp))
+                    ActivityCard(
+                        iconResId = R.drawable.dumbbelliconv2,
+                        date = "23 PAŹDZIERNIKA 12:45",
+                        activityName = "Skok ze spadochronem",
+                        currentParticipants = 21,
+                        maxParticipants = 32,
+                        location = "Beliny-Prażmowskiego",
+                    ) {
 
+                    }
+                    ActivityCard(
+                        iconResId = R.drawable.dumbbelliconv2,
+                        date = "23 PAŹDZIERNIKA 12:45",
+                        activityName = "Skok ze spadochronem",
+                        currentParticipants = 21,
+                        maxParticipants = 32,
+                        location = "Beliny-Prażmowskiego",
+                    ) {}
+                    ActivityCard(
+                        iconResId = R.drawable.dumbbelliconv2,
+                        date = "23 PAŹDZIERNIKA 12:45",
+                        activityName = "Skok ze spadochronem",
+                        currentParticipants = 21,
+                        maxParticipants = 32,
+                        location = "Beliny-Prażmowskiego",
+                    ) {}
+
+                }
             }
+
             Box(contentAlignment =Alignment.BottomCenter, modifier = Modifier.fillMaxSize() ){
                 BarOnTheBottom()
 
