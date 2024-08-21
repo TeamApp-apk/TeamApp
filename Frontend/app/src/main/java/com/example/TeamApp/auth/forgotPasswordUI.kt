@@ -48,6 +48,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -180,14 +182,20 @@ fun EmailButtonField(labelValue: String, painterResource: Painter) {
         modifier = Modifier.fillMaxWidth(),
         label = { Text(text = labelValue) },
         value = if (labelValue == "Your Email") email else textValue.value,
-        onValueChange = {
+        onValueChange = { newText ->
+            val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+            if (allowedCharsRegex.matches(newText)) {
+                viewModel.onEmailChange(newText)
+            }
+            /*
             if (labelValue == "Your Email") {
                 viewModel.onEmailChange(it)
             } else {
                 textValue.value = it
             }
+             */
         },
-        keyboardOptions = KeyboardOptions.Default,
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done, keyboardType = KeyboardType.Text),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = primaryLight,
             focusedLabelColor = secondaryLight,
