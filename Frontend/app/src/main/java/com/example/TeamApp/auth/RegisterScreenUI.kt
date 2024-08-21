@@ -249,7 +249,7 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter) {
         },
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Done,
-            keyboardType = KeyboardType.Text
+            keyboardType = KeyboardType.Password
         ),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,

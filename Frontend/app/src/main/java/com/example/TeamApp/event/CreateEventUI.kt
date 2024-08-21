@@ -83,7 +83,7 @@ fun CreateEventScreen(navController: NavController) {
                      },
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done,
-                    keyboardType = KeyboardType.Text
+                    keyboardType = KeyboardType.Password
                 ),
                 label = { Text("Address*") },
                 modifier = Modifier
