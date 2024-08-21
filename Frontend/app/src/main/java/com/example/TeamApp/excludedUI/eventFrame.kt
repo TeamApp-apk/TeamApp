@@ -1,4 +1,4 @@
-package com.example.TeamApp.event
+package com.example.TeamApp.excludedUI
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
