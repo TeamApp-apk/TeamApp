@@ -1,6 +1,6 @@
 package com.example.TeamApp.event
 
-import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,22 +17,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.TeamApp.auth.LoginViewModel
-import com.example.compose.TeamAppTheme
+import com.example.TeamApp.R
+import com.example.TeamApp.data.Event
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateEventScreen(navController: NavController) {
     val viewModel: CreateEventViewModel = viewModel()
     val sport by viewModel.sport.observeAsState("")
-    val address by viewModel.address.observeAsState("")
+    val address by viewModel.location.observeAsState("")
     val limit by viewModel.limit.observeAsState("")
     val description by viewModel.description.observeAsState("")
     val availableSports = viewModel.getAvailableSports()
     val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+    val location by viewModel.location.observeAsState("")
+    val date by viewModel.date.observeAsState("")
+
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize().padding(bottom = 15.dp)) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(bottom = 15.dp)) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -109,7 +116,6 @@ fun CreateEventScreen(navController: NavController) {
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             )
-
             TextField(
                 value = description,
                 onValueChange = {
@@ -130,7 +136,30 @@ fun CreateEventScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    //viewModel.createEvent(context, sport, address, limit, description)
+                    Log.d("CreateEventScreen", "Submit button clicked")
+                    val participantLimit = limit.toIntOrNull()
+                    Log.e("CreateEventScreen", "Participant limit: $participantLimit")
+                    Log.e("CreateEventScreen", "Sport: $sport")
+                    Log.e("CreateEventScreen", "Address: $address")
+                    Log.e("CreateEventScreen", "Date: $date")
+                    Log.e("CreateEventScreen", "Location: $location")
+                    if (sport.isNotEmpty() && address.isNotEmpty()  && location.isNotEmpty()) {
+                        Log.d("CreateEventScreen", "Valid input")
+                        val newEvent = Event(
+                            iconResId = R.drawable.dumbbelliconv5, // Replace with actual icon resource if available
+                            date = "23 PAŹDZIERNIKA 12:45", // Replace with actual date
+                            activityName = sport,
+                            currentParticipants = 0,
+                            maxParticipants = limit.toInt(),
+                            location = location
+                        )
+                        viewModel.createEvent(newEvent)
+                        snackbarMessage = "Event created successfully!"
+                        showSnackbar = true
+                    } else {
+                        snackbarMessage = "Please fill all required fields correctly."
+                        showSnackbar = true
+                    }
                 },
                 modifier = Modifier.padding(vertical = 16.dp)
             ) {
@@ -145,7 +174,7 @@ fun CreateEventScreen(navController: NavController) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Button(onClick = { viewModel.navigateToSearchThrough(navController)}) {
+            Button(onClick = { navController.navigate("search") }) {
                 Text(text = "Search")
             }
             Button(onClick = {}, colors = ButtonDefaults.buttonColors(Color.Gray)) {

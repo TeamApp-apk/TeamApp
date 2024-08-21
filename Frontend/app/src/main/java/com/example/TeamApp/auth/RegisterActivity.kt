@@ -39,7 +39,7 @@ import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventActivity
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.profile.ProfileScreen
-import com.example.TeamApp.profile.SearchScreen
+import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.settings.SettingsScreen
 import com.example.TeamApp.ui.LoadingScreen
 import com.example.TeamApp.utils.SystemUiUtils
@@ -62,21 +62,17 @@ class RegisterActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private lateinit var oneTapClient: SignInClient
     private var isFirstLaunch by mutableStateOf(true)
+
     @OptIn(ExperimentalAnimationApi::class)
     @SuppressLint("UnrememberedMutableState")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         isFirstLaunch = true
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
-            SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
-        )
         FirebaseApp.initializeApp(this)
-        Firebase.initialize(this)
-        oneTapClient = Identity.getSignInClient(this)
         val auth = FirebaseAuth.getInstance()
-        enableEdgeToEdge()
+        oneTapClient = Identity.getSignInClient(this) // Initialize oneTapClient here
+
         setContent {
             val gradientColors = listOf(
                 Color(0xFFE8E8E8),
@@ -99,8 +95,7 @@ class RegisterActivity : ComponentActivity() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(brush = Brush.linearGradient(colors = gradientColors)
-                    )
+                    .background(brush = Brush.linearGradient(colors = gradientColors))
             ) {
                 // Loading screen
                 AnimatedVisibility(
@@ -150,7 +145,7 @@ class RegisterActivity : ComponentActivity() {
                                 initialOffsetX = { -1000 },
                                 animationSpec = tween(
                                     durationMillis = 400,
-
+                                    easing = FastOutSlowInEasing
                                 )
                             ) + fadeIn(animationSpec = tween(durationMillis = 300))
                         },
@@ -159,25 +154,45 @@ class RegisterActivity : ComponentActivity() {
                                 targetOffsetX = { -1000 },
                                 animationSpec = tween(
                                     durationMillis = 400,
-
+                                    easing = FastOutSlowInEasing
                                 )
                             ) + fadeOut(animationSpec = tween(durationMillis = 300))
                         }
                     ) {
                         composable("register") { RegisterScreen(navController) }
                         composable("login") { LoginScreen(navController) }
-                        composable("createEvent") { CreateEventScreen(navController) }
+                        composable(
+                            "CreateEvent",
+                            enterTransition = {
+                                fadeIn(animationSpec = tween(durationMillis = 400)) // Krótkie zanikanie
+                            },
+                            exitTransition = {
+                                fadeOut(animationSpec = tween(durationMillis = 50)) // Krótkie zanikanie
+                            }
+                        ) {
+                            CreateEventScreen(navController)
+                        }
                         composable("forgotPassword") { ForgotPasswordScreen(navController) }
-                        composable("search") { SearchScreen(navController) }
+                        composable(
+                            "search",
+                            enterTransition = {
+                                fadeIn(animationSpec = tween(durationMillis =500)) // Krótkie zanikanie
+                            },
+                            exitTransition = {
+                                fadeOut(animationSpec = tween(durationMillis = 50)) // Krótkie zanikanie
+                            }
+                        ) {
+                            SearchScreen(navController)
+                        }
+
+
                         composable("profile") { ProfileScreen(navController) }
-                        composable("settings"){ SettingsScreen(navController) }
+                        composable("settings") { SettingsScreen(navController) }
                     }
                 }
             }
         }
     }
-
-
 
     fun handleSignInResult(data: Intent?, navController: NavController) {
         try {

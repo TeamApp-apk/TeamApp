@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.TeamApp.auth.RegisterScreen
 import com.example.TeamApp.event.CreateEventScreen
+import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.settings.SettingsScreen
 import com.example.TeamApp.utils.SystemUiUtils
 import com.example.compose.TeamAppTheme

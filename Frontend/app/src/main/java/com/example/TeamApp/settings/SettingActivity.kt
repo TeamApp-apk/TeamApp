@@ -11,7 +11,7 @@ import com.example.TeamApp.auth.ForgotPasswordScreen
 import com.example.TeamApp.auth.RegisterScreen
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.profile.ProfileScreen
-import com.example.TeamApp.profile.SearchScreen
+import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.utils.SystemUiUtils
 
 
