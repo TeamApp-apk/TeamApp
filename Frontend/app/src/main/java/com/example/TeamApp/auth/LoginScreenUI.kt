@@ -64,6 +64,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -245,10 +246,13 @@ fun EmailBoxForLogin(labelValue: String, painterResource: Painter) {
         modifier = Modifier.fillMaxWidth(),
         label = { Text(text = labelValue) },
         value = email,
-        onValueChange = {
-            viewModel.onEmailChange(it)
+        onValueChange = { newText ->
+            val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+            if (allowedCharsRegex.matches(newText)) {
+                viewModel.onEmailChange(newText)
+            }
         },
-        keyboardOptions = KeyboardOptions.Default,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Text),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -276,9 +280,13 @@ fun PasswordTextFieldForLogin(labelValue: String, painterResource: Painter) {
         label = { Text(text = labelValue) },
         value = password,
         onValueChange = {
-            viewModel.onPasswordChanged(it)
+                newText ->
+            val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+            if (allowedCharsRegex.matches(newText)) {
+                viewModel.onPasswordChanged(newText)
+            }
         },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done, keyboardType = KeyboardType.Password),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,

@@ -3,6 +3,7 @@ package com.example.TeamApp.event
 import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -10,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -26,7 +29,7 @@ fun CreateEventScreen(navController: NavController) {
     val limit by viewModel.limit.observeAsState("")
     val description by viewModel.description.observeAsState("")
     val availableSports = viewModel.getAvailableSports()
-
+    val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize().padding(bottom = 15.dp)) {
@@ -72,7 +75,16 @@ fun CreateEventScreen(navController: NavController) {
 
             TextField(
                 value = address,
-                onValueChange = { viewModel.onAddressChange(it) },
+                onValueChange = { newText ->
+                    if (allowedCharsRegex.matches(newText))
+                    {
+                        viewModel.onAddressChange(newText)
+                    }
+                     },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Text
+                ),
                 label = { Text("Address*") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -81,7 +93,17 @@ fun CreateEventScreen(navController: NavController) {
 
             TextField(
                 value = limit,
-                onValueChange = { viewModel.onLimitChange(it) },
+                onValueChange = { newText ->
+                    val numberRegex = Regex("^[0-9]*\$")
+                    if (numberRegex.matches(newText))
+                    {
+                        viewModel.onLimitChange(newText)
+                    }
+                                },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Text
+                ),
                 label = { Text("Limit of participants*") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -90,8 +112,17 @@ fun CreateEventScreen(navController: NavController) {
 
             TextField(
                 value = description,
-                onValueChange = { viewModel.onDescriptionChange(it) },
+                onValueChange = {
+                        newText ->
+                    if (allowedCharsRegex.matches(newText))
+                    {
+                        viewModel.onDescriptionChange(newText)
+                    } },
                 label = { Text("Description") },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Text
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)

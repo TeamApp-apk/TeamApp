@@ -69,6 +69,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -231,13 +232,25 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter) {
             ) },
         value = if (labelValue == "E-mail") email else textValue.value,
         onValueChange = {
+                newText ->
+
             if (labelValue == "E-mail") {
-                viewModel.onEmailChange(it)
+                val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+                if (allowedCharsRegex.matches(newText)) {
+                    viewModel.onEmailChange(newText)
+
+                }
             } else {
-                textValue.value = it
+                val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+                if (allowedCharsRegex.matches(newText)) {
+                    textValue.value = newText
+                }
             }
         },
-        keyboardOptions = KeyboardOptions.Default,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Done,
+            keyboardType = KeyboardType.Text
+        ),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -271,8 +284,14 @@ fun PasswordTextField(labelValue: String, painterResource: Painter) {
             style = textInBoxes
         ) },
         value = password,
-        onValueChange = { viewModel.onPasswordChanged(it) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        onValueChange = { newText ->
+
+            val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+            if (allowedCharsRegex.matches(newText)) {
+                viewModel.onPasswordChanged(newText)
+            }
+        },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Password),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -320,8 +339,13 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
             style = textInBoxes
         ) },
         value = confirmPassword,
-        onValueChange = { viewModel.onConfirmPasswordChanged(it) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        onValueChange = { newText ->
+            val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+            if (allowedCharsRegex.matches(newText)) {
+                viewModel.onConfirmPasswordChanged(newText)
+            }
+             },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Password),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
