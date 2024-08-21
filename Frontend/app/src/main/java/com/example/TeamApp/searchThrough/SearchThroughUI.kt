@@ -1,4 +1,5 @@
 package com.example.TeamApp.searchThrough
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,6 +54,7 @@ fun SearchScreen(navController: NavController) {
     var showEmptyMessage by remember { mutableStateOf(false) }
 
     LaunchedEffect(activityList) {
+        Log.d("ScreenThrough", "weszlo")
         viewModel.fetchEvents()
         if (activityList.isEmpty()) {
             delay(2000) // Opóźnienie 2 sekundy przed sprawdzeniem
@@ -85,8 +87,10 @@ fun SearchScreen(navController: NavController) {
             }
 
             LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(600.dp),  // You can adjust the height to your preference
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 when {
                     showEmptyMessage -> {
@@ -183,7 +187,7 @@ fun BarOnTheBottom(navController: NavController) {
             .fillMaxWidth()
             .height(60.dp)
             .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 73.dp))
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 40.dp, vertical = 8.dp)
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
