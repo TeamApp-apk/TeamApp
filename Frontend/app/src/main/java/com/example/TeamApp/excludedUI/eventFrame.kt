@@ -1,5 +1,6 @@
 package com.example.TeamApp.excludedUI
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -28,10 +30,14 @@ object Variables {
     val P3: Color = Color(0xFF1A73E8)
     val Black: Color = Color(0xFF000000)
 }
+fun getIconResourceId(context: Context, iconName: String): Int {
+    return context.resources.getIdentifier(iconName, "drawable", context.packageName)
+}
+
 
 @Composable
 fun ActivityCard(
-    iconResId: Int,
+    iconResId: String,
     date: String,
     activityName: String,
     currentParticipants: Int,
@@ -39,6 +45,8 @@ fun ActivityCard(
     location: String,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val iconId = getIconResourceId(context, iconResId)
     Row(
         modifier = Modifier
             .shadow(
@@ -53,7 +61,7 @@ fun ActivityCard(
             .padding(start = 4.dp, top = 10.dp, end = 4.dp, bottom = 10.dp)
     ) {
         Image(
-            painter = painterResource(id = iconResId),
+            painter = painterResource(id = iconId),
             contentDescription = "Activity Icon",
             modifier = Modifier
                 .padding(0.dp)
@@ -141,16 +149,16 @@ fun ActivityCard(
     }
 }
 
-@Preview(showBackground = false)
-@Composable
-fun PreviewActivityCard() {
-    ActivityCard(
-        iconResId = R.drawable.dumbbelliconv5,
-        date = "23 PAŹDZIERNIKA 12:45",
-        activityName = "Skok ze spadochronem",
-        currentParticipants = 21,
-        maxParticipants = 32,
-        location = "Beliny-Prażmowskiego",
-        onClick = { /* akcja na kliknięcie */ }
-    )
-}
+//@Preview(showBackground = false)
+//@Composable
+//fun PreviewActivityCard() {
+//    ActivityCard(
+//        iconResId = R.drawable.dumbbelliconv5,
+//        date = "23 PAŹDZIERNIKA 12:45",
+//        activityName = "Skok ze spadochronem",
+//        currentParticipants = 21,
+//        maxParticipants = 32,
+//        location = "Beliny-Prażmowskiego",
+//        onClick = { /* akcja na kliknięcie */ }
+//    )
+//}

@@ -40,22 +40,12 @@ class CreateEventViewModel : ViewModel() {
         }
     }
 
-
     fun createEvent(event : Event){
-//        val event = Event(
-//            iconResId = iconResId,
-//            date = date,
-//            activityName = activityName,
-//            currentParticipants = currentParticipants,
-//            maxParticipants = maxParticipants,
-//            location = location
-//        )
         val db = Firebase.firestore
         db.collection("events").add(event)
             .addOnSuccessListener { Log.d("CreateEventViewModel", "Event successfully created") }
             .addOnFailureListener { e -> Log.w("CreateEventViewModel", "Error creating event", e) }
         activityList.add(event)
-
     }
     fun fetchEvents() {
         val db = Firebase.firestore
