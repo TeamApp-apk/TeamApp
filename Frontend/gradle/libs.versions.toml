@@ -3,6 +3,7 @@ accompanistNavigationAnimation = "0.31.0-alpha"
 accompanistNavigationAnimationVersion = "<latest_version>"
 agp = "8.5.1"
 constraintlayoutCompose = "1.0.1"
+converterGson = "2.9.0"
 facebookAndroidSdk = "latest.release"
 facebookFacebookAndroidSdkVersion = "[LATEST_VERSION]"
 firebaseAuthVersion = "23.0.0"
@@ -23,6 +24,7 @@ firebaseDatabase = "20.0.5"
 firebaseAnalyticsKtx = "21.0.0"
 googleServices = "4.4.2"
 googleGmsGoogleServices = "4.4.2"
+lifecycleRuntimeKtxVersion = "2.3.1"
 lifecycleViewmodelCompose = "2.8.3"
 materialIconsExtended = "<version>"
 materialIconsExtendedVersion = "1.0.0"
@@ -30,6 +32,7 @@ navigationComposeVersion = "2.5.3"
 navigationRuntimeKtx = "2.7.7"
 firebaseFirestore = "25.0.0"
 playServicesAuth = "21.2.0"
+retrofit = "2.9.0"
 runtime = "1.6.8"
 appcompat = "1.7.0"
 uiTextGoogleFonts = "1.6.8"
@@ -39,6 +42,7 @@ accompanist-navigation-animation-v0300 = { module = "com.google.accompanist:acco
 accompanist-navigation-animation-vversion = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "googleAccompanistNavigationAnimation" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx-v231 = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-material-icons-extended-v100 = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtendedVersion" }
@@ -49,6 +53,7 @@ androidx-runtime = { module = "androidx.compose.runtime:runtime", version.ref = 
 androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtime" }
 androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 com-facebook-android-facebook-android-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookFacebookAndroidSdkVersion" }
+converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 facebook-android-sdk-vlatestrelease = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdk" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
@@ -78,6 +83,7 @@ firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analy
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,8 +1,11 @@
 package com.example.TeamApp.event
 import DescriptionTextField
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Context
+import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,12 +20,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -30,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,21 +48,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import com.example.TeamApp.R
+import com.example.TeamApp.excludedUI.getPlaceSuggestions
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.util.Calendar
 import kotlinx.coroutines.launch
@@ -145,6 +163,8 @@ fun CreateEventv2() {
                             .padding(top = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        MyDateTimePicker()
+                        activityList()
                     }
                 }
             }
@@ -159,74 +179,99 @@ fun CreateEventv2() {
 fun SearchStreetField() {
     var query by remember { mutableStateOf("") }
     var suggestions by remember { mutableStateOf(listOf<String>()) }
+    var expanded by remember { mutableStateOf(false) } // Sterowanie rozwijaniem listy
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // Stylizowane TextField przypominające przycisk
-        OutlinedTextField(
-            value = query,
-            onValueChange = {
-                query = it
-                coroutineScope.launch {
-                    suggestions = getPlaceSuggestions(it)
-                }
-            },
-            label = {
-                Text(
-                    text = "lokalizacja",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center, // Wycentrowanie tekstu
+        Column {
+            // Pole tekstowe
+            TextField(
+                value = query,
+                onValueChange = { newText ->
+                    query = newText
+                    coroutineScope.launch {
+                        suggestions = getPlaceSuggestions(newText)
+                        expanded = suggestions.isNotEmpty() // Rozwijaj listę, gdy są sugestie
+                    }
+                },
+                placeholder = {
+                    Text(
+                        text = "Lokalizacja",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = TextFieldDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    cursorColor = Color.Black,
+                    containerColor = Color.White
+                ),
+                textStyle = TextStyle(fontSize = 16.sp),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
                 )
-            },
-            modifier = Modifier
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),  // Zaokrąglone rogi
-            colors = TextFieldDefaults.outlinedTextFieldColors(
-                focusedBorderColor = Color.Blue, // Kolor obramowania w trakcie focusa
-                unfocusedBorderColor = Color(0xFFFFFFFF), // Kolor obramowania, gdy pole nie jest aktywne
-                cursorColor = Color.Black, // Kolor kursora
-                containerColor = Color(0xFFFFFFFF)
             )
-        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            // DropdownMenu, aby lista rozwijała się pod polem tekstowym
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }, // Zamknięcie menu
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White),
+                properties = PopupProperties(focusable = false)
+            ) {
+                suggestions.forEach { suggestion ->
+                    DropdownMenuItem(
+                        text = { Text(suggestion) },
+                        onClick = {
+                            query = suggestion
+                            expanded = false // Zamknięcie menu po kliknięciu
+                            suggestions = emptyList()
 
-        // LazyColumn do wyświetlania listy sugestii
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            items(suggestions) { suggestion ->
-                SuggestionItem(suggestion)
+                            // Ukrycie klawiatury
+                            (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+                                ?.hideSoftInputFromWindow((context as Activity).currentFocus?.windowToken, 0)
+
+                            focusManager.clearFocus() // Zwolnienie fokusu z TextField
+                        }
+                    )
+                }
             }
         }
     }
 }
 
+
+
 @Composable
-fun SuggestionItem(suggestion: String) {
+fun SuggestionItem(suggestion: String, onSuggestionClick: (String) -> Unit) {
     Text(
         text = suggestion,
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                // Działanie na kliknięcie podpowiedzi (możesz tu dodać nawigację lub inny kod)
-                println("Wybrano: $suggestion")
-            }
+                onSuggestionClick(suggestion)
+            },
+        style = TextStyle(
+            fontSize = 14.sp,
+            color = Color.Black
+        )
     )
 }
 
-suspend fun getPlaceSuggestions(query: String): List<String> {
-    // Tu można zaimplementować logikę pobierania danych z Google Places API
-    // Na razie zwracamy fikcyjne dane
-    return if (query.isNotEmpty()) {
-        listOf("Warszawa, ul. Piękna", "Kraków, ul. Floriańska", "Gdańsk, ul. Długa")
-    } else {
-        emptyList()
-    }
-}
+
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -298,7 +343,10 @@ fun MyDateTimePicker() {
 }
 
 
+@Composable
+fun activityList(){
 
+}
 
 @Preview(showBackground = false)
 @Composable
