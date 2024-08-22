@@ -139,8 +139,8 @@ fun CreateEventScreen(navController: NavController) {
                     if (sport.isNotEmpty() && address.isNotEmpty()  && location.isNotEmpty()) {
                         Log.d("CreateEventScreen", "Valid input")
                         val newEvent = Event(
-                            iconResId = "dumbbelliconv5", // Replace with actual icon resource if available
-                            date = "23 PAŹDZIERNIKA 12:45", // Replace with actual date
+                            iconResId = Event.sportIcons[sport] ?: "",
+                            date = "23 PAŹDZIERNIKA 12:45",
                             activityName = sport,
                             currentParticipants = 0,
                             maxParticipants = limit.toInt(),

@@ -89,7 +89,7 @@ class CreateEventViewModel : ViewModel() {
     }
 
     fun getAvailableSports():List<String>{
-        return Event.SportDiscipline.entries.map { it.name }
+        return Event.sportIcons.keys.toList()
     }
 
 }
