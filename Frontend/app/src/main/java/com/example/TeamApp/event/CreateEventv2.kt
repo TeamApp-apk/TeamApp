@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -54,6 +55,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -70,6 +72,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import com.example.TeamApp.R
+import com.example.TeamApp.data.Event
+import com.example.TeamApp.excludedUI.EventButton
 import com.example.TeamApp.excludedUI.getPlaceSuggestions
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.util.Calendar
@@ -154,18 +158,13 @@ fun CreateEventv2() {
                 )
                 DescriptionTextField(label = "Opisz pokrótce szczegóły wydarzenia...", isEditable = true)
                 Column(
-                    modifier = Modifier.padding(horizontal = 28.dp),
+                    modifier = Modifier.padding(horizontal = 20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
                     SearchStreetField()
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        MyDateTimePicker()
-                        activityList()
-                    }
+                    ButtonsRow()
+                    MyDateTimePicker()
+                    EventButton(text = "Stwórz", onClick = { /*TODO*/ })
                 }
             }
         }
@@ -179,7 +178,7 @@ fun CreateEventv2() {
 fun SearchStreetField() {
     var query by remember { mutableStateOf("") }
     var suggestions by remember { mutableStateOf(listOf<String>()) }
-    var expanded by remember { mutableStateOf(false) } // Sterowanie rozwijaniem listy
+    var expanded by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -187,7 +186,6 @@ fun SearchStreetField() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
     ) {
         Column {
             // Pole tekstowe
@@ -197,18 +195,27 @@ fun SearchStreetField() {
                     query = newText
                     coroutineScope.launch {
                         suggestions = getPlaceSuggestions(newText)
-                        expanded = suggestions.isNotEmpty() // Rozwijaj listę, gdy są sugestie
+                        expanded = suggestions.isNotEmpty()
                     }
                 },
                 placeholder = {
                     Text(
                         text = "Lokalizacja",
                         modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        style = TextStyle(
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily(Font(R.font.robotoregular)),
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Black,
+                            textAlign = TextAlign.Start
+                        )
                     )
                 },
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .height(56.dp),  // Ustawienie jednakowej wysokości
                 shape = RoundedCornerShape(16.dp),
                 colors = TextFieldDefaults.textFieldColors(
                     focusedIndicatorColor = Color.Transparent,
@@ -222,10 +229,9 @@ fun SearchStreetField() {
                 )
             )
 
-            // DropdownMenu, aby lista rozwijała się pod polem tekstowym
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }, // Zamknięcie menu
+                onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White),
@@ -236,14 +242,13 @@ fun SearchStreetField() {
                         text = { Text(suggestion) },
                         onClick = {
                             query = suggestion
-                            expanded = false // Zamknięcie menu po kliknięciu
+                            expanded = false
                             suggestions = emptyList()
 
-                            // Ukrycie klawiatury
                             (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
                                 ?.hideSoftInputFromWindow((context as Activity).currentFocus?.windowToken, 0)
 
-                            focusManager.clearFocus() // Zwolnienie fokusu z TextField
+                            focusManager.clearFocus()
                         }
                     )
                 }
@@ -276,62 +281,55 @@ fun SuggestionItem(suggestion: String, onSuggestionClick: (String) -> Unit) {
 @SuppressLint("DefaultLocale")
 @Composable
 fun MyDateTimePicker() {
-    // Zmienna do przechowywania wybranej daty i godziny
     var selectedDateTime by remember { mutableStateOf("") }
 
-    // Funkcja do otwarcia DatePickerDialog
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
     val day = calendar.get(Calendar.DAY_OF_MONTH)
-
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val minute = calendar.get(Calendar.MINUTE)
 
-    // Zmienna do przechowywania wybranej godziny
     var selectedTime by remember { mutableStateOf("") }
 
-    // TimePickerDialog
     val timePickerDialog = TimePickerDialog(
         LocalContext.current,
         R.style.CustomDatePickerTheme,
         { _, pickedHour, pickedMinute ->
             selectedTime = String.format("%02d:%02d", pickedHour, pickedMinute)
-            // Zaktualizuj datę i godzinę razem
             selectedDateTime += " $selectedTime"
         }, hour, minute, true
     )
 
-    // DatePickerDialog
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
         R.style.CustomTimePickerTheme,
         { _, pickedYear, pickedMonth, pickedDayOfMonth ->
-            // Zaktualizuj zmienną po wyborze daty
             selectedDateTime = "$pickedDayOfMonth/${pickedMonth + 1}/$pickedYear"
-            // Po wyborze daty, otwórz TimePickerDialog
             timePickerDialog.show()
         }, year, month, day
     )
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxWidth()
     ) {
         // Przycisk z dynamicznie zmienianym tekstem
         Button(
             onClick = { datePickerDialog.show() },
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,  // Ustawienie koloru przycisku na biały
-                contentColor = Color.Black      // Ustawienie koloru tekstu na czarny
+                containerColor = Color.White,
+                contentColor = Color.Black
             ), modifier = Modifier
-                .width(280.dp)
-                .height(45.dp)
+                .padding(8.dp)
+                .fillMaxWidth()
+                .height(56.dp)  // Taka sama wysokość jak w SearchStreetField
                 .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
 
         ) {
-            Text(text = if (selectedDateTime.isEmpty()) "Data i godzina" else selectedDateTime,
+            Text(
+                text = if (selectedDateTime.isEmpty()) "Data i godzina" else selectedDateTime,
                 style = TextStyle(
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     lineHeight = 25.sp,
                     fontFamily = FontFamily(Font(R.font.robotoregular)),
                     fontWeight = FontWeight(400),
@@ -344,9 +342,157 @@ fun MyDateTimePicker() {
 
 
 @Composable
-fun activityList(){
+fun ButtonsRow() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        // Sport Dropdown Button
+        SportDropdownButton(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp) // Dystans między przyciskami
+        )
 
+        // Participants Dropdown Button
+        ParticipantsDropdownButton(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp) // Dystans między przyciskami
+        )
+    }
 }
+
+@Composable
+fun SportDropdownButton(modifier: Modifier = Modifier) {
+    var selectedDiscipline by remember { mutableStateOf<Event.SportDiscipline?>(null) }
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = modifier
+            .background(
+                Color.White,
+                shape = RoundedCornerShape(16.dp)
+            ) // Białe tło i zaokrąglone rogi
+            .clickable { expanded = !expanded }
+            .padding(16.dp)
+            .heightIn(min = 28.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = selectedDiscipline?.displayName ?: "aktywność",
+                modifier = Modifier.weight(1f),
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily(Font(R.font.robotoregular)),
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.chevron_down),
+                contentDescription = "Activity Icon",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Event.SportDiscipline.entries.forEach { discipline ->
+            DropdownMenuItem(
+                onClick = {
+                    selectedDiscipline = discipline
+                    expanded = false
+                },
+                text = {
+                    Text(
+                        text = discipline.displayName,
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Start
+                    )
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
+    var selectedPeople by remember { mutableStateOf<Int?>(null) }
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = modifier
+            .background(
+                Color.White,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable { expanded = !expanded }
+            .padding(16.dp)
+            .heightIn(min = 28.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = selectedPeople?.toString() ?: "liczba osób",
+                modifier = Modifier.weight(1f),
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily(Font(R.font.robotoregular)),
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+            )
+
+            Image(
+                painter = painterResource(id = R.drawable.chevron_down),
+                contentDescription = "Chevron Icon",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        (1..22).forEach { peopleCount ->
+            DropdownMenuItem(
+                onClick = {
+                    selectedPeople = peopleCount
+                    expanded = false
+                },
+                text = {
+                    Text(
+                        text = peopleCount.toString(),
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Start
+                    )
+                }
+            )
+        }
+    }
+}
+
+
 
 @Preview(showBackground = false)
 @Composable

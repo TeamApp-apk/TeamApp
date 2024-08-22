@@ -13,7 +13,7 @@ class Event(
 ) {
     constructor() : this("", "", "", 0, 0, "")
 
-//    private val endDate: LocalDate
+    //    private val endDate: LocalDate
     private val participants: MutableList<User> = ArrayList()
 
     companion object {
