@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -51,12 +52,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -91,6 +95,10 @@ fun LoginScreen(navController: NavController){
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
     var snackbarSuccess by remember { mutableStateOf(false) }
+    val emailFocusRequester = remember { FocusRequester() }
+    val passwordFocusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
     LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
         when {
             emailSent != null -> {
@@ -128,6 +136,7 @@ fun LoginScreen(navController: NavController){
     }
     LaunchedEffect(Unit) {
         viewModel.mySetSignInLauncher(launcher)
+        focusManager.clearFocus()
     }
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
@@ -163,9 +172,9 @@ fun LoginScreen(navController: NavController){
                     value = "Witaj ponownie!",
                 )
                 Spacer(modifier = Modifier.height(height * 0.00625f * 8 * density))
-                EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.mail_icon) )
+                EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.mail_icon), nextFocusRequester = passwordFocusRequester, focusRequester = emailFocusRequester )
                 Spacer(modifier = Modifier.height(height * 0.00625f * 6 / density))
-                PasswordTextFieldForLogin(labelValue ="password" , painterResource (id = R.drawable.lock_icon) )
+                PasswordTextFieldForLogin(labelValue ="password" , painterResource (id = R.drawable.lock_icon), nextFocusRequester = null, focusRequester = passwordFocusRequester )
                 Spacer(modifier = Modifier.height(height * 0.00625f * 6 / density))
                 Row(horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
@@ -238,12 +247,14 @@ fun ToggleSwitch(){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmailBoxForLogin(labelValue: String, painterResource: Painter) {
+fun EmailBoxForLogin(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
     val viewModel: LoginViewModel = viewModel()
     val email by viewModel.email.observeAsState("")
+    val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .focusRequester(focusRequester),
         label = { Text(text = labelValue) },
         value = email,
         onValueChange = { newText ->
@@ -252,7 +263,15 @@ fun EmailBoxForLogin(labelValue: String, painterResource: Painter) {
                 viewModel.onEmailChange(newText)
             }
         },
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Text),
+        keyboardOptions = KeyboardOptions(imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done, keyboardType = KeyboardType.Text),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                nextFocusRequester?.requestFocus() ?: focusManager.clearFocus()
+            },
+            onDone = {
+                focusManager.clearFocus()
+            }
+        ),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -270,13 +289,15 @@ fun EmailBoxForLogin(labelValue: String, painterResource: Painter) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordTextFieldForLogin(labelValue: String, painterResource: Painter) {
+fun PasswordTextFieldForLogin(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
     val viewModel: LoginViewModel = viewModel()
     val password by viewModel.password.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .focusRequester(focusRequester),
         label = { Text(text = labelValue) },
         value = password,
         onValueChange = {
@@ -286,7 +307,15 @@ fun PasswordTextFieldForLogin(labelValue: String, painterResource: Painter) {
                 viewModel.onPasswordChanged(newText)
             }
         },
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done, keyboardType = KeyboardType.Password),
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done, keyboardType = KeyboardType.Password),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                nextFocusRequester?.requestFocus() ?: focusManager.clearFocus()
+            },
+            onDone = {
+                focusManager.clearFocus()
+            }
+        ),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,

@@ -124,6 +124,8 @@ fun RegisterScreen(navController: NavController){
     val repeatpasswordFocusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
+
+
     LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
         when {
             emailSent != null -> {
@@ -155,6 +157,8 @@ fun RegisterScreen(navController: NavController){
     }
     LaunchedEffect(Unit) {
         viewModel.mySetSignInLauncher(launcher)
+        focusManager.clearFocus()
+
     }
     SideEffect {
         val window = (context as? Activity)?.window ?: return@SideEffect
@@ -237,6 +241,7 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter, nextFocusReque
     val width = configuration.screenWidthDp.dp
     val focusManager = LocalFocusManager.current
 
+
     TextField(
         modifier = Modifier.fillMaxWidth()
         .height(height * 0.00625f * 8 * density )
@@ -287,9 +292,7 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter, nextFocusReque
         },
         shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f))
     )
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -359,9 +362,6 @@ fun PasswordTextField(labelValue: String, painterResource: Painter, nextFocusReq
         },
         visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
     )
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -429,9 +429,6 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
         },
         visualTransformation = if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
     )
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
 }
 
 @Composable
