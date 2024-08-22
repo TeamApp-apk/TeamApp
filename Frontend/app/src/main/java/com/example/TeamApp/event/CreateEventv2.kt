@@ -5,9 +5,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,8 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,9 +33,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import com.example.TeamApp.R
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.util.Calendar
+import kotlinx.coroutines.launch
 
 @Composable
 fun CreateEventv2() {
@@ -137,12 +139,12 @@ fun CreateEventv2() {
                     modifier = Modifier.padding(horizontal = 28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
+                    SearchStreetField()
                     Row(
                         modifier = Modifier
                             .padding(top = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-
                     }
                 }
             }
@@ -150,11 +152,82 @@ fun CreateEventv2() {
     }
 }
 
-@Preview(showBackground = false)
+
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateEventv2Preview() {
-    MyDateTimePicker()
+fun SearchStreetField() {
+    var query by remember { mutableStateOf("") }
+    var suggestions by remember { mutableStateOf(listOf<String>()) }
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        // Stylizowane TextField przypominające przycisk
+        OutlinedTextField(
+            value = query,
+            onValueChange = {
+                query = it
+                coroutineScope.launch {
+                    suggestions = getPlaceSuggestions(it)
+                }
+            },
+            label = {
+                Text(
+                    text = "lokalizacja",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center, // Wycentrowanie tekstu
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),  // Zaokrąglone rogi
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color.Blue, // Kolor obramowania w trakcie focusa
+                unfocusedBorderColor = Color(0xFFFFFFFF), // Kolor obramowania, gdy pole nie jest aktywne
+                cursorColor = Color.Black, // Kolor kursora
+                containerColor = Color(0xFFFFFFFF)
+            )
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // LazyColumn do wyświetlania listy sugestii
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            items(suggestions) { suggestion ->
+                SuggestionItem(suggestion)
+            }
+        }
+    }
 }
+
+@Composable
+fun SuggestionItem(suggestion: String) {
+    Text(
+        text = suggestion,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable {
+                // Działanie na kliknięcie podpowiedzi (możesz tu dodać nawigację lub inny kod)
+                println("Wybrano: $suggestion")
+            }
+    )
+}
+
+suspend fun getPlaceSuggestions(query: String): List<String> {
+    // Tu można zaimplementować logikę pobierania danych z Google Places API
+    // Na razie zwracamy fikcyjne dane
+    return if (query.isNotEmpty()) {
+        listOf("Warszawa, ul. Piękna", "Kraków, ul. Floriańska", "Gdańsk, ul. Długa")
+    } else {
+        emptyList()
+    }
+}
+
 @SuppressLint("DefaultLocale")
 @Composable
 fun MyDateTimePicker() {
@@ -210,7 +283,7 @@ fun MyDateTimePicker() {
                 .height(45.dp)
                 .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
 
-                ) {
+        ) {
             Text(text = if (selectedDateTime.isEmpty()) "Data i godzina" else selectedDateTime,
                 style = TextStyle(
                     fontSize = 12.sp,
@@ -218,13 +291,20 @@ fun MyDateTimePicker() {
                     fontFamily = FontFamily(Font(R.font.robotoregular)),
                     fontWeight = FontWeight(400),
                     color = Color.Black,
-
-                    ))
+                )
+            )
         }
     }
 }
 
 
+
+
+@Preview(showBackground = false)
+@Composable
+fun CreateEventv2Preview() {
+    CreateEventv2()
+}
 
 
 
