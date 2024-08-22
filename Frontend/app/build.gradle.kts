@@ -119,4 +119,13 @@ dependencies {
     //fonts
     implementation(libs.androidx.ui.text.google.fonts)
 
+    //Google localization services
+    implementation ("com.google.android.libraries.places:places:3.5.0")
+    implementation ("androidx.compose.ui:ui:1.6.8")
+    implementation ("androidx.compose.material:material:1.6.8")
+    implementation ("androidx.compose.ui:ui-tooling:1.6.8")
+    implementation (libs.androidx.lifecycle.runtime.ktx.v231)
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+
 }
