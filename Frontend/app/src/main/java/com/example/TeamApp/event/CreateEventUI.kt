@@ -10,14 +10,11 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.TeamApp.R
 import com.example.TeamApp.data.Event
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,11 +80,10 @@ fun CreateEventScreen(navController: NavController) {
             TextField(
                 value = address,
                 onValueChange = { newText ->
-                    if (allowedCharsRegex.matches(newText))
-                    {
+                    if (allowedCharsRegex.matches(newText)) {
                         viewModel.onAddressChange(newText)
                     }
-                     },
+                },
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done,
                     keyboardType = KeyboardType.Password
@@ -102,11 +98,10 @@ fun CreateEventScreen(navController: NavController) {
                 value = limit,
                 onValueChange = { newText ->
                     val numberRegex = Regex("^[0-9]*\$")
-                    if (numberRegex.matches(newText))
-                    {
+                    if (numberRegex.matches(newText)) {
                         viewModel.onLimitChange(newText)
                     }
-                                },
+                },
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done,
                     keyboardType = KeyboardType.Text
@@ -118,10 +113,8 @@ fun CreateEventScreen(navController: NavController) {
             )
             TextField(
                 value = description,
-                onValueChange = {
-                        newText ->
-                    if (allowedCharsRegex.matches(newText))
-                    {
+                onValueChange = { newText ->
+                    if (allowedCharsRegex.matches(newText)) {
                         viewModel.onDescriptionChange(newText)
                     } },
                 label = { Text("Description") },
