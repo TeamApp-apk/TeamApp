@@ -1,5 +1,8 @@
 package com.example.TeamApp.event
 import DescriptionTextField
+import android.annotation.SuppressLint
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -49,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.TeamApp.R
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import java.util.Calendar
 
 @Composable
 fun CreateEventv2() {
@@ -148,8 +153,77 @@ fun CreateEventv2() {
 @Preview(showBackground = false)
 @Composable
 fun CreateEventv2Preview() {
-    CreateEventv2()
+    MyDateTimePicker()
 }
+@SuppressLint("DefaultLocale")
+@Composable
+fun MyDateTimePicker() {
+    // Zmienna do przechowywania wybranej daty i godziny
+    var selectedDateTime by remember { mutableStateOf("") }
+
+    // Funkcja do otwarcia DatePickerDialog
+    val calendar = Calendar.getInstance()
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+    val minute = calendar.get(Calendar.MINUTE)
+
+    // Zmienna do przechowywania wybranej godziny
+    var selectedTime by remember { mutableStateOf("") }
+
+    // TimePickerDialog
+    val timePickerDialog = TimePickerDialog(
+        LocalContext.current,
+        R.style.CustomDatePickerTheme,
+        { _, pickedHour, pickedMinute ->
+            selectedTime = String.format("%02d:%02d", pickedHour, pickedMinute)
+            // Zaktualizuj datę i godzinę razem
+            selectedDateTime += " $selectedTime"
+        }, hour, minute, true
+    )
+
+    // DatePickerDialog
+    val datePickerDialog = DatePickerDialog(
+        LocalContext.current,
+        R.style.CustomTimePickerTheme,
+        { _, pickedYear, pickedMonth, pickedDayOfMonth ->
+            // Zaktualizuj zmienną po wyborze daty
+            selectedDateTime = "$pickedDayOfMonth/${pickedMonth + 1}/$pickedYear"
+            // Po wyborze daty, otwórz TimePickerDialog
+            timePickerDialog.show()
+        }, year, month, day
+    )
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // Przycisk z dynamicznie zmienianym tekstem
+        Button(
+            onClick = { datePickerDialog.show() },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,  // Ustawienie koloru przycisku na biały
+                contentColor = Color.Black      // Ustawienie koloru tekstu na czarny
+            ), modifier = Modifier
+                .width(280.dp)
+                .height(45.dp)
+                .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
+
+                ) {
+            Text(text = if (selectedDateTime.isEmpty()) "Data i godzina" else selectedDateTime,
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    lineHeight = 25.sp,
+                    fontFamily = FontFamily(Font(R.font.robotoregular)),
+                    fontWeight = FontWeight(400),
+                    color = Color.Black,
+
+                    ))
+        }
+    }
+}
+
 
 
 
