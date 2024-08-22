@@ -38,7 +38,6 @@ fun DescriptionTextField(
             .padding(vertical = 8.dp)
     ) {
         if (isEditable) {
-            // Użyj BasicTextField z logiką ograniczenia liczby linii
             BasicTextField(
                 value = text,
                 onValueChange = { newText ->

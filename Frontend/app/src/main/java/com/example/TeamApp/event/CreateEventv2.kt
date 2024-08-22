@@ -42,6 +42,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -71,6 +72,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.excludedUI.EventButton
@@ -207,7 +209,7 @@ fun SearchStreetField() {
                             fontSize = 14.sp,
                             fontFamily = FontFamily(Font(R.font.robotoregular)),
                             fontWeight = FontWeight.Medium,
-                            color = Color.Black,
+                            color = Color.Gray,
                             textAlign = TextAlign.Start
                         )
                     )
@@ -333,7 +335,7 @@ fun MyDateTimePicker() {
                     lineHeight = 25.sp,
                     fontFamily = FontFamily(Font(R.font.robotoregular)),
                     fontWeight = FontWeight(400),
-                    color = Color.Black,
+                    color = Color.Gray,
                 )
             )
         }
@@ -366,8 +368,10 @@ fun ButtonsRow() {
 
 @Composable
 fun SportDropdownButton(modifier: Modifier = Modifier) {
-    var selectedDiscipline by remember { mutableStateOf<Event.SportDiscipline?>(null) }
+    val viewModel: CreateEventViewModel = viewModel()
+    val availableSports = viewModel.getAvailableSports()
     var expanded by remember { mutableStateOf(false) }
+    val sport by viewModel.sport.observeAsState("")
 
     Box(
         modifier = modifier
@@ -385,13 +389,13 @@ fun SportDropdownButton(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = selectedDiscipline?.displayName ?: "aktywność",
+                text = if(sport.isEmpty())"Aktynowść" else sport,
                 modifier = Modifier.weight(1f),
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontFamily = FontFamily(Font(R.font.robotoregular)),
                     fontWeight = FontWeight.Medium,
-                    color = Color.Black,
+                    color = Color.Gray,
                     textAlign = TextAlign.Center
                 )
             )
@@ -410,18 +414,12 @@ fun SportDropdownButton(modifier: Modifier = Modifier) {
         onDismissRequest = { expanded = false },
         modifier = Modifier.fillMaxWidth()
     ) {
-        Event.SportDiscipline.entries.forEach { discipline ->
+        availableSports.forEach { sport ->
             DropdownMenuItem(
+                text = { Text(sport) },
                 onClick = {
-                    selectedDiscipline = discipline
+                    viewModel.onSportChange(sport)
                     expanded = false
-                },
-                text = {
-                    Text(
-                        text = discipline.displayName,
-                        fontSize = 18.sp,
-                        textAlign = TextAlign.Start
-                    )
                 }
             )
         }
@@ -455,7 +453,7 @@ fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
                     fontSize = 14.sp,
                     fontFamily = FontFamily(Font(R.font.robotoregular)),
                     fontWeight = FontWeight.Medium,
-                    color = Color.Black,
+                    color = Color.Gray,
                     textAlign = TextAlign.Center
                 )
             )
