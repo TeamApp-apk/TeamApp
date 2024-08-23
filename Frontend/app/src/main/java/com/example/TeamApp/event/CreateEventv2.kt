@@ -412,6 +412,7 @@ fun SearchStreetField() {
                         text = { Text(suggestion) },
                         onClick = {
                             query = suggestion
+                            viewModel.onAddressChange(suggestion)
                             expanded = false
                             suggestions = emptyList()
 

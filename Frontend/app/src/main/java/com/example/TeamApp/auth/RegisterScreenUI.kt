@@ -248,7 +248,6 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter, nextFocusReque
         .focusRequester(focusRequester),
         label = { Text(
             text = labelValue,
-            style = textInBoxes
             ) },
         value = if (labelValue == "E-mail") email else textValue.value,
         onValueChange = {
@@ -313,7 +312,6 @@ fun PasswordTextField(labelValue: String, painterResource: Painter, nextFocusReq
         .focusRequester(focusRequester),
         label = { Text(
             text = labelValue,
-            style = textInBoxes
         ) },
         value = password,
         onValueChange = { newText ->
@@ -381,7 +379,6 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
             .focusRequester(focusRequester),
         label = { Text(
             text = labelValue,
-            style = textInBoxes
         ) },
         value = confirmPassword,
         onValueChange = { newText ->
