@@ -46,12 +46,15 @@ import com.example.TeamApp.R
 import com.example.TeamApp.excludedUI.ActivityCard
 import com.example.TeamApp.event.CreateEventViewModel
 import kotlinx.coroutines.delay
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun SearchScreen(navController: NavController) {
     val viewModel: CreateEventViewModel = viewModel()
     val activityList = viewModel.activityList
     var showEmptyMessage by remember { mutableStateOf(false) }
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+
 
     LaunchedEffect(activityList) {
         Log.d("ScreenThrough", "weszlo")
@@ -60,7 +63,6 @@ fun SearchScreen(navController: NavController) {
             delay(2000) // Opóźnienie 2 sekundy przed sprawdzeniem
             showEmptyMessage = activityList.isEmpty()
         }
-
     }
 
     val gradientColors = listOf(
@@ -68,17 +70,20 @@ fun SearchScreen(navController: NavController) {
         Color(0xFF007BFF)
     )
 
-    Surface(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(brush = Brush.linearGradient(colors = gradientColors))
+            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(bottom = 60.dp)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(brush = Brush.linearGradient(colors = gradientColors))
-                .padding(horizontal = 20.dp)
-                .padding(vertical = 16.dp)
         ) {
             Row(
                 modifier = Modifier
-                    .width(320.dp)
+                    .fillMaxWidth() // Ensure the Row fills the maximum width
                     .height(90.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
                 verticalAlignment = Alignment.CenterVertically,
@@ -88,15 +93,17 @@ fun SearchScreen(navController: NavController) {
 
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(600.dp),  // You can adjust the height to your preference
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                    .fillMaxWidth() 
+                    .weight(1f)
+                    .padding(0.dp)
             ) {
                 when {
                     showEmptyMessage -> {
                         item {
                             Box(
-                                modifier = Modifier.fillParentMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 20.dp), // Ensure the Box fills the available size and has the same horizontal padding
                                 contentAlignment = Alignment.Center
                             ) {
                                 NoCurrentActivitiesBar()
@@ -107,7 +114,7 @@ fun SearchScreen(navController: NavController) {
                         items(activityList) { activity ->
                             ActivityCard(
                                 iconResId = activity.iconResId,
-                                date = activity.date.toString(),
+                                date = activity.date,
                                 activityName = activity.activityName,
                                 currentParticipants = activity.currentParticipants,
                                 maxParticipants = activity.maxParticipants,
@@ -119,17 +126,15 @@ fun SearchScreen(navController: NavController) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(60.dp)) // Add spacing before the bottom bar
 
-            Box(
-                contentAlignment = Alignment.BottomCenter,
-                modifier = Modifier.fillMaxWidth() // Upewnij się, że pasek jest na dole i zajmuje całą szerokość
-            ) {
-                BarOnTheBottom(navController)
-            }
+            // BarOnTheBottom
+            BarOnTheBottom(navController)
         }
     }
 }
+
+
 
 @Composable
 @Preview(showBackground = false)

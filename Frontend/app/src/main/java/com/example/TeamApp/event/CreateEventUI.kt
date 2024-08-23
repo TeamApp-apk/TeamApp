@@ -19,7 +19,7 @@ import com.example.TeamApp.data.Event
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateEventScreen(navController: NavController) {
+fun CreateEventScreen1(navController: NavController) {
     val viewModel: CreateEventViewModel = viewModel()
     val sport by viewModel.sport.observeAsState("")
     val address by viewModel.location.observeAsState("")
@@ -28,7 +28,7 @@ fun CreateEventScreen(navController: NavController) {
     val availableSports = viewModel.getAvailableSports()
     val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
     val location by viewModel.location.observeAsState("")
-    val date by viewModel.date.observeAsState("")
+    val date by viewModel.dateTime.observeAsState("")
 
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
@@ -138,15 +138,15 @@ fun CreateEventScreen(navController: NavController) {
                     Log.e("CreateEventScreen", "Location: $location")
                     if (sport.isNotEmpty() && address.isNotEmpty()  && location.isNotEmpty()) {
                         Log.d("CreateEventScreen", "Valid input")
-                        val newEvent = Event(
-                            iconResId = Event.sportIcons[sport] ?: "",
-                            date = "23 PAŹDZIERNIKA 12:45",
-                            activityName = sport,
-                            currentParticipants = 0,
-                            maxParticipants = limit.toInt(),
-                            location = location
-                        )
-                        viewModel.createEvent(newEvent)
+//                        val newEvent = Event(
+//                            iconResId = Event.sportIcons[sport] ?: "",
+//                            date = date,
+//                            activityName = sport,
+//                            currentParticipants = 0,
+//                            maxParticipants = limit.toInt(),
+//                            location = location
+//                        )
+                        //viewModel.createEvent(newEvent)
                         snackbarMessage = "Event created successfully!"
                         showSnackbar = true
                     } else {

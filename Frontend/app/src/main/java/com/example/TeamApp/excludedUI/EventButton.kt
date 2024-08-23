@@ -29,10 +29,10 @@ fun EventButton(
     Button(
         onClick = onClick,
         modifier = Modifier
-            .padding(8.dp)
+            .padding(vertical = 20.dp, horizontal = 0.dp)
             .fillMaxWidth()
             .height(56.dp)  // Taka sama wysokość jak w SearchStreetField
-            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(size = 16.dp)),
+            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(size = 70.dp)),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF007BFF), // Kolor tła przycisku
             contentColor = Color.White // Kolor tekstu przycisku

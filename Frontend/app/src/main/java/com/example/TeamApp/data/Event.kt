@@ -1,9 +1,10 @@
 package com.example.TeamApp.data
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 
-class Event(
+data class Event(
     val iconResId: String = "",
     val date: String = "",
     val activityName: String = "",

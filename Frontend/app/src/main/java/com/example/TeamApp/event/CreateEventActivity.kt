@@ -45,7 +45,7 @@ class CreateEventActivity : ComponentActivity() {
                     ) + fadeOut(animationSpec = tween(1000))
                 }
             ) {
-                composable("createEvent") { CreateEventScreen(navController) }
+                composable("createEvent") { CreateEventScreen1(navController) }
                 composable("register") { RegisterScreen(navController) }
                 composable("profile") { ProfileScreen(navController) }
                 composable("settings") { SettingsScreen(navController) }

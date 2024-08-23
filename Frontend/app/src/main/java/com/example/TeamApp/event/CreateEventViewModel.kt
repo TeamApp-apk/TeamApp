@@ -10,6 +10,7 @@ import androidx.navigation.NavController
 import com.example.TeamApp.data.Event
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import java.time.LocalDateTime
 
 
 class CreateEventViewModel : ViewModel() {
@@ -20,8 +21,8 @@ class CreateEventViewModel : ViewModel() {
     private val _location = MutableLiveData<String>()
     val location: LiveData<String> get() = _location
 
-    private val _date = MutableLiveData<String>()
-    val date: LiveData<String> get() = _date
+    private val _dateTime = MutableLiveData<String>()
+    val dateTime: LiveData<String> = _dateTime
 
     private val _description = MutableLiveData<String>()
     val description: LiveData<String> get() = _description
@@ -78,6 +79,10 @@ class CreateEventViewModel : ViewModel() {
 
     fun onAddressChange(newAddress: String) {
         _location.value = newAddress
+    }
+
+    fun onDateChange(newDate: String) {
+        _dateTime.value = newDate
     }
 
     fun onLimitChange(newLimit: String) {

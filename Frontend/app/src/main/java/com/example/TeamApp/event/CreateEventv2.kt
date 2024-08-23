@@ -1,13 +1,16 @@
 package com.example.TeamApp.event
+import BarOnTheBottom
 import DescriptionTextField
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,6 +52,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusModifier
@@ -59,6 +63,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -68,11 +73,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.excludedUI.EventButton
@@ -80,96 +88,249 @@ import com.example.TeamApp.excludedUI.getPlaceSuggestions
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.util.Calendar
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @Composable
-fun CreateEventv2() {
+fun CreateEventScreen(navController: NavController) {
+    val viewModel: CreateEventViewModel = viewModel()
+    val sport by viewModel.sport.observeAsState("")
+    val address by viewModel.location.observeAsState("")
+    val limit by viewModel.limit.observeAsState("")
+    val description by viewModel.description.observeAsState("")
+    val availableSports = viewModel.getAvailableSports()
+    val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+    val location by viewModel.location.observeAsState("")
+    val dateTime by viewModel.dateTime.observeAsState("")
+
+    var showSnackbar by remember { mutableStateOf(false) }
+    var snackbarMessage by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF)
     )
+    var showDialog by remember { mutableStateOf(false) }
 
-    // Outer Box filling the whole screen with gradient background
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(brush = Brush.linearGradient(colors = gradientColors))
-            .padding(horizontal = 12.dp, vertical = 36.dp),
-        contentAlignment = Alignment.Center // Centering the content
+            .padding(horizontal = 20.dp, vertical = 60.dp)
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = "Stwórz wydarzenie",
+                style = TextStyle(
+                    fontSize = 26.sp,
+                    fontFamily = FontFamily(Font(R.font.robotobold)),
+                    fontWeight = FontWeight(900),
+                    color = Color(0xFF003366),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 25.sp,
+                ),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 30.dp))
+                    .padding(bottom = 16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .background(
+                            color = Color(0xFFF2F2F2),
+                            shape = RoundedCornerShape(size = 16.dp)
+                        ),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    DescriptionInputField(
+                        description = description,
+                        onEditClick = { showDialog = true }
+                    )
+
+                    Column(
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        SearchStreetField()
+                        ButtonsColumn()
+                        MyDateTimePicker(onDateChange = { newDate -> viewModel.onDateChange(newDate) })
+                        Spacer(modifier = Modifier.height(25.dp))
+                        EventButton(text = "Stwórz", onClick = {
+                            Log.d("CreateEventScreen", "Submit button clicked")
+                            val participantLimit = limit.toIntOrNull()
+                            Log.e("CreateEventScreen", "Participant limit: $participantLimit")
+                            Log.e("CreateEventScreen", "Sport: $sport")
+                            Log.e("CreateEventScreen", "Address: $address")
+                            Log.e("CreateEventScreen", "Date: $dateTime")
+                            Log.e("CreateEventScreen", "Location: $location")
+                            if (sport.isNotEmpty() && address.isNotEmpty()  && location.isNotEmpty()) {
+                                Log.d("CreateEventScreen", "Valid input")
+                                val newEvent = Event(
+                                    iconResId = Event.sportIcons[sport] ?: "",
+                                    date = dateTime,
+                                    activityName = sport,
+                                    currentParticipants = 0,
+                                    maxParticipants = limit.toInt(),
+                                    location = location
+                                )
+                                viewModel.createEvent(newEvent)
+                                snackbarMessage = "Event created successfully!"
+                                showSnackbar = true
+                            } else {
+                                snackbarMessage = "Please fill all required fields correctly."
+                                showSnackbar = true
+                            }
+
+                        })
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            BarOnTheBottom(navController)
+        }
+    }
+
+    if (showDialog) {
+        DescriptionDialog(
+            initialText = description,
+            onDismiss = { showDialog = false },
+            onSave = { newText ->
+                viewModel.onDescriptionChange(newText)
+                showDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+fun DescriptionInputField(
+    description: String,
+    onEditClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 27.dp, vertical = 8.dp)
+            .height(56.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                color = Color.White,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable(onClick = onEditClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = if (description.isEmpty()) "Dodaj opis" else description,
+            textAlign = TextAlign.Center,
+            style = TextStyle(
+                color = if (description.isEmpty()) Color.Gray else Color.Black,
+                fontSize = 16.sp
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DescriptionDialog(
+    initialText: String,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
+) {
+    val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+    var text by remember { mutableStateOf(initialText) }
+    val viewModel: CreateEventViewModel = viewModel()
+
+    // Create a FocusRequester to request focus on the TextField
+    val focusRequester = remember { FocusRequester() }
+
+    // Get the keyboard controller
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxSize()
-                .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 16.dp))
+                .background(Color.White, shape = RoundedCornerShape(16.dp))
+                .padding(16.dp)
         ) {
-            // Inner Box centered with specific dimensions and background color
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxSize()
-                    .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 10.dp)
-                    .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 16.dp)),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ){
-                Row(
-                    verticalAlignment = Alignment.CenterVertically, // Ensures vertical alignment of icon and text
-                    horizontalArrangement = Arrangement.SpaceBetween, // Keeps everything aligned to the left
+            Column {
+                Text(
+                    text = "Opisz pokrótce szczegóły wydarzenia...",
+                    style = TextStyle(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth() // Makes the Row take up full width
-                        .padding(bottom = 24.dp)
-
+                        .fillMaxWidth()
+                        .background(
+                            Color.White,
+                            shape = RoundedCornerShape(8.dp)
+                        ) // Ensure the background is white
+                        .padding(horizontal = 8.dp) // Add some padding inside the TextField
                 ) {
-                        IconButton(
-                            onClick = { /* Handle back click */ },
-                            modifier = Modifier
-                            .size(26.dp),// Set size for the icon
-                        ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.arrowleft),
-                            contentDescription = "Back Icon"
-                        ) }
-
-                    Text(
-                        text = "Stwórz wydarzenie",
-                        style = TextStyle(
-                            fontSize = 22.sp,
-                            fontFamily = FontFamily(Font(R.font.robotobold)),
-                            fontWeight = FontWeight(900),
-                            color = Color(0xFF003366),
-                            textAlign = TextAlign.Start, // Align text to the start
-                            lineHeight = 25.sp,
-                        ),
+                    TextField(
+                        value = text,
+                        onValueChange = { newText -> text = newText },
                         modifier = Modifier
-                            .align(Alignment.CenterVertically) // Ensure text is vertically aligned with icon
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester), // Attach FocusRequester to the TextField
+                        shape = RoundedCornerShape(16.dp),
+                        colors = TextFieldDefaults.textFieldColors(
+                            focusedIndicatorColor = Color.Transparent, // No underline when focused
+                            unfocusedIndicatorColor = Color.Transparent // No underline when unfocused
+                        )
                     )
                 }
-                Spacer(modifier = Modifier.height(20.dp))
-                Text(modifier = Modifier
-                    .width(328.dp)
-                    .height(20.dp)
-                    .padding(horizontal = 16.dp)
-                    ,
-                    text = "Dodaj opis",
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        lineHeight = 12.sp,
-                        fontFamily = FontFamily(Font(R.font.robotobold)),
-                        fontWeight = FontWeight(800),
-                        color = Color(0xFF003366),
-                    )
-                )
-                DescriptionTextField(label = "Opisz pokrótce szczegóły wydarzenia...", isEditable = true)
-                Column(
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ){
-                    SearchStreetField()
-                    ButtonsRow()
-                    MyDateTimePicker()
-                    EventButton(text = "Stwórz", onClick = { /*TODO*/ })
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Button(onClick = onDismiss) {
+                        Text("Anuluj")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = {
+                        viewModel.onDescriptionChange(text)
+                        onSave(text)
+                    }) {
+                        Text("Zapisz")
+                    }
                 }
             }
         }
+    }
+    // Automatically focus the TextField and show the keyboard when the dialog is opened
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+        keyboardController?.show()
     }
 }
 
@@ -184,6 +345,7 @@ fun SearchStreetField() {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+    val viewModel:CreateEventViewModel = viewModel()
 
     Box(
         modifier = Modifier
@@ -194,7 +356,12 @@ fun SearchStreetField() {
             TextField(
                 value = query,
                 onValueChange = { newText ->
+                    // Aktualizacja query
                     query = newText
+
+                    // Wywołanie onAddressChange z nowym tekstem
+                    viewModel.onAddressChange(newText)
+                    // Uruchomienie coroutineScope dla uzyskania sugestii
                     coroutineScope.launch {
                         suggestions = getPlaceSuggestions(newText)
                         expanded = suggestions.isNotEmpty()
@@ -206,7 +373,7 @@ fun SearchStreetField() {
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
                         style = TextStyle(
-                            fontSize = 14.sp,
+                            fontSize = 16.sp,
                             fontFamily = FontFamily(Font(R.font.robotoregular)),
                             fontWeight = FontWeight.Medium,
                             color = Color.Gray,
@@ -272,7 +439,7 @@ fun SuggestionItem(suggestion: String, onSuggestionClick: (String) -> Unit) {
                 onSuggestionClick(suggestion)
             },
         style = TextStyle(
-            fontSize = 14.sp,
+            fontSize = 16.sp,
             color = Color.Black
         )
     )
@@ -282,9 +449,8 @@ fun SuggestionItem(suggestion: String, onSuggestionClick: (String) -> Unit) {
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun MyDateTimePicker() {
+fun MyDateTimePicker(onDateChange: (String) -> Unit) {
     var selectedDateTime by remember { mutableStateOf("") }
-
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
@@ -292,50 +458,52 @@ fun MyDateTimePicker() {
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val minute = calendar.get(Calendar.MINUTE)
 
-    var selectedTime by remember { mutableStateOf("") }
-
     val timePickerDialog = TimePickerDialog(
         LocalContext.current,
         R.style.CustomDatePickerTheme,
         { _, pickedHour, pickedMinute ->
-            selectedTime = String.format("%02d:%02d", pickedHour, pickedMinute)
-            selectedDateTime += " $selectedTime"
-        }, hour, minute, true
+            val dateTime = LocalDateTime.of(year, month + 1, day, pickedHour, pickedMinute)
+            val formattedDateTime = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+            selectedDateTime = formattedDateTime
+            onDateChange(formattedDateTime) // Pass formatted string to onDateChange
+        },
+        hour, minute, true
     )
 
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
         R.style.CustomTimePickerTheme,
         { _, pickedYear, pickedMonth, pickedDayOfMonth ->
+            calendar.set(pickedYear, pickedMonth, pickedDayOfMonth)
             selectedDateTime = "$pickedDayOfMonth/${pickedMonth + 1}/$pickedYear"
             timePickerDialog.show()
-        }, year, month, day
+        },
+        year, month, day
     )
 
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        // Przycisk z dynamicznie zmienianym tekstem
         Button(
             onClick = { datePickerDialog.show() },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White,
                 contentColor = Color.Black
-            ), modifier = Modifier
+            ),
+            modifier = Modifier
                 .padding(8.dp)
                 .fillMaxWidth()
-                .height(56.dp)  // Taka sama wysokość jak w SearchStreetField
+                .height(56.dp)
                 .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
-
         ) {
             Text(
                 text = if (selectedDateTime.isEmpty()) "Data i godzina" else selectedDateTime,
                 style = TextStyle(
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     lineHeight = 25.sp,
                     fontFamily = FontFamily(Font(R.font.robotoregular)),
                     fontWeight = FontWeight(400),
-                    color = Color.Gray,
+                    color = Color.Gray
                 )
             )
         }
@@ -343,9 +511,10 @@ fun MyDateTimePicker() {
 }
 
 
+
 @Composable
-fun ButtonsRow() {
-    Row(
+fun ButtonsColumn() {  // Zmieniłem nazwę na ButtonsColumn, bo teraz to będzie kolumna
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
@@ -353,18 +522,19 @@ fun ButtonsRow() {
         // Sport Dropdown Button
         SportDropdownButton(
             modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp) // Dystans między przyciskami
+                .fillMaxWidth()
+                .padding(bottom = 8.dp) // Dystans między przyciskami
         )
 
         // Participants Dropdown Button
         ParticipantsDropdownButton(
             modifier = Modifier
-                .weight(1f)
-                .padding(start = 8.dp) // Dystans między przyciskami
+                .fillMaxWidth()
+                .padding(top = 8.dp) // Dystans między przyciskami
         )
     }
 }
+
 
 @Composable
 fun SportDropdownButton(modifier: Modifier = Modifier) {
@@ -389,15 +559,19 @@ fun SportDropdownButton(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = if(sport.isEmpty())"Aktynowść" else sport,
-                modifier = Modifier.weight(1f),
+                text = if (sport.isEmpty()) "Dyscyplina" else sport,
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentSize(Alignment.Center), // Dostosowuje rozmiar do treści
                 style = TextStyle(
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     fontFamily = FontFamily(Font(R.font.robotoregular)),
                     fontWeight = FontWeight.Medium,
                     color = Color.Gray,
                     textAlign = TextAlign.Center
-                )
+                ),
+                maxLines = 1, // Zapewnia, że tekst nie będzie się łamał
+                overflow = TextOverflow.Ellipsis // Dodaje „...” jeśli tekst jest za długi
             )
 
             Image(
@@ -430,6 +604,7 @@ fun SportDropdownButton(modifier: Modifier = Modifier) {
 fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
     var selectedPeople by remember { mutableStateOf<Int?>(null) }
     var expanded by remember { mutableStateOf(false) }
+    val viewModel:CreateEventViewModel = viewModel()
 
     Box(
         modifier = modifier
@@ -447,10 +622,10 @@ fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = selectedPeople?.toString() ?: "liczba osób",
+                text = selectedPeople?.toString() ?: "Liczba uczestników",
                 modifier = Modifier.weight(1f),
                 style = TextStyle(
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     fontFamily = FontFamily(Font(R.font.robotoregular)),
                     fontWeight = FontWeight.Medium,
                     color = Color.Gray,
@@ -476,6 +651,7 @@ fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
             DropdownMenuItem(
                 onClick = {
                     selectedPeople = peopleCount
+                    viewModel.onLimitChange(peopleCount.toString())
                     expanded = false
                 },
                 text = {
@@ -492,11 +668,11 @@ fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
 
 
 
-@Preview(showBackground = false)
-@Composable
-fun CreateEventv2Preview() {
-    CreateEventv2()
-}
+//@Preview(showBackground = false)
+//@Composable
+//fun CreateEventv2Preview() {
+//    CreateEventv2()
+//}
 
 
 

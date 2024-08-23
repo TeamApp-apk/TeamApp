@@ -1,7 +1,7 @@
 [versions]
 accompanistNavigationAnimation = "0.31.0-alpha"
 accompanistNavigationAnimationVersion = "<latest_version>"
-agp = "8.5.1"
+agp = "8.5.2"
 constraintlayoutCompose = "1.0.1"
 converterGson = "2.9.0"
 facebookAndroidSdk = "latest.release"

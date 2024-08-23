@@ -24,12 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventActivity
-import com.example.TeamApp.event.CreateEventScreen
+import com.example.TeamApp.event.CreateEventScreen1
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -101,7 +99,7 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
                 ){
                     composable("register") { RegisterScreen(navController) }
                     composable("login") { LoginScreen(navController) }
-                    composable("createEvent") { CreateEventScreen(navController) }
+                    composable("createEvent") { CreateEventScreen1(navController) }
                     composable("forgotPassword") { ForgotPasswordScreen(navController) }
                 }
             }

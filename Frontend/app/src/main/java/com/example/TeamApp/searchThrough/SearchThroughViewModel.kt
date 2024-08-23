@@ -32,4 +32,6 @@ class SearchThroughViewModel : ViewModel(){
             popUpTo("searchThrough"){inclusive = true}
         }
     }
+
+
 }
