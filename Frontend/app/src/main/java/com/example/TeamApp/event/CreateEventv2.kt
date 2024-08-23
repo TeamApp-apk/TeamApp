@@ -91,6 +91,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun CreateEventScreen(navController: NavController) {
@@ -462,10 +463,16 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
         LocalContext.current,
         R.style.CustomDatePickerTheme,
         { _, pickedHour, pickedMinute ->
-            val dateTime = LocalDateTime.of(year, month + 1, day, pickedHour, pickedMinute)
-            val formattedDateTime = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
-            selectedDateTime = formattedDateTime
-            onDateChange(formattedDateTime) // Pass formatted string to onDateChange
+            val pickedDateTime = LocalDateTime.of(
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH) + 1,
+                calendar.get(Calendar.DAY_OF_MONTH),
+                pickedHour,
+                pickedMinute
+            )
+            val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("pl"))
+            selectedDateTime = pickedDateTime.format(formatter)
+            onDateChange(selectedDateTime) // Pass formatted string to onDateChange
         },
         hour, minute, true
     )
