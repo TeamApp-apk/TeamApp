@@ -25,7 +25,10 @@ class SettingsViewModel : ViewModel() {
     fun navigateToForgotPasswordActivity(navController: NavController) {
 
     }
-
-
-
+    fun logout(navController: NavController) {
+        FirebaseAuth.getInstance().signOut()
+        navController.navigate("register") {
+            popUpTo("createEvent") { inclusive = true }
+        }
+    }
 }

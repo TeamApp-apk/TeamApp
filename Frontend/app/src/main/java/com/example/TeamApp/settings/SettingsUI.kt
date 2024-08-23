@@ -50,6 +50,11 @@ fun SettingsScreen(navController: NavController) {
             title = "Terms of Service",
             onClick = { /* Handle terms of service click */ }
         )
+
+        SettingItem(
+            title = "Log out",
+            onClick = {viewModel.logout(navController)}
+        )
     }
 }
 
