@@ -1,4 +1,5 @@
 package com.example.TeamApp.searchThrough
+import BottomNavBar
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,14 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -45,20 +41,19 @@ import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.TeamApp.excludedUI.ActivityCard
 import com.example.TeamApp.event.CreateEventViewModel
+import com.example.TeamApp.event.ViewModelProvider
 import kotlinx.coroutines.delay
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun SearchScreen(navController: NavController) {
-    val viewModel: CreateEventViewModel = viewModel()
+    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val activityList = viewModel.activityList
     var showEmptyMessage by remember { mutableStateOf(false) }
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
 
 
-    LaunchedEffect(activityList) {
-        Log.d("ScreenThrough", "weszlo")
-        viewModel.fetchEvents()
+    LaunchedEffect(Unit) {
         if (activityList.isEmpty()) {
             delay(2000) // Opóźnienie 2 sekundy przed sprawdzeniem
             showEmptyMessage = activityList.isEmpty()
@@ -67,9 +62,8 @@ fun SearchScreen(navController: NavController) {
 
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
-        Color(0xFF007BFF)
+        Color(0xFF007BFF),
     )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -128,13 +122,9 @@ fun SearchScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(60.dp)) // Add spacing before the bottom bar
 
-            // BarOnTheBottom
-            BarOnTheBottom(navController)
         }
     }
 }
-
-
 
 @Composable
 @Preview(showBackground = false)
@@ -181,59 +171,5 @@ fun NoCurrentActivitiesBar(){
         )
 
 
-    }
-}
-@Composable
-fun BarOnTheBottom(navController: NavController) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 73.dp))
-            .padding(horizontal = 40.dp, vertical = 8.dp)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(24.dp)
-        ) {
-            IconButton(
-                onClick = { /*TODO*/ },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.search),
-                    contentDescription = "search",
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-            // Ikona 'pluscircle' (zamieniona miejscami z 'search')
-            IconButton(
-                onClick = { navController.navigate("createEvent") },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.pluscircle),
-                    contentDescription = "circle",
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-            IconButton(
-                onClick = { navController.navigate("profile") },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.user),
-                    contentDescription = "user",
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
     }
 }

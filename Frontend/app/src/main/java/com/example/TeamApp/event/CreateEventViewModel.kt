@@ -17,6 +17,7 @@ class CreateEventViewModel : ViewModel() {
     private val _sport = MutableLiveData<String>()
     val activityList =   mutableStateListOf<Event>()
     val sport: LiveData<String> get()= _sport
+    private var isDataFetched = false
 
     private val _location = MutableLiveData<String>()
     val location: LiveData<String> get() = _location
@@ -49,6 +50,8 @@ class CreateEventViewModel : ViewModel() {
         activityList.add(event)
     }
     fun fetchEvents() {
+        if (isDataFetched) return
+        Log.d("CreateEventViewModel", "fetchEvents")
         val db = Firebase.firestore
         db.collection("events").get()
             .addOnSuccessListener { result ->
@@ -57,6 +60,11 @@ class CreateEventViewModel : ViewModel() {
                     val event = document.toObject(Event::class.java)
                     activityList.add(event)
                 }
+                if (!activityList.isEmpty()) {
+                    Log.d("CreateEventViewModel", "events found")
+                }
+                Log.d("CreateEventViewModel", "Events fetched successfully")
+                isDataFetched = true
             }
             .addOnFailureListener { e ->
                 Log.w("CreateEventViewModel", "Error fetching events", e)
