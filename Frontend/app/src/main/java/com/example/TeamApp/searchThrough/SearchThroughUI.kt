@@ -66,8 +66,9 @@ fun SearchScreen(navController: NavController) {
     }
 
     val gradientColors = listOf(
+
         Color(0xFFE8E8E8),
-        Color(0xFF007BFF)
+        Color(0xFF007BFF) ,
     )
 
     Box(

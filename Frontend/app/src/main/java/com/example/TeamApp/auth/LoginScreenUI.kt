@@ -79,6 +79,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
+import com.example.TeamApp.excludedUI.CustomSnackbar
 import com.example.ui.theme.fontFamily
 import kotlinx.coroutines.delay
 
@@ -99,27 +100,6 @@ fun LoginScreen(navController: NavController){
     val passwordFocusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
-        when {
-            emailSent != null -> {
-                snackbarMessage = "Email"
-                snackbarSuccess = emailSent ?: false
-                showSnackbar = true
-            }
-            loginSuccess != null -> {
-                snackbarMessage = "login"
-                snackbarSuccess = loginSuccess ?: false
-                showSnackbar = true
-            }
-            registerSuccess != null -> {
-                snackbarMessage = "register"
-                snackbarSuccess = registerSuccess ?: false
-                showSnackbar = true
-            }
-        }
-        Log.e("RegisterScreen", "loginSuccess: $loginSuccess, registerSuccess: $registerSuccess, emailSent: $emailSent, showSnackbar:$showSnackbar")
-
-    }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
@@ -188,7 +168,10 @@ fun LoginScreen(navController: NavController){
                         .fillMaxWidth()
                         .wrapContentSize(Alignment.Center) // Center horizontally
                 ) {
-                    ButtonSignIN(navController)
+                    ButtonSignIN(navController,
+                        onSnackbarMessageChanged = { message -> snackbarMessage = message ?: "" },
+                        onShowSnackbar = { showSnackbar = it },
+                        onSnackbarSuccess = { success -> snackbarSuccess = success})
                 }
                 Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
                 DividerTextComponent()
@@ -373,12 +356,25 @@ fun ForgotPasswordTextField(navController: NavController) {
 
 
 @Composable
-fun ButtonSignIN(navController: NavController) {
+fun ButtonSignIN(navController: NavController,
+                 onSnackbarMessageChanged: (String?) -> Unit,
+                 onShowSnackbar: (Boolean) -> Unit,
+                 onSnackbarSuccess: (Boolean) -> Unit) {
     val viewModel: LoginViewModel = viewModel()
     val isLoading by viewModel.isLoading.observeAsState(false)
 
     Button(
-        onClick = { viewModel.onLoginClick(navController) },
+        onClick = { viewModel.onLoginClick(navController){ result ->
+            if (result == null) {
+                onSnackbarMessageChanged("Logowanie przebiegło pomyślnie")
+                onSnackbarSuccess(true)
+            } else {
+                onSnackbarMessageChanged(result)
+                onSnackbarSuccess(false)
+            }
+            onShowSnackbar(true)
+        }
+                  },
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
@@ -451,47 +447,4 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier, navController: Nav
             viewModel.getToRegisterScreen(navController)
         }
     )
-}
-@Composable
-fun CustomSnackbar(success: Boolean, type: String, onDismiss: () -> Unit) {
-    LaunchedEffect(Unit) {
-        delay(2000)
-        onDismiss()
-        LoginViewModel().resetSuccess()
-    }
-
-    Snackbar(
-        modifier = Modifier
-            .padding(80.dp)
-            .wrapContentSize(Alignment.Center),
-        shape = RoundedCornerShape(60.dp),
-        containerColor = if (success) Color(0xFF4CAF50) else Color(0xFFF44336),
-        contentColor = Color.White,
-        action = {}
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Log.e("LoginScreen","Snackbar")
-            Text(
-
-                text = if (success) {
-                    when (type) {
-                        "login" -> "Login Successful"
-                        "Email" -> "Email Sent"
-                        else -> "Registration Successful"
-                    }
-                } else {
-                    when (type) {
-                        "login" -> "Login Failed"
-                        "Email" -> "Email not registered"
-                        else -> "Registration Failed"
-                    }
-                },
-                style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
-            )
-        }
-    }
 }
