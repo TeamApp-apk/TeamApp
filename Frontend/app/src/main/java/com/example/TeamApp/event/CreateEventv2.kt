@@ -1,4 +1,5 @@
 package com.example.TeamApp.event
+
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -90,6 +91,8 @@ fun CreateEventScreen(navController: NavController) {
 
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
+    var snackbarSuccess by remember { mutableStateOf(false) }
+
     var expanded by remember { mutableStateOf(false) }
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
@@ -159,13 +162,14 @@ fun CreateEventScreen(navController: NavController) {
                         MyDateTimePicker(onDateChange = { newDate -> viewModel.onDateChange(newDate) })
                         Spacer(modifier = Modifier.height(25.dp))
                         EventButton(text = "Stwórz", onClick = {
+
                             Log.d("CreateEventScreen", "Submit button clicked")
                             val participantLimit = limit.toIntOrNull()
                             Log.e("CreateEventScreen", "Participant limit: $participantLimit")
                             Log.e("CreateEventScreen", "Sport: $sport")
                             Log.e("CreateEventScreen", "Address: $address")
                             Log.e("CreateEventScreen", "Date: $dateTime")
-                            Log.e("CreateEventScreen", "Location: $location")
+                            Log.e("CreateEventScreen", "Description: $description")
                             if (sport.isNotEmpty() && address.isNotEmpty()  && location.isNotEmpty()) {
                                 Log.d("CreateEventScreen", "Valid input")
                                 val newEvent = Event(
@@ -176,11 +180,21 @@ fun CreateEventScreen(navController: NavController) {
                                     maxParticipants = limit.toInt(),
                                     location = location
                                 )
-                                viewModel.createEvent(newEvent)
-                                snackbarMessage = "Event created successfully!"
-                                showSnackbar = true
+                                viewModel.createEvent(newEvent){ result ->
+                                    if (result == null) {
+                                        snackbarMessage = "Utworzono Event"
+                                        snackbarSuccess = true
+                                        viewModel.resetFields()
+                                    } else {
+                                        snackbarMessage = result
+                                        snackbarSuccess = false
+                                    }
+                                    showSnackbar = true
+                                }
+
                             } else {
-                                snackbarMessage = "Please fill all required fields correctly."
+                                snackbarMessage = "Uzupełnij wszystkie pola"
+                                snackbarSuccess = false
                                 showSnackbar = true
                             }
 
@@ -201,6 +215,15 @@ fun CreateEventScreen(navController: NavController) {
             onSave = { newText ->
                 viewModel.onDescriptionChange(newText)
                 showDialog = false
+            }
+        )
+    }
+    if (showSnackbar) {
+        com.example.TeamApp.excludedUI.CustomSnackbar(
+            success = snackbarSuccess,
+            type = snackbarMessage,
+            onDismiss = {
+                showSnackbar = false
             }
         )
     }
@@ -246,7 +269,7 @@ fun DescriptionDialog(
 ) {
     val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
     var text by remember { mutableStateOf(initialText) }
-    val viewModel: CreateEventViewModel = viewModel()
+    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
 
     // Create a FocusRequester to request focus on the TextField
     val focusRequester = remember { FocusRequester() }
@@ -332,7 +355,7 @@ fun SearchStreetField() {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    val viewModel:CreateEventViewModel = viewModel()
+    val viewModel:CreateEventViewModel = ViewModelProvider.createEventViewModel
 
     Box(
         modifier = Modifier
@@ -532,7 +555,7 @@ fun ButtonsColumn() {  // Zmieniłem nazwę na ButtonsColumn, bo teraz to będzi
 
 @Composable
 fun SportDropdownButton(modifier: Modifier = Modifier) {
-    val viewModel: CreateEventViewModel = viewModel()
+    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val availableSports = viewModel.getAvailableSports()
     var expanded by remember { mutableStateOf(false) }
     val sport by viewModel.sport.observeAsState("")
@@ -598,7 +621,7 @@ fun SportDropdownButton(modifier: Modifier = Modifier) {
 fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
     var selectedPeople by remember { mutableStateOf<Int?>(null) }
     var expanded by remember { mutableStateOf(false) }
-    val viewModel:CreateEventViewModel = viewModel()
+    val viewModel:CreateEventViewModel = ViewModelProvider.createEventViewModel
 
     Box(
         modifier = modifier

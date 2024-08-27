@@ -42,11 +42,11 @@ class CreateEventViewModel : ViewModel() {
         }
     }
 
-    fun createEvent(event : Event){
+    fun createEvent(event : Event, callback: (String?) -> Unit){
         val db = Firebase.firestore
         db.collection("events").add(event)
-            .addOnSuccessListener { Log.d("CreateEventViewModel", "Event successfully created") }
-            .addOnFailureListener { e -> Log.w("CreateEventViewModel", "Error creating event", e) }
+            .addOnSuccessListener { Log.d("CreateEventViewModel", "Event successfully created"); callback(null) }
+            .addOnFailureListener { e -> Log.w("CreateEventViewModel", "Error creating event", e); callback("Błąd, nie dodano Eventu") }
         activityList.add(event)
     }
     fun fetchEvents() {
@@ -71,7 +71,13 @@ class CreateEventViewModel : ViewModel() {
             }
     }
 
-
+    fun resetFields() {
+        _sport.value = ""
+        _location.value = ""
+        _limit.value = ""
+        _description.value = ""
+        _dateTime.value = ""
+    }
 
     //temporary here
     fun logout(navController: NavController) {
