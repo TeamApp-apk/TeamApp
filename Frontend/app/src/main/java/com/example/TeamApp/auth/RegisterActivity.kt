@@ -34,7 +34,6 @@ import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventFragment
 import com.example.TeamApp.event.CreateEventScreen
-import com.example.TeamApp.event.CreateEventScreen1
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.settings.SettingsScreen

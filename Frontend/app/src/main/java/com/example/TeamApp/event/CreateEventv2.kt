@@ -356,6 +356,8 @@ fun SearchStreetField() {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val viewModel:CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val location by viewModel.location.observeAsState("")
+    query = location
 
     Box(
         modifier = Modifier
@@ -461,6 +463,7 @@ fun SuggestionItem(suggestion: String, onSuggestionClick: (String) -> Unit) {
 @SuppressLint("DefaultLocale")
 @Composable
 fun MyDateTimePicker(onDateChange: (String) -> Unit) {
+    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     var selectedDateTime by remember { mutableStateOf("") }
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
@@ -468,6 +471,7 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
     val day = calendar.get(Calendar.DAY_OF_MONTH)
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val minute = calendar.get(Calendar.MINUTE)
+    val date by viewModel.dateTime.observeAsState("")
 
     val timePickerDialog = TimePickerDialog(
         LocalContext.current,
@@ -514,7 +518,7 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
                 .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
         ) {
             Text(
-                text = if (selectedDateTime.isEmpty()) "Data i godzina" else selectedDateTime,
+                text = if (date.isEmpty()) "Data i godzina" else date,
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 25.sp,
@@ -622,6 +626,7 @@ fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
     var selectedPeople by remember { mutableStateOf<Int?>(null) }
     var expanded by remember { mutableStateOf(false) }
     val viewModel:CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val limit by viewModel.limit.observeAsState("")
 
     Box(
         modifier = modifier
@@ -639,7 +644,7 @@ fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = selectedPeople?.toString() ?: "Liczba uczestników",
+                text = if (limit.isEmpty()) "Liczba uczestników" else limit,
                 modifier = Modifier.weight(1f),
                 style = TextStyle(
                     fontSize = 16.sp,
