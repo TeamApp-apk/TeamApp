@@ -9,7 +9,11 @@ facebookFacebookAndroidSdkVersion = "[LATEST_VERSION]"
 firebaseAuthVersion = "23.0.0"
 firebaseBom = "33.1.2"
 firebaseUiAuth = "7.2.0"
+fragmentKtx = "1.8.2"
 googleAccompanistNavigationAnimation = "<version>"
+hiltAndroid = "2.45"
+hiltAndroidVersion = "2.44"
+hiltCompiler = "2.44"
 kotlin = "1.9.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -26,6 +30,7 @@ googleServices = "4.4.2"
 googleGmsGoogleServices = "4.4.2"
 lifecycleRuntimeKtxVersion = "2.3.1"
 lifecycleViewmodelCompose = "2.8.3"
+lifecycleViewmodelKtx = "2.8.4"
 materialIconsExtended = "<version>"
 materialIconsExtendedVersion = "1.0.0"
 navigationComposeVersion = "2.5.3"
@@ -42,8 +47,10 @@ accompanist-navigation-animation-v0300 = { module = "com.google.accompanist:acco
 accompanist-navigation-animation-vversion = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "googleAccompanistNavigationAnimation" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-lifecycle-runtime-ktx-v231 = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-material-icons-extended-v100 = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtendedVersion" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationRuntimeKtx" }
@@ -63,6 +70,9 @@ firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx" }
 firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
 firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
 google-accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimationVersion" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-android-v244 = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidVersion" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

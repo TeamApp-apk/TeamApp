@@ -1,6 +1,7 @@
 package com.example.TeamApp.excludedUI
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -32,8 +33,11 @@ object Variables {
     val Black: Color = Color(0xFF000000)
 }
 fun getIconResourceId(context: Context, iconName: String): Int {
-    return context.resources.getIdentifier(iconName, "drawable", context.packageName)
+    val resourceId = context.resources.getIdentifier(iconName, "drawable", context.packageName)
+    Log.d("ResourceCheck", "Resource ID for $iconName: $resourceId")
+    return resourceId
 }
+
 
 
 @Composable

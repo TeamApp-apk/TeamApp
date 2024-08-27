@@ -19,14 +19,14 @@ import androidx.navigation.NavController
 import com.example.TeamApp.R
 
 @Composable
-fun BarOnTheBottom(navController: NavController) {
+fun BottomNavBar(navController: NavController) {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
-            .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 73.dp))
+            .background(color = Color(0xFFF2F2F2))
             .padding(horizontal = 40.dp, vertical = 8.dp)
     ) {
         Row(
@@ -35,6 +35,7 @@ fun BarOnTheBottom(navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(24.dp)
+
         ) {
             IconButton(
                 onClick = { navController.navigate("search") },

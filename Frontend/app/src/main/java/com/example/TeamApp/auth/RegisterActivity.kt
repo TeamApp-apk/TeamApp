@@ -30,7 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
+import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.data.User
+import com.example.TeamApp.event.CreateEventFragment
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.event.CreateEventScreen1
 import com.example.TeamApp.profile.ProfileScreen
@@ -65,7 +67,10 @@ class RegisterActivity : ComponentActivity() {
         FirebaseApp.initializeApp(this)
         val auth = FirebaseAuth.getInstance()
         oneTapClient = Identity.getSignInClient(this) // Initialize oneTapClient here
-
+        if(auth.currentUser != null){
+            Log.d("RegisterActivity", "User is already logged in")
+            goToMainAppActivity()
+        }
         setContent {
             val gradientColors = listOf(
                 Color(0xFFE8E8E8),
@@ -132,7 +137,7 @@ class RegisterActivity : ComponentActivity() {
                 ) {
                     AnimatedNavHost(
                         navController = navController,
-                        startDestination = if (auth.currentUser != null) "createEvent" else "register",
+                        startDestination = if (auth.currentUser != null) "mainApp" else "register",
                         enterTransition = {
                             slideInHorizontally(
                                 initialOffsetX = { -1000 },
@@ -157,13 +162,13 @@ class RegisterActivity : ComponentActivity() {
                         composable(
                             "CreateEvent",
                             enterTransition = {
-                                fadeIn(animationSpec = tween(durationMillis = 500)) // Krótkie zanikanie
+                                fadeIn(animationSpec = tween(durationMillis = 800)) // Krótkie zanikanie
                             },
                             exitTransition = {
                                 fadeOut(animationSpec = tween(durationMillis = 50)) // Krótkie zanikanie
                             }
                         ) {
-                            CreateEventScreen(navController)
+                            CreateEventFragment()
                         }
                         composable("forgotPassword") { ForgotPasswordScreen(navController) }
                         composable(
@@ -181,6 +186,7 @@ class RegisterActivity : ComponentActivity() {
 
                         composable("profile") { ProfileScreen(navController) }
                         composable("settings") { SettingsScreen(navController) }
+
                     }
                 }
             }
@@ -239,5 +245,10 @@ class RegisterActivity : ComponentActivity() {
         } else {
             Log.e("LoginActivity", "Sign-in failed")
         }
+    }
+    private fun goToMainAppActivity(){
+        val intent = Intent(this, MainAppActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }

@@ -14,7 +14,6 @@ import androidx.navigation.NavController
 import com.example.TeamApp.auth.RegisterActivity
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.data.User
-import com.example.TeamApp.event.CreateEventActivity
 import com.example.TeamApp.profile.ProfileActivity
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
