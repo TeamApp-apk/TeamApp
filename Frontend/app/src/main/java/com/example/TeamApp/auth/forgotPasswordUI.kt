@@ -48,6 +48,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,6 +59,7 @@ import com.example.TeamApp.R
 import com.example.compose.primaryLight
 import com.example.compose.secondaryLight
 import com.example.ui.theme.fontFamily
+import com.example.TeamApp.excludedUI.CustomSnackbar
 
 @Composable
 fun ForgotPasswordScreen(navController: NavController){
@@ -68,25 +71,7 @@ fun ForgotPasswordScreen(navController: NavController){
     var snackbarMessage by remember { mutableStateOf("") }
     var snackbarSuccess by remember { mutableStateOf(false) }
 
-    LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
-        when {
-            emailSent != null -> {
-                snackbarMessage = "Email"
-                snackbarSuccess = emailSent ?: false
-                showSnackbar = true
-            }
-            loginSuccess != null -> {
-                snackbarMessage = "login"
-                snackbarSuccess = loginSuccess ?: false
-                showSnackbar = true
-            }
-            registerSuccess != null -> {
-                snackbarMessage = "register"
-                snackbarSuccess = registerSuccess ?: false
-                showSnackbar = true
-            }
-        }
-    }
+
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
@@ -118,7 +103,11 @@ fun ForgotPasswordScreen(navController: NavController){
                         .fillMaxWidth()
                         .wrapContentSize(Alignment.Center) // Center horizontally
                 ) {
-                    ButtonWithSend()
+                    ButtonWithSend(
+                        onSnackbarMessageChanged = { message -> snackbarMessage = message ?: "" },
+                        onShowSnackbar = { showSnackbar = it },
+                        onSnackbarSuccess = { success -> snackbarSuccess = success}
+                    )
                 }
             }
         }
@@ -180,14 +169,20 @@ fun EmailButtonField(labelValue: String, painterResource: Painter) {
         modifier = Modifier.fillMaxWidth(),
         label = { Text(text = labelValue) },
         value = if (labelValue == "Your Email") email else textValue.value,
-        onValueChange = {
+        onValueChange = { newText ->
+            val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+            if (allowedCharsRegex.matches(newText)) {
+                viewModel.onEmailChange(newText)
+            }
+            /*
             if (labelValue == "Your Email") {
                 viewModel.onEmailChange(it)
             } else {
                 textValue.value = it
             }
+             */
         },
-        keyboardOptions = KeyboardOptions.Default,
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done, keyboardType = KeyboardType.Text),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = primaryLight,
             focusedLabelColor = secondaryLight,
@@ -204,10 +199,23 @@ fun EmailButtonField(labelValue: String, painterResource: Painter) {
 
 
 @Composable
-fun ButtonWithSend() {
+fun ButtonWithSend(onSnackbarMessageChanged: (String?) -> Unit,
+                   onShowSnackbar: (Boolean) -> Unit,
+                   onSnackbarSuccess: (Boolean) -> Unit) {
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
-    Button(onClick = { viewModel.onForgotPasswordClick() }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+    Button(onClick = { viewModel.onForgotPasswordClick(){ result ->
+            if (result == null) {
+                onSnackbarMessageChanged("Wysłano maila")
+                onSnackbarSuccess(true)
+            } else {
+                onSnackbarMessageChanged(result)
+                onSnackbarSuccess(false)
+            }
+            onShowSnackbar(true)
+        }
+                     },
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier

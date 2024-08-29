@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.androidx.runtime) // Use the Compose runtime version you're working with
     implementation(libs.androidx.runtime.livedata) // Ensure it matches the Compose version you're using
     implementation (libs.androidx.material.icons.extended)
+    implementation(libs.hilt.android)
 
     // Navigation
     implementation(libs.androidx.navigation.runtime.ktx)
@@ -77,8 +78,16 @@ dependencies {
     implementation(libs.accompanist.navigation.animation.v0300)
     implementation (libs.accompanist.navigation.animation.vversion)
     implementation (libs.accompanist.navigation.animation )
+    //nie zmieniac tych ponizej, bo jest jakis blad z tymi libsowymi wersjami
     implementation ("com.google.accompanist:accompanist-navigation-animation:0.31.0-alpha")
     implementation("androidx.compose.foundation:foundation-layout-android:1.6.8")
+    implementation (libs.androidx.fragment.ktx) // Sprawdź najnowszą wersję
+    implementation (libs.androidx.lifecycle.viewmodel.ktx) // Sprawdź najnowszą wersję
+    implementation(libs.hilt.android.v244)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    // Hilt dependencies
+    implementation(libs.hilt.android)
 
 
 
@@ -118,5 +127,14 @@ dependencies {
 
     //fonts
     implementation(libs.androidx.ui.text.google.fonts)
+
+    //Google localization services
+    implementation ("com.google.android.libraries.places:places:3.5.0")
+    implementation ("androidx.compose.ui:ui:1.6.8")
+    implementation ("androidx.compose.material:material:1.6.8")
+    implementation ("androidx.compose.ui:ui-tooling:1.6.8")
+    implementation (libs.androidx.lifecycle.runtime.ktx.v231)
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
 
 }

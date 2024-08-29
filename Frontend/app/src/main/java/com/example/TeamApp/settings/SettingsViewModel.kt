@@ -13,7 +13,6 @@ import com.example.TeamApp.auth.ForgotPasswordActivity
 import com.example.TeamApp.auth.RegisterActivity
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.data.User
-import com.example.TeamApp.event.CreateEventActivity
 import com.example.TeamApp.profile.ProfileActivity
 import com.example.TeamApp.searchThrough.SearchThroughActivity
 import com.example.TeamApp.settings.SettingActivity
@@ -25,7 +24,10 @@ class SettingsViewModel : ViewModel() {
     fun navigateToForgotPasswordActivity(navController: NavController) {
 
     }
-
-
-
+    fun logout(navController: NavController) {
+        FirebaseAuth.getInstance().signOut()
+        navController.navigate("register") {
+            popUpTo("createEvent") { inclusive = true }
+        }
+    }
 }

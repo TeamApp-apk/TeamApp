@@ -1,5 +1,7 @@
-package com.example.TeamApp.event
+package com.example.TeamApp.excludedUI
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -17,6 +20,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,10 +32,17 @@ object Variables {
     val P3: Color = Color(0xFF1A73E8)
     val Black: Color = Color(0xFF000000)
 }
+fun getIconResourceId(context: Context, iconName: String): Int {
+    val resourceId = context.resources.getIdentifier(iconName, "drawable", context.packageName)
+    Log.d("ResourceCheck", "Resource ID for $iconName: $resourceId")
+    return resourceId
+}
+
+
 
 @Composable
 fun ActivityCard(
-    iconResId: Int,
+    iconResId: String,
     date: String,
     activityName: String,
     currentParticipants: Int,
@@ -39,6 +50,8 @@ fun ActivityCard(
     location: String,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val iconId = getIconResourceId(context, iconResId)
     Row(
         modifier = Modifier
             .shadow(
@@ -53,7 +66,7 @@ fun ActivityCard(
             .padding(start = 4.dp, top = 10.dp, end = 4.dp, bottom = 10.dp)
     ) {
         Image(
-            painter = painterResource(id = iconResId),
+            painter = painterResource(id = iconId),
             contentDescription = "Activity Icon",
             modifier = Modifier
                 .padding(0.dp)
@@ -133,6 +146,9 @@ fun ActivityCard(
                         fontStyle = FontStyle.Italic,
                         color = Variables.Black,
                     ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
             }
 
@@ -141,16 +157,16 @@ fun ActivityCard(
     }
 }
 
-@Preview(showBackground = false)
-@Composable
-fun PreviewActivityCard() {
-    ActivityCard(
-        iconResId = R.drawable.dumbbelliconv5,
-        date = "23 PAŹDZIERNIKA 12:45",
-        activityName = "Skok ze spadochronem",
-        currentParticipants = 21,
-        maxParticipants = 32,
-        location = "Beliny-Prażmowskiego",
-        onClick = { /* akcja na kliknięcie */ }
-    )
-}
+//@Preview(showBackground = false)
+//@Composable
+//fun PreviewActivityCard() {
+//    ActivityCard(
+//        iconResId = R.drawable.dumbbelliconv5,
+//        date = "23 PAŹDZIERNIKA 12:45",
+//        activityName = "Skok ze spadochronem",
+//        currentParticipants = 21,
+//        maxParticipants = 32,
+//        location = "Beliny-Prażmowskiego",
+//        onClick = { /* akcja na kliknięcie */ }
+//    )
+//}

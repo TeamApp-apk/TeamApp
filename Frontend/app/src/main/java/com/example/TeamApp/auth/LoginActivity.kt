@@ -24,11 +24,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.data.User
-import com.example.TeamApp.event.CreateEventActivity
 import com.example.TeamApp.event.CreateEventScreen
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -62,7 +60,7 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         // No need to initialize signInLauncher here
 
         if (FirebaseAuth.getInstance().currentUser != null) {
-            startActivity(Intent(this, CreateEventActivity::class.java).apply {
+            startActivity(Intent(this, MainAppActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             })
             finish()

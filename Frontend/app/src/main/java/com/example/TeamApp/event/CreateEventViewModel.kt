@@ -1,32 +1,29 @@
 package com.example.TeamApp.event
 
-import android.content.Context
-import android.content.Intent
 import android.util.Log
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import com.example.TeamApp.auth.LoginActivity
-import com.example.TeamApp.auth.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
-import com.example.TeamApp.auth.RegisterActivity
 import com.example.TeamApp.data.Event
-import com.example.TeamApp.data.User
-import com.example.TeamApp.profile.ProfileActivity
-import com.example.TeamApp.searchThrough.SearchThroughActivity
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 class CreateEventViewModel : ViewModel() {
     private val _sport = MutableLiveData<String>()
+    val activityList =   mutableStateListOf<Event>()
     val sport: LiveData<String> get()= _sport
+    private var isDataFetched = false
 
-    private val _address = MutableLiveData<String>()
-    val address: LiveData<String> get() = _address
+    private val _location = MutableLiveData<String>()
+    val location: LiveData<String> get() = _location
 
+    private val _dateTime = MutableLiveData<String>()
+    val dateTime: LiveData<String> = _dateTime
 
     private val _description = MutableLiveData<String>()
     val description: LiveData<String> get() = _description
@@ -45,30 +42,42 @@ class CreateEventViewModel : ViewModel() {
         }
     }
 
-//    fun createEvent(context: Context, sport: String, address: String, limit: String, description: String) {
-//        if (sport.isEmpty() || address.isEmpty() || limit.isEmpty() || description.isEmpty()) {
-//            Log.e("CreateEventViewModel", "One or more fields are empty") //do debugu
-//            return
-//        }
-//
-//        Log.d("CreateEventViewModel", "createEvent called with sport: $sport, address: $address, limit: $limit, description: $description")
-//        val event = Event(
-//            location = address,
-//            iconResId = 0,
-//            date = LocalDate.now().toString(),
-//            time = "12:00",
-//            sportDiscipline = Event.SportDiscipline.valueOf(sport),
-//            maxParticipants = limit.toInt(),
-//            currentParticipants = 0,
-//            description = description,
-//            creator = FirebaseAuth.getInstance().currentUser?.uid.toString(),
-//            endDate = LocalDate.now().plusDays(7).toString()
-//        )
-//        val db = Firebase.firestore
-//        db.collection("events").add(event)
-//            .addOnSuccessListener { Log.d("CreateEventViewModel", "Event successfully created") }
-//            .addOnFailureListener { e -> Log.w("CreateEventViewModel", "Error creating event", e) }
-//    }
+    fun createEvent(event : Event, callback: (String?) -> Unit){
+        val db = Firebase.firestore
+        db.collection("events").add(event)
+            .addOnSuccessListener { Log.d("CreateEventViewModel", "Event successfully created"); callback(null) }
+            .addOnFailureListener { e -> Log.w("CreateEventViewModel", "Error creating event", e); callback("Błąd, nie dodano Eventu") }
+        activityList.add(event)
+    }
+    fun fetchEvents() {
+        if (isDataFetched) return
+        Log.d("CreateEventViewModel", "fetchEvents")
+        val db = Firebase.firestore
+        db.collection("events").get()
+            .addOnSuccessListener { result ->
+                activityList.clear()
+                for (document in result) {
+                    val event = document.toObject(Event::class.java)
+                    activityList.add(event)
+                }
+                if (!activityList.isEmpty()) {
+                    Log.d("CreateEventViewModel", "events found")
+                }
+                Log.d("CreateEventViewModel", "Events fetched successfully")
+                isDataFetched = true
+            }
+            .addOnFailureListener { e ->
+                Log.w("CreateEventViewModel", "Error fetching events", e)
+            }
+    }
+
+    fun resetFields() {
+        _sport.value = ""
+        _location.value = ""
+        _limit.value = ""
+        _description.value = ""
+        _dateTime.value = ""
+    }
 
     //temporary here
     fun logout(navController: NavController) {
@@ -79,11 +88,15 @@ class CreateEventViewModel : ViewModel() {
     }
 
     fun onSportChange(newSport: String) {
-        _sport.value = newSport
+        _sport.value = newSport.toString()
     }
 
     fun onAddressChange(newAddress: String) {
-        _address.value = newAddress
+        _location.value = newAddress
+    }
+
+    fun onDateChange(newDate: String) {
+        _dateTime.value = newDate
     }
 
     fun onLimitChange(newLimit: String) {
@@ -95,7 +108,7 @@ class CreateEventViewModel : ViewModel() {
     }
 
     fun getAvailableSports():List<String>{
-        return Event.SportDiscipline.entries.map { it.name }
+        return Event.sportIcons.keys.toList()
     }
 
 }

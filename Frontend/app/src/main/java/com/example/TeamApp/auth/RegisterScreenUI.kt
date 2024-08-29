@@ -7,8 +7,16 @@ import android.app.Activity.RESULT_OK
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +35,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -54,6 +63,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -69,6 +81,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -86,6 +99,9 @@ import com.example.compose.secondaryLight
 import com.example.TeamApp.R
 import com.example.ui.theme.textInBoxes
 import kotlinx.coroutines.time.delay
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
+import com.example.TeamApp.excludedUI.CustomSnackbar
 
 
 /*
@@ -111,27 +127,12 @@ fun RegisterScreen(navController: NavController){
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
     var snackbarSuccess by remember { mutableStateOf(false) }
-    LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
-        when {
-            emailSent != null -> {
-                snackbarMessage = "Email"
-                snackbarSuccess = emailSent ?: false
-                showSnackbar = true
-            }
-            loginSuccess != null -> {
-                snackbarMessage = "login"
-                snackbarSuccess = loginSuccess ?: false
-                showSnackbar = true
-            }
-            registerSuccess != null -> {
-                snackbarMessage = "register"
-                snackbarSuccess = registerSuccess ?: false
-                showSnackbar = true
-            }
-        }
-        Log.e("RegisterScreen", "loginSuccess: $loginSuccess, registerSuccess: $registerSuccess, emailSent: $emailSent")
+    val nameFocusRequester = remember { FocusRequester() }
+    val emailFocusRequester = remember { FocusRequester() }
+    val passwordFocusRequester = remember { FocusRequester() }
+    val repeatpasswordFocusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
 
-    }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
@@ -142,6 +143,8 @@ fun RegisterScreen(navController: NavController){
     }
     LaunchedEffect(Unit) {
         viewModel.mySetSignInLauncher(launcher)
+        focusManager.clearFocus()
+
     }
     SideEffect {
         val window = (context as? Activity)?.window ?: return@SideEffect
@@ -166,20 +169,24 @@ fun RegisterScreen(navController: NavController){
                 Spacer(modifier = Modifier.height(height * 0.00625f * 8))
                 UpperTextField(value = "Dolacz do nas!")
                 Spacer(modifier = Modifier.height(height * 0.00625f * 6 ))
-                NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.user_icon))
+                NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.user_icon), nextFocusRequester = emailFocusRequester, focusRequester = nameFocusRequester)
                 Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
-                NameAndEmailBox(labelValue = "E-mail", painterResource (id = R.drawable.mail_icon) )
+                NameAndEmailBox(labelValue = "E-mail", painterResource (id = R.drawable.mail_icon), nextFocusRequester = passwordFocusRequester, focusRequester = emailFocusRequester)
                 Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
-                PasswordTextField(labelValue ="Hasło" , painterResource (id=R.drawable.lock_icon) )
+                PasswordTextField(labelValue ="Hasło" , painterResource (id=R.drawable.lock_icon),  nextFocusRequester = repeatpasswordFocusRequester, focusRequester = passwordFocusRequester)
                 Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
-                PasswordTextFieldRepeatPassword(labelValue ="Powtórz hasło" , painterResource (id=R.drawable.lock_icon) )
+                PasswordTextFieldRepeatPassword(labelValue ="Powtórz hasło", painterResource (id=R.drawable.lock_icon), nextFocusRequester = null, focusRequester = repeatpasswordFocusRequester)
                 Spacer(modifier = Modifier.height(height * 0.00625f * 8 / density))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentSize(Alignment.Center) // Center horizontally
                 ) {
-                    ButtonSignUP(navController)
+                    ButtonSignUP(navController,
+                        onSnackbarMessageChanged = { message -> snackbarMessage = message ?: "" },
+                        onShowSnackbar = { showSnackbar = it },
+                        onSnackbarSuccess = { success -> snackbarSuccess = success}
+                    )
                 }
                 Spacer(modifier = Modifier.height(height * 0.00625f * 9 / density))
                 DividerTextComponent()
@@ -215,29 +222,52 @@ fun RegisterScreen(navController: NavController){
 //}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NameAndEmailBox(labelValue: String, painterResource: Painter) {
+fun NameAndEmailBox(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
     val email by viewModel.email.observeAsState("")
     val configuration = LocalConfiguration.current
     val height = configuration.screenHeightDp.dp
     val width = configuration.screenWidthDp.dp
+    val focusManager = LocalFocusManager.current
+
+
     TextField(
         modifier = Modifier.fillMaxWidth()
-        .height(height * 0.00625f * 8 * density ),
+        .height(height * 0.00625f * 8 * density )
+        .focusRequester(focusRequester),
         label = { Text(
             text = labelValue,
-            style = textInBoxes
             ) },
         value = if (labelValue == "E-mail") email else textValue.value,
         onValueChange = {
+                newText ->
+
             if (labelValue == "E-mail") {
-                viewModel.onEmailChange(it)
+                val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+                if (allowedCharsRegex.matches(newText)) {
+                    viewModel.onEmailChange(newText)
+
+                }
             } else {
-                textValue.value = it
+                val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+                if (allowedCharsRegex.matches(newText)) {
+                    textValue.value = newText
+                }
             }
         },
-        keyboardOptions = KeyboardOptions.Default,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done,
+            keyboardType = KeyboardType.Password
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                nextFocusRequester?.requestFocus() ?: focusManager.clearFocus()
+            },
+            onDone = {
+                focusManager.clearFocus()
+            }
+        ),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -251,28 +281,47 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter) {
         },
         shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f))
     )
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordTextField(labelValue: String, painterResource: Painter) {
+fun PasswordTextField(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
     val viewModel: LoginViewModel = viewModel()
     val password by viewModel.password.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val height = configuration.screenHeightDp.dp
     val width = configuration.screenWidthDp.dp
+    val textValue = remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
 
     TextField(
         modifier = Modifier.fillMaxWidth().
-        height(height * 0.00625f * 8 * density ),
+        height(height * 0.00625f * 8 * density )
+        .focusRequester(focusRequester),
         label = { Text(
             text = labelValue,
-            style = textInBoxes
         ) },
         value = password,
-        onValueChange = { viewModel.onPasswordChanged(it) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        onValueChange = { newText ->
+
+            val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+            if (allowedCharsRegex.matches(newText)) {
+                viewModel.onPasswordChanged(newText)
+            }
+        },
+        keyboardOptions = KeyboardOptions(
+            imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done,
+            keyboardType = KeyboardType.Password),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                nextFocusRequester?.requestFocus() ?: focusManager.clearFocus()
+            },
+            onDone = {
+                focusManager.clearFocus()
+            }
+        ),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -305,23 +354,40 @@ fun PasswordTextField(labelValue: String, painterResource: Painter) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter) {
+fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
     val viewModel: LoginViewModel = viewModel()
     val confirmPassword by viewModel.confirmPassword.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val height = configuration.screenHeightDp.dp
     val width = configuration.screenWidthDp.dp
+    val focusManager = LocalFocusManager.current
+
     TextField(
         modifier = Modifier.fillMaxWidth()
-            .height(height * 0.00625f * 8 * density),
+            .height(height * 0.00625f * 8 * density)
+            .focusRequester(focusRequester),
         label = { Text(
             text = labelValue,
-            style = textInBoxes
         ) },
         value = confirmPassword,
-        onValueChange = { viewModel.onConfirmPasswordChanged(it) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        onValueChange = { newText ->
+            val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+            if (allowedCharsRegex.matches(newText)) {
+                viewModel.onConfirmPasswordChanged(newText)
+            }
+             },
+        keyboardOptions = KeyboardOptions(
+            imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done,
+            keyboardType = KeyboardType.Password),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                nextFocusRequester?.requestFocus() ?: focusManager.clearFocus()
+            },
+            onDone = {
+                focusManager.clearFocus()
+            }
+        ),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -353,7 +419,10 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
 }
 
 @Composable
-fun ButtonSignUP(navController: NavController) {
+fun ButtonSignUP(navController: NavController,
+                 onSnackbarMessageChanged: (String?) -> Unit,
+                 onShowSnackbar: (Boolean) -> Unit,
+                 onSnackbarSuccess: (Boolean) -> Unit) {
     val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel()
     val isLoading by viewModel.isLoading.observeAsState(false)
@@ -362,8 +431,19 @@ fun ButtonSignUP(navController: NavController) {
     val height = configuration.screenHeightDp.dp
     val width = configuration.screenWidthDp.dp
 
+    
     Button(
-        onClick = { viewModel.onRegisterClick(navController) }, // Zmieniono navController na context
+        onClick = {viewModel.onRegisterClick(navController) { result ->
+            if (result == null) {
+                onSnackbarMessageChanged("Rejestracja przebiegła pomyślnie")
+                onSnackbarSuccess(true)
+            } else {
+                onSnackbarMessageChanged(result)
+                onSnackbarSuccess(false)
+            }
+            onShowSnackbar(true)
+        }
+                  }, // Zmieniono navController na context
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
@@ -414,6 +494,7 @@ fun ButtonSignUP(navController: NavController) {
         }
     }
 }
+
 
 @Composable
 fun DividerTextComponent() {

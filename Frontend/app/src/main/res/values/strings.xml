@@ -10,4 +10,7 @@
     <string name="facebook_client_token">3f43e5db11722fd2db33c6663d067384</string>
     <string name="client_id">372737693570-kuaf685hmfk6ngjp0j1ffrgcaebfofjd.apps.googleusercontent.com</string>
     <string name="title_activity_forgot_password">ForgotPasswordActivity</string>
+    <string name="title_activity_main_app">MainAppActivity</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

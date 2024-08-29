@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -51,12 +52,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -64,6 +68,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -74,6 +79,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
+import com.example.TeamApp.excludedUI.CustomSnackbar
 import com.example.ui.theme.fontFamily
 import kotlinx.coroutines.delay
 
@@ -90,27 +96,10 @@ fun LoginScreen(navController: NavController){
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
     var snackbarSuccess by remember { mutableStateOf(false) }
-    LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
-        when {
-            emailSent != null -> {
-                snackbarMessage = "Email"
-                snackbarSuccess = emailSent ?: false
-                showSnackbar = true
-            }
-            loginSuccess != null -> {
-                snackbarMessage = "login"
-                snackbarSuccess = loginSuccess ?: false
-                showSnackbar = true
-            }
-            registerSuccess != null -> {
-                snackbarMessage = "register"
-                snackbarSuccess = registerSuccess ?: false
-                showSnackbar = true
-            }
-        }
-        Log.e("RegisterScreen", "loginSuccess: $loginSuccess, registerSuccess: $registerSuccess, emailSent: $emailSent, showSnackbar:$showSnackbar")
+    val emailFocusRequester = remember { FocusRequester() }
+    val passwordFocusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
 
-    }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
@@ -127,6 +116,7 @@ fun LoginScreen(navController: NavController){
     }
     LaunchedEffect(Unit) {
         viewModel.mySetSignInLauncher(launcher)
+        focusManager.clearFocus()
     }
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
@@ -162,9 +152,9 @@ fun LoginScreen(navController: NavController){
                     value = "Witaj ponownie!",
                 )
                 Spacer(modifier = Modifier.height(height * 0.00625f * 8 * density))
-                EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.mail_icon) )
+                EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.mail_icon), nextFocusRequester = passwordFocusRequester, focusRequester = emailFocusRequester )
                 Spacer(modifier = Modifier.height(height * 0.00625f * 6 / density))
-                PasswordTextFieldForLogin(labelValue ="password" , painterResource (id = R.drawable.lock_icon) )
+                PasswordTextFieldForLogin(labelValue ="password" , painterResource (id = R.drawable.lock_icon), nextFocusRequester = null, focusRequester = passwordFocusRequester )
                 Spacer(modifier = Modifier.height(height * 0.00625f * 6 / density))
                 Row(horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
@@ -178,7 +168,10 @@ fun LoginScreen(navController: NavController){
                         .fillMaxWidth()
                         .wrapContentSize(Alignment.Center) // Center horizontally
                 ) {
-                    ButtonSignIN(navController)
+                    ButtonSignIN(navController,
+                        onSnackbarMessageChanged = { message -> snackbarMessage = message ?: "" },
+                        onShowSnackbar = { showSnackbar = it },
+                        onSnackbarSuccess = { success -> snackbarSuccess = success})
                 }
                 Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
                 DividerTextComponent()
@@ -237,18 +230,31 @@ fun ToggleSwitch(){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmailBoxForLogin(labelValue: String, painterResource: Painter) {
+fun EmailBoxForLogin(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
     val viewModel: LoginViewModel = viewModel()
     val email by viewModel.email.observeAsState("")
+    val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .focusRequester(focusRequester),
         label = { Text(text = labelValue) },
         value = email,
-        onValueChange = {
-            viewModel.onEmailChange(it)
+        onValueChange = { newText ->
+            val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+            if (allowedCharsRegex.matches(newText)) {
+                viewModel.onEmailChange(newText)
+            }
         },
-        keyboardOptions = KeyboardOptions.Default,
+        keyboardOptions = KeyboardOptions(imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done, keyboardType = KeyboardType.Text),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                nextFocusRequester?.requestFocus() ?: focusManager.clearFocus()
+            },
+            onDone = {
+                focusManager.clearFocus()
+            }
+        ),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -266,19 +272,33 @@ fun EmailBoxForLogin(labelValue: String, painterResource: Painter) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordTextFieldForLogin(labelValue: String, painterResource: Painter) {
+fun PasswordTextFieldForLogin(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
     val viewModel: LoginViewModel = viewModel()
     val password by viewModel.password.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .focusRequester(focusRequester),
         label = { Text(text = labelValue) },
         value = password,
         onValueChange = {
-            viewModel.onPasswordChanged(it)
+                newText ->
+            val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+            if (allowedCharsRegex.matches(newText)) {
+                viewModel.onPasswordChanged(newText)
+            }
         },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done, keyboardType = KeyboardType.Password),
+        keyboardActions = KeyboardActions(
+            onNext = {
+                nextFocusRequester?.requestFocus() ?: focusManager.clearFocus()
+            },
+            onDone = {
+                focusManager.clearFocus()
+            }
+        ),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
@@ -336,12 +356,25 @@ fun ForgotPasswordTextField(navController: NavController) {
 
 
 @Composable
-fun ButtonSignIN(navController: NavController) {
+fun ButtonSignIN(navController: NavController,
+                 onSnackbarMessageChanged: (String?) -> Unit,
+                 onShowSnackbar: (Boolean) -> Unit,
+                 onSnackbarSuccess: (Boolean) -> Unit) {
     val viewModel: LoginViewModel = viewModel()
     val isLoading by viewModel.isLoading.observeAsState(false)
 
     Button(
-        onClick = { viewModel.onLoginClick(navController) },
+        onClick = { viewModel.onLoginClick(navController){ result ->
+            if (result == null) {
+                onSnackbarMessageChanged("Logowanie przebiegło pomyślnie")
+                onSnackbarSuccess(true)
+            } else {
+                onSnackbarMessageChanged(result)
+                onSnackbarSuccess(false)
+            }
+            onShowSnackbar(true)
+        }
+                  },
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
@@ -414,47 +447,4 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier, navController: Nav
             viewModel.getToRegisterScreen(navController)
         }
     )
-}
-@Composable
-fun CustomSnackbar(success: Boolean, type: String, onDismiss: () -> Unit) {
-    LaunchedEffect(Unit) {
-        delay(2000)
-        onDismiss()
-        LoginViewModel().resetSuccess()
-    }
-
-    Snackbar(
-        modifier = Modifier
-            .padding(80.dp)
-            .wrapContentSize(Alignment.Center),
-        shape = RoundedCornerShape(60.dp),
-        containerColor = if (success) Color(0xFF4CAF50) else Color(0xFFF44336),
-        contentColor = Color.White,
-        action = {}
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            Log.e("LoginScreen","Snackbar")
-            Text(
-
-                text = if (success) {
-                    when (type) {
-                        "login" -> "Login Successful"
-                        "Email" -> "Email Sent"
-                        else -> "Registration Successful"
-                    }
-                } else {
-                    when (type) {
-                        "login" -> "Login Failed"
-                        "Email" -> "Email not registered"
-                        else -> "Registration Failed"
-                    }
-                },
-                style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
-            )
-        }
-    }
 }
