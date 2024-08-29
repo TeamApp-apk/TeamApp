@@ -7,8 +7,16 @@ import android.app.Activity.RESULT_OK
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -92,7 +100,8 @@ import com.example.TeamApp.R
 import com.example.ui.theme.textInBoxes
 import kotlinx.coroutines.time.delay
 import androidx.compose.ui.platform.LocalFocusManager
-
+import androidx.compose.ui.text.TextStyle
+import com.example.TeamApp.excludedUI.CustomSnackbar
 
 
 /*
@@ -124,29 +133,6 @@ fun RegisterScreen(navController: NavController){
     val repeatpasswordFocusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-
-
-    LaunchedEffect(loginSuccess, registerSuccess, emailSent) {
-        when {
-            emailSent != null -> {
-                snackbarMessage = "Email"
-                snackbarSuccess = emailSent ?: false
-                showSnackbar = true
-            }
-            loginSuccess != null -> {
-                snackbarMessage = "login"
-                snackbarSuccess = loginSuccess ?: false
-                showSnackbar = true
-            }
-            registerSuccess != null -> {
-                snackbarMessage = "register"
-                snackbarSuccess = registerSuccess ?: false
-                showSnackbar = true
-            }
-        }
-        Log.e("RegisterScreen", "loginSuccess: $loginSuccess, registerSuccess: $registerSuccess, emailSent: $emailSent")
-
-    }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
@@ -196,7 +182,11 @@ fun RegisterScreen(navController: NavController){
                         .fillMaxWidth()
                         .wrapContentSize(Alignment.Center) // Center horizontally
                 ) {
-                    ButtonSignUP(navController)
+                    ButtonSignUP(navController,
+                        onSnackbarMessageChanged = { message -> snackbarMessage = message ?: "" },
+                        onShowSnackbar = { showSnackbar = it },
+                        onSnackbarSuccess = { success -> snackbarSuccess = success}
+                    )
                 }
                 Spacer(modifier = Modifier.height(height * 0.00625f * 9 / density))
                 DividerTextComponent()
@@ -429,7 +419,10 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
 }
 
 @Composable
-fun ButtonSignUP(navController: NavController) {
+fun ButtonSignUP(navController: NavController,
+                 onSnackbarMessageChanged: (String?) -> Unit,
+                 onShowSnackbar: (Boolean) -> Unit,
+                 onSnackbarSuccess: (Boolean) -> Unit) {
     val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel()
     val isLoading by viewModel.isLoading.observeAsState(false)
@@ -437,9 +430,20 @@ fun ButtonSignUP(navController: NavController) {
     val density = LocalDensity.current.density // Użycie gęstości dla rozmiarów
     val height = configuration.screenHeightDp.dp
     val width = configuration.screenWidthDp.dp
+
     
     Button(
-        onClick = { viewModel.onRegisterClick(navController) }, // Zmieniono navController na context
+        onClick = {viewModel.onRegisterClick(navController) { result ->
+            if (result == null) {
+                onSnackbarMessageChanged("Rejestracja przebiegła pomyślnie")
+                onSnackbarSuccess(true)
+            } else {
+                onSnackbarMessageChanged(result)
+                onSnackbarSuccess(false)
+            }
+            onShowSnackbar(true)
+        }
+                  }, // Zmieniono navController na context
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
@@ -490,6 +494,7 @@ fun ButtonSignUP(navController: NavController) {
         }
     }
 }
+
 
 @Composable
 fun DividerTextComponent() {

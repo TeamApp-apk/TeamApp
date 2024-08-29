@@ -9,7 +9,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.TeamApp.event.CreateEventScreen1
+import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.settings.SettingsScreen
@@ -30,7 +30,7 @@ class ForgotPasswordActivity : ComponentActivity() {
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = "changePassword") {
                 composable("changePassword"){ ForgotPasswordScreen(navController) }
-                composable("createEvent") { CreateEventScreen1(navController) }
+                composable("createEvent") { CreateEventScreen(navController) }
                 composable("register") { RegisterScreen(navController) }
                 composable("profile"){ ProfileScreen(navController) }
                 composable("settings"){ SettingsScreen(navController) }

@@ -28,7 +28,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.composable
 import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.data.User
-import com.example.TeamApp.event.CreateEventScreen1
+import com.example.TeamApp.event.CreateEventScreen
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
@@ -100,7 +100,7 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
                 ){
                     composable("register") { RegisterScreen(navController) }
                     composable("login") { LoginScreen(navController) }
-                    composable("createEvent") { CreateEventScreen1(navController) }
+                    composable("createEvent") { CreateEventScreen(navController) }
                     composable("forgotPassword") { ForgotPasswordScreen(navController) }
                 }
             }

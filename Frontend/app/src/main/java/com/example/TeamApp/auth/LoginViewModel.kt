@@ -6,6 +6,8 @@ import android.os.Looper
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
@@ -21,6 +23,9 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.ApiException
 import androidx.navigation.NavController
 import com.example.TeamApp.MainAppActivity
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 
 class LoginViewModel : ViewModel() {
     lateinit var signInLauncher: ActivityResultLauncher<IntentSenderRequest>
@@ -28,6 +33,17 @@ class LoginViewModel : ViewModel() {
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
     val email: LiveData<String> = _email
+
+    private val _snackbarMessage = MutableLiveData<String?>()
+    val snackbarMessage: LiveData<String?> get() = _snackbarMessage
+
+    fun showSnackbar(message: String) {
+        _snackbarMessage.value = message
+    }
+
+    fun clearSnackbar() {
+        _snackbarMessage.value = null
+    }
 
     fun setLoading(loading: Boolean) {
         Log.d("LoginViewModel", "setLoading: $loading")
@@ -82,9 +98,9 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun onLoginClick(navController: NavController) {
-        val email = _email.value ?: return
-        val password = _password.value ?: return
+    fun onLoginClick(navController: NavController, callback: (String?) -> Unit) {
+        val email = _email.value ?: return  callback("Uzupełnij wszystkie pola")
+        val password = _password.value ?: return  callback("Uzupełnij wszystkie pola")
         setLoading(true)
         Log.d("LoginAttempt", "Attempting to log in with email: $email")
 
@@ -96,6 +112,7 @@ class LoginViewModel : ViewModel() {
                         if (task.isSuccessful) {
                             Log.d("Login", "Login successful")
                             _loginSuccess.value = true
+                            callback(null)
 
                             val context = navController.context
                             val intent = Intent(context, MainAppActivity::class.java)
@@ -104,6 +121,7 @@ class LoginViewModel : ViewModel() {
                             context.startActivity(intent)
                         } else {
                             Log.e("Login", "Login failed: ${task.exception?.message}")
+                            callback(task.exception?.message)
                             _loginSuccess.value = false
                         }
                     }, 200) // delay
@@ -112,6 +130,7 @@ class LoginViewModel : ViewModel() {
             Log.d("LoginAttempt", "Login failed: empty email or password field")
             _loginSuccess.value= false
             setLoading(false)
+            callback("Uzupełnij wszystkie pola")
         }
     }
 
@@ -162,59 +181,65 @@ class LoginViewModel : ViewModel() {
             popUpTo("login") { inclusive = true }
         }
     }
-    fun onRegisterClick(navController: NavController) {
+    fun onRegisterClick(navController: NavController, callback: (String?) -> Unit){
         Log.e("LoginViewModel", "onRegisterClick")
-        val email = _email.value ?: return
-        val password = _password.value ?: return
-        val confirmPassword = _confirmPassword.value ?: return
 
+        val email = _email.value ?: return callback("Uzupełnij wszystkie pola")
+        val password = _password.value ?: return callback("Uzupełnij wszystkie pola")
+        val confirmPassword = _confirmPassword.value ?: return callback("Uzupełnij wszystkie pola")
         // Temporarily hardcoded username
         val username = "xyz"
         val db = Firebase.firestore
         val user = User(name = username, email = email)
-//        setLoading(true)
-//        if (password != confirmPassword) {
-//            Log.d("RegisterAttempt", "Register failed: passwords do not match")
-//            _registerSuccess.value = false
-//            setLoading(false)
-//            return
-//        }
         var arePasswordsDifferent: Boolean = false
+        var errorMessage: String? = null
+
+
         if (email.isNotEmpty() && password.isNotEmpty()) {
             setLoading(true)  // Start loading spinner here
             if (password != confirmPassword) {
                 Log.d("RegisterAttempt", "Register failed: passwords do not match")
                 arePasswordsDifferent = true
-
+                setLoading(false)
+                return callback("Hasła są niezgodne")
             }
-            Log.d("RegisterAttempt", "Attempting to register with email: $email")
-            auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->
-                    android.os.Handler(Looper.getMainLooper()).postDelayed({
-                        if (task.isSuccessful && !arePasswordsDifferent) {
-                            Log.d("Register", "Registration successful")
-                            db.collection("users").add(user)
-                            _registerSuccess.value = true
-                            navController.navigate("CreateEvent") {
-                                popUpTo("register") { inclusive = true }
+            else
+            {
+                Log.d("RegisterAttempt", "Attempting to register with email: $email")
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        android.os.Handler(Looper.getMainLooper()).postDelayed({
+                            if (task.isSuccessful && !arePasswordsDifferent) {
+                                Log.d("Register", "Registration successful")
+                                db.collection("users").add(user)
+                                _registerSuccess.value = true
+
+                                navController.navigate("CreateEvent") {
+                                    popUpTo("register") { inclusive = true }
+                                }
+                                callback(null)
+                            } else {
+                                Log.e("Register", "Registration failed: ${task.exception?.message}")
+                                errorMessage = when (val exception = task.exception) {
+                                    is FirebaseAuthWeakPasswordException -> "Hasło jest za słabe"
+                                    is FirebaseAuthInvalidCredentialsException -> "Zły format e-maila"
+                                    is FirebaseAuthUserCollisionException -> "Konto z podanym mailem już istnieje"
+                                    else -> exception?.message ?: "Rejstracja nie powiodła się"
+                                }
+                                _registerSuccess.value = false
+                                callback(errorMessage)
                             }
-                        } else {
-                            Log.e("Register", "Registration failed: ${task.exception?.message}")
-                            _registerSuccess.value = false
-                        }
-                        setLoading(false) // Stop loading spinner here, after all tasks are done
-                    }, 200) // delay for better UX
-                }
+                            setLoading(false) // Stop loading spinner here, after all tasks are done
+                        }, 300) // delay for better UX
+                    }
+            }
         } else {
             Log.d("RegisterAttempt", "Register failed: empty email or password field")
             _registerSuccess.value = false
             setLoading(false)
+            callback("Uzupełnij wszystkie pola")
         }
     }
-
-
-
-
 
     fun resetSuccess() {
         _loginSuccess.postValue(null)
@@ -222,12 +247,12 @@ class LoginViewModel : ViewModel() {
         _emailSent.postValue(null)
     }
 
-    fun onForgotPasswordClick() {
+    fun onForgotPasswordClick(callback: (String?) -> Unit) {
         val email = _email.value ?: return
         if (email.isNullOrEmpty()) {
             Log.e("LoginViewModel", "Email is empty")
             _emailSent.value = false // Indicate that the operation was unsuccessful
-            return
+            return callback("Uzupełnij pole")
         }
 
         Log.d("LoginViewModel", "Checking if email exists in Firestore: $email")
@@ -243,20 +268,24 @@ class LoginViewModel : ViewModel() {
                             if (sendTask.isSuccessful) {
                                 _emailSent.value = true
                                 Log.d("LoginViewModel", "Password reset email sent.")
+                                callback(null)
                             } else {
                                 _emailSent.value = false
                                 Log.e("LoginViewModel", "Failed to send password reset email.", sendTask.exception)
+                                callback("Nie udało się wysłać maila")
                             }
                         }
                 } else {
                     // Email does not exist in the database
                     _emailSent.value = false
                     Log.e("LoginViewModel", "Email not found in the database.")
+                    callback("Nie znaleziono konta z podanym mailem")
                 }
             }
             .addOnFailureListener { exception ->
                 _emailSent.value = false
                 Log.e("LoginViewModel", "Error checking email in the database.", exception)
+                callback("Błąd sprawdzania maila w bazie danych")
             }
     }
 

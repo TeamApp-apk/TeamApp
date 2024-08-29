@@ -12,17 +12,9 @@ import androidx.compose.ui.graphics.Color
 
 @Composable
 fun LoadingScreen() {
-    // Definiujemy gradientowe kolory tła
-    val gradientColors = listOf(
-        Color(0xFFE8E8E8), // Jasny szary kolor
-        Color(0xFF007BFF)  // Niebieski kolor
-    )
-
-    // Ustawiamy tło gradientowe
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(brush = Brush.linearGradient(colors = gradientColors)), // Gradientowe tło
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         // Wskaźnik ładowania

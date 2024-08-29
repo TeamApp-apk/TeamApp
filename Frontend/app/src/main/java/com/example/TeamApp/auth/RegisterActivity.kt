@@ -34,7 +34,6 @@ import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventFragment
 import com.example.TeamApp.event.CreateEventScreen
-import com.example.TeamApp.event.CreateEventScreen1
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.settings.SettingsScreen
@@ -81,10 +80,10 @@ class RegisterActivity : ComponentActivity() {
             var showMainContent by remember { mutableStateOf(false) }
 
             LaunchedEffect(Unit) {
-                delay(400) // Simulate loading time
+                delay(450) // Simulate loading time
                 isLoading = false
 
-                delay(850) // Ensure the loading screen transitions out fully before showing main content
+                delay(360) // Ensure the loading screen transitions out fully before showing main content
                 showMainContent = true
             }
 
@@ -99,7 +98,7 @@ class RegisterActivity : ComponentActivity() {
                 AnimatedVisibility(
                     visible = isLoading,
                     enter = slideInVertically(
-                        initialOffsetY = { it },
+                        initialOffsetY = {it},
                         animationSpec = tween(
                             durationMillis = 1000,
                             easing = FastOutSlowInEasing
@@ -111,7 +110,7 @@ class RegisterActivity : ComponentActivity() {
                             durationMillis = 1000,
                             easing = FastOutSlowInEasing
                         )
-                    ) + fadeOut(animationSpec = tween(durationMillis = 1000))
+                    )
                 ) {
                     LoadingScreen()
                 }
