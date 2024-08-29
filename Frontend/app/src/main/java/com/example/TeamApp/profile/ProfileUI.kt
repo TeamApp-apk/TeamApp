@@ -46,7 +46,7 @@ fun ProfileScreen(navController: NavController) {
         ) {
             Spacer(modifier = Modifier.height(50.dp)) // Adjust the height as needed
             Button(
-                onClick = { viewModel.navitagateToSettings(navController) },
+                onClick = { navController.navigate("settings") },
             ) {
                 Text(text = "Ustawienia")
             }

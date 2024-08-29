@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -43,19 +45,31 @@ import com.example.TeamApp.excludedUI.ActivityCard
 import com.example.TeamApp.event.CreateEventViewModel
 import com.example.TeamApp.event.ViewModelProvider
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.map
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun SearchScreen(navController: NavController) {
+fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boolean) -> Unit) {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
-    val activityList = viewModel.activityList
     var showEmptyMessage by remember { mutableStateOf(false) }
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    val scrollState = rememberLazyListState()
+    val activityList = remember { viewModel.activityList }
 
+    LaunchedEffect(scrollState) {
+        var previousIndex = 0
+        var previousOffset = 0
+        snapshotFlow { scrollState.firstVisibleItemIndex to scrollState.firstVisibleItemScrollOffset }
+            .collect { (index, offset) ->
+                val isScrollingDown = index > previousIndex || (index == previousIndex && offset > previousOffset)
+                onScroll(isScrollingDown)
+                previousIndex = index
+                previousOffset = offset
+            }
+    }
 
     LaunchedEffect(Unit) {
         if (activityList.isEmpty()) {
-            delay(2000) // Opóźnienie 2 sekundy przed sprawdzeniem
+            delay(2000) // Delay 2 seconds before checking
             showEmptyMessage = activityList.isEmpty()
         }
     }
@@ -68,8 +82,7 @@ fun SearchScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .background(brush = Brush.linearGradient(colors = gradientColors))
-            .padding(horizontal = 20.dp, vertical = 16.dp)
-            .padding(bottom = 60.dp)
+            .padding(horizontal = 20.dp)
     ) {
         Column(
             modifier = Modifier
@@ -77,7 +90,7 @@ fun SearchScreen(navController: NavController) {
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth() // Ensure the Row fills the maximum width
+                    .fillMaxWidth()
                     .height(90.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
                 verticalAlignment = Alignment.CenterVertically,
@@ -87,9 +100,9 @@ fun SearchScreen(navController: NavController) {
 
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth() 
-                    .weight(1f)
-                    .padding(0.dp)
+                    .fillMaxWidth()
+                    .weight(1f) // Ensure LazyColumn fills the remaining space
+                , state = scrollState
             ) {
                 when {
                     showEmptyMessage -> {
@@ -97,7 +110,7 @@ fun SearchScreen(navController: NavController) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(horizontal = 20.dp), // Ensure the Box fills the available size and has the same horizontal padding
+                                    .padding(horizontal = 20.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 NoCurrentActivitiesBar()
@@ -119,19 +132,16 @@ fun SearchScreen(navController: NavController) {
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(60.dp)) // Add spacing before the bottom bar
-
         }
     }
 }
 
-@Composable
-@Preview(showBackground = false)
-
-fun MainScreenPreview(){
-    SearchScreen(navController = NavController(LocalContext.current))
-}
+//@Composable
+//@Preview(showBackground = false)
+//
+//fun MainScreenPreview(){
+//    SearchScreen(navController = NavController(LocalContext.current))
+//}
 @Composable
 fun CurrentCity(value: String, modifier: Modifier = Modifier) {
     Box(

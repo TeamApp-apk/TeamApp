@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.compose.composable
 import com.example.TeamApp.MainAppActivity
@@ -116,7 +117,10 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
                         if (task.isSuccessful) {
                             Log.d("LoginActivity", "signInWithCredential:success")
                             val user = FirebaseAuth.getInstance().currentUser
-                            updateUI(user, navController)
+                            val intent = Intent(this, MainAppActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                            finish()
                             val db = com.google.firebase.ktx.Firebase.firestore
                             user?.let { firebaseUser ->
                                 val email = firebaseUser.email
@@ -152,8 +156,9 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
 
     private fun updateUI(user: FirebaseUser?, navController: NavController) {
         if (user != null) {
-            // Użyj NavController do nawigacji
-            navController.navigate("createEvent")
+            // Przejdź do CreateEventActivity za pomocą Intent
+            val intent = Intent(this, MainAppActivity::class.java)
+            startActivity(intent)
         } else {
             Log.e("LoginActivity", "Sign-in failed")
         }

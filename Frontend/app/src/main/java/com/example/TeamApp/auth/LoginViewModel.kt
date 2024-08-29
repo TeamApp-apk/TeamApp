@@ -8,11 +8,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.TeamApp.data.User
-
 import com.example.TeamApp.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
@@ -21,10 +22,10 @@ import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.ApiException
 import androidx.navigation.NavController
+import com.example.TeamApp.MainAppActivity
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
-
 
 class LoginViewModel : ViewModel() {
     lateinit var signInLauncher: ActivityResultLauncher<IntentSenderRequest>
@@ -106,16 +107,18 @@ class LoginViewModel : ViewModel() {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
-                    // Add a delay to simulate loading
                     android.os.Handler(Looper.getMainLooper()).postDelayed({
                         setLoading(false)
                         if (task.isSuccessful) {
                             Log.d("Login", "Login successful")
                             _loginSuccess.value = true
-                            navController.navigate("createEvent") {
-                                popUpTo("login") { inclusive = true }
-                            }
                             callback(null)
+
+                            val context = navController.context
+                            val intent = Intent(context, MainAppActivity::class.java)
+                            // Dodaj flagi, aby zamknąć bieżącą aktywność po przejściu do nowej
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            context.startActivity(intent)
                         } else {
                             Log.e("Login", "Login failed: ${task.exception?.message}")
                             callback(task.exception?.message)
@@ -130,6 +133,7 @@ class LoginViewModel : ViewModel() {
             callback("Uzupełnij wszystkie pola")
         }
     }
+
 
 
     fun signInWithGoogle(context: Context) {
