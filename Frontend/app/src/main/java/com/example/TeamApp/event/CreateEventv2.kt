@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
-
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
@@ -246,7 +246,7 @@ fun DescriptionDialog(
 ) {
     val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
     var text by remember { mutableStateOf(initialText) }
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel: CreateEventViewModel = viewModel()
 
     // Create a FocusRequester to request focus on the TextField
     val focusRequester = remember { FocusRequester() }
@@ -332,7 +332,7 @@ fun SearchStreetField() {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel:CreateEventViewModel = viewModel()
 
     Box(
         modifier = Modifier
@@ -532,7 +532,7 @@ fun ButtonsColumn() {  // Zmieniłem nazwę na ButtonsColumn, bo teraz to będzi
 
 @Composable
 fun SportDropdownButton(modifier: Modifier = Modifier) {
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel: CreateEventViewModel = viewModel()
     val availableSports = viewModel.getAvailableSports()
     var expanded by remember { mutableStateOf(false) }
     val sport by viewModel.sport.observeAsState("")
@@ -598,7 +598,7 @@ fun SportDropdownButton(modifier: Modifier = Modifier) {
 fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
     var selectedPeople by remember { mutableStateOf<Int?>(null) }
     var expanded by remember { mutableStateOf(false) }
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel:CreateEventViewModel = viewModel()
 
     Box(
         modifier = modifier
