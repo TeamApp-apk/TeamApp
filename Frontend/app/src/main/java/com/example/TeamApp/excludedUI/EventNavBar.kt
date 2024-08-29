@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,8 +26,9 @@ fun BottomNavBar(navController: NavController) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp)
+            .height(50.dp)
             .background(color = Color(0xFFF2F2F2))
+            .navigationBarsPadding()
             .padding(horizontal = 40.dp, vertical = 8.dp)
     ) {
         Row(
@@ -35,7 +37,6 @@ fun BottomNavBar(navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(24.dp)
-
         ) {
             IconButton(
                 onClick = { navController.navigate("search") },

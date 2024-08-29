@@ -12,6 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.getValue
@@ -36,7 +37,6 @@ class MainAppActivity : ComponentActivity() {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             Log.d("MainAppActivity", "onCreate called")
             SystemUiUtils.configureSystemUi(this)
@@ -47,6 +47,7 @@ class MainAppActivity : ComponentActivity() {
             )
             var isBottomBarVisible by remember { mutableStateOf(true) }
             Scaffold(
+                modifier = Modifier.navigationBarsPadding(),
                 bottomBar = {
                     if (isBottomBarVisible) {
                         BottomNavBar(navController)

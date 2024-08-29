@@ -154,7 +154,7 @@ fun LoginScreen(navController: NavController){
                 Spacer(modifier = Modifier.height(height * 0.00625f * 8 * density))
                 EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.mail_icon), nextFocusRequester = passwordFocusRequester, focusRequester = emailFocusRequester )
                 Spacer(modifier = Modifier.height(height * 0.00625f * 6 / density))
-                PasswordTextFieldForLogin(labelValue ="password" , painterResource (id = R.drawable.lock_icon), nextFocusRequester = null, focusRequester = passwordFocusRequester )
+                PasswordTextFieldForLogin(labelValue ="Hasło" , painterResource (id = R.drawable.lock_icon), nextFocusRequester = null, focusRequester = passwordFocusRequester )
                 Spacer(modifier = Modifier.height(height * 0.00625f * 6 / density))
                 Row(horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
@@ -411,7 +411,7 @@ fun ButtonSignIN(navController: NavController,
                         fontSize = 16.sp,
                         fontFamily = FontFamily(Font(R.font.robotobold)),
                         fontWeight = FontWeight(500),
-                        color = Color(0xFF003366),
+                        color = Color(0xffe0e0e0),
                         textAlign = TextAlign.Center,
                         letterSpacing = 1.sp
                     )
@@ -435,7 +435,7 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier, navController: Nav
     val annotatedString = buildAnnotatedString {
         append(initialText)
         pushStringAnnotation(tag = "logintext", annotation = loginText)
-        withStyle(style = SpanStyle(color = Color.Blue)) {
+        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontWeight = FontWeight.Bold)) {
             append(loginText)
         }
         pop()
@@ -448,3 +448,4 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier, navController: Nav
         }
     )
 }
+
