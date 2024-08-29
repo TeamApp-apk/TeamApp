@@ -6,6 +6,8 @@ import android.os.Looper
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -19,6 +21,7 @@ import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.ApiException
 import androidx.navigation.NavController
+import com.example.TeamApp.MainAppActivity
 
 class LoginViewModel : ViewModel() {
     lateinit var signInLauncher: ActivityResultLauncher<IntentSenderRequest>
@@ -89,15 +92,17 @@ class LoginViewModel : ViewModel() {
         if (email.isNotEmpty() && password.isNotEmpty()) {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
-                    // Add a delay to simulate loading
                     android.os.Handler(Looper.getMainLooper()).postDelayed({
                         setLoading(false)
                         if (task.isSuccessful) {
                             Log.d("Login", "Login successful")
                             _loginSuccess.value = true
-                            navController.navigate("createEvent") {
-                                popUpTo("login") { inclusive = true }
-                            }
+
+                            val context = navController.context
+                            val intent = Intent(context, MainAppActivity::class.java)
+                            // Dodaj flagi, aby zamknąć bieżącą aktywność po przejściu do nowej
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            context.startActivity(intent)
                         } else {
                             Log.e("Login", "Login failed: ${task.exception?.message}")
                             _loginSuccess.value = false
@@ -110,6 +115,7 @@ class LoginViewModel : ViewModel() {
             setLoading(false)
         }
     }
+
 
 
     fun signInWithGoogle(context: Context) {

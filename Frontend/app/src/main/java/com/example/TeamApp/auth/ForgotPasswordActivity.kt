@@ -34,7 +34,7 @@ class ForgotPasswordActivity : ComponentActivity() {
                 composable("register") { RegisterScreen(navController) }
                 composable("profile"){ ProfileScreen(navController) }
                 composable("settings"){ SettingsScreen(navController) }
-                composable("search"){ SearchScreen(navController) }
+                //composable("search"){ SearchScreen(navController) }
             }
         }
     }

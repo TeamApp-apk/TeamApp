@@ -159,33 +159,7 @@ class RegisterActivity : ComponentActivity() {
                     ) {
                         composable("register") { RegisterScreen(navController) }
                         composable("login") { LoginScreen(navController) }
-                        composable(
-                            "CreateEvent",
-                            enterTransition = {
-                                fadeIn(animationSpec = tween(durationMillis = 800)) // Krótkie zanikanie
-                            },
-                            exitTransition = {
-                                fadeOut(animationSpec = tween(durationMillis = 50)) // Krótkie zanikanie
-                            }
-                        ) {
-                            CreateEventFragment()
-                        }
                         composable("forgotPassword") { ForgotPasswordScreen(navController) }
-                        composable(
-                            "search",
-                            enterTransition = {
-                                fadeIn(animationSpec = tween(durationMillis =800)) // Krótkie zanikanie
-                            },
-                            exitTransition = {
-                                fadeOut(animationSpec = tween(durationMillis = 50)) // Krótkie zanikanie
-                            }
-                        ) {
-                            SearchScreen(navController)
-                        }
-
-
-                        composable("profile") { ProfileScreen(navController) }
-                        composable("settings") { SettingsScreen(navController) }
 
                     }
                 }
@@ -204,7 +178,10 @@ class RegisterActivity : ComponentActivity() {
                         if (task.isSuccessful) {
                             Log.d("RegisterActivity", "signInWithCredential:success")
                             val user = FirebaseAuth.getInstance().currentUser
-                            updateUI(user, navController)
+                            val intent = Intent(this, MainAppActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            startActivity(intent)
+                            finish()
                             val db = com.google.firebase.ktx.Firebase.firestore
                             user?.let { firebaseUser ->
                                 val email = firebaseUser.email
@@ -238,16 +215,10 @@ class RegisterActivity : ComponentActivity() {
         }
     }
 
-    private fun updateUI(user: FirebaseUser?, navController: NavController) {
-        if (user != null) {
-            // Użyj NavController do nawigacji
-            navController.navigate("createEvent")
-        } else {
-            Log.e("LoginActivity", "Sign-in failed")
-        }
-    }
+
     private fun goToMainAppActivity(){
         val intent = Intent(this, MainAppActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
     }

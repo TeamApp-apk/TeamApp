@@ -20,6 +20,7 @@ import com.example.compose.TeamAppTheme
 @Composable
 fun SettingsScreen(navController: NavController) {
     val viewModel: SettingsViewModel = viewModel()
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,7 +54,7 @@ fun SettingsScreen(navController: NavController) {
 
         SettingItem(
             title = "Log out",
-            onClick = {viewModel.logout(navController)}
+            onClick = {viewModel.logout(context)}
         )
     }
 }

@@ -32,24 +32,7 @@ class SearchThroughActivity : ComponentActivity() {
                 composable("register") { RegisterScreen(navController) }
                 composable("profile"){ ProfileScreen(navController) }
                 composable("settings"){ SettingsScreen(navController) }
-                composable("search"){ SearchScreen(navController) }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting2(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview2() {
-    TeamAppTheme {
-        Greeting2("Android")
     }
 }

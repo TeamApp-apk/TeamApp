@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,8 +19,10 @@ import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.settings.SettingsScreen
 import com.example.TeamApp.utils.SystemUiUtils
 import com.example.compose.TeamAppTheme
+import com.google.accompanist.navigation.animation.composable
 
 class ProfileActivity : ComponentActivity() {
+    @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -31,24 +34,8 @@ class ProfileActivity : ComponentActivity() {
                 composable("register") { RegisterScreen(navController) }
                 composable("profile"){ProfileScreen(navController)}
                 composable("settings"){ SettingsScreen(navController) }
-                composable("search"){SearchScreen(navController)}
+                composable("settings"){ SettingsScreen(navController) }
+                }
             }
         }
     }
-
-    @Composable
-    fun Greeting(name: String, modifier: Modifier = Modifier) {
-        Text(
-            text = "Hello $name!",
-            modifier = modifier
-        )
-    }
-
-    @Preview(showBackground = true)
-    @Composable
-    fun GreetingPreview() {
-        TeamAppTheme {
-            Greeting("Android")
-        }
-    }
-}
