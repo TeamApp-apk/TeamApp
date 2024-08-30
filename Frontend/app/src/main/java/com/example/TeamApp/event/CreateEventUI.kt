@@ -7,6 +7,8 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -47,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
@@ -254,7 +257,7 @@ fun DescriptionInputField(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = if (description.isEmpty()) "Dodaj opis" else description,
+            text = if (description.isEmpty()) "Opis" else description,
             textAlign = TextAlign.Center,
             style = TextStyle(
                 color = if (description.isEmpty()) Color.Gray else Color.Black,
@@ -641,6 +644,7 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
                 contentColor = Color.Black
             ),
             modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
                 .padding(8.dp)
                 .fillMaxWidth()
                 .height(56.dp)
@@ -651,9 +655,9 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 25.sp,
-                    fontFamily = FontFamily(Font(R.font.robotoregular)),
-                    fontWeight = FontWeight(400),
-                    color = Color.Gray
+                    fontFamily = if(date.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontWeight = if(date.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                    color = if(date.isEmpty()) Color.Gray else Color(0xFF003366),
                 )
             )
         }
@@ -692,17 +696,19 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
     val availableSports = viewModel.getAvailableSports()
     var showDialog by remember { mutableStateOf(false) }
     val selectedSport by viewModel.sport.observeAsState("")
-
     // Przycisk, który otwiera popup
     Box(
         modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
             .background(
                 Color.White,
                 shape = RoundedCornerShape(16.dp)
             )
             .clickable { showDialog = true } // Kliknięcie otwiera popup
             .padding(16.dp)
-            .heightIn(min = 28.dp)
+            .heightIn(min = 28.dp),
+        contentAlignment = Alignment.Center
+
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -716,20 +722,13 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                     .wrapContentSize(Alignment.Center),
                 style = TextStyle(
                     fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.robotoregular)),
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Gray,
+                    fontFamily = if (selectedSport.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontWeight = if(selectedSport.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                    color = if (selectedSport.isEmpty()) Color.Gray else Color(0xFF003366),
                     textAlign = TextAlign.Center
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
-            )
-
-            Image(
-                painter = painterResource(id = R.drawable.chevron_down),
-                contentDescription = "Activity Icon",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(24.dp)
             )
         }
     }
@@ -798,13 +797,15 @@ fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
     // Przycisk, który otwiera popup
     Box(
         modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
             .background(
                 Color.White,
                 shape = RoundedCornerShape(16.dp)
             )
             .clickable { showDialog = true } // Kliknięcie otwiera popup
             .padding(16.dp)
-            .heightIn(min = 28.dp)
+            .heightIn(min = 28.dp),
+        contentAlignment = Alignment.Center
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -813,21 +814,14 @@ fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = if (limit.isEmpty()) "Liczba uczestników" else limit,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).align(Alignment.CenterVertically),
                 style = TextStyle(
                     fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.robotoregular)),
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Gray,
+                    fontFamily = if(limit.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontWeight = if(limit.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                    color = if(limit.isEmpty()) Color.Gray else Color(0xFF003366),
                     textAlign = TextAlign.Center
                 )
-            )
-
-            Image(
-                painter = painterResource(id = R.drawable.chevron_down),
-                contentDescription = "Chevron Icon",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(24.dp)
             )
         }
     }
