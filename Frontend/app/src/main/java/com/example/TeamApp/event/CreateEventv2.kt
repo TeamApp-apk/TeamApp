@@ -159,7 +159,8 @@ fun CreateEventScreen(navController: NavController) {
                     )
 
                     Column(
-                        modifier = Modifier.padding(horizontal = 20.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         SearchStreetField()
@@ -464,6 +465,7 @@ fun SuggestionItem(suggestion: String, onSuggestionClick: (String) -> Unit) {
     )
 }
 
+
 @SuppressLint("DefaultLocale")
 @Composable
 fun MyDateTimePickerv2() {
@@ -491,11 +493,8 @@ fun MyDateTimePickerv2() {
         datePicker.minDate = calendar.timeInMillis
     }
 
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
         Button(
-            onClick = { showDialog = true },
+            onClick = { showDialog = true},
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White,
                 contentColor = Color.Black
@@ -505,19 +504,21 @@ fun MyDateTimePickerv2() {
                 .fillMaxWidth()
                 .height(56.dp)
                 .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
-        ) {
+        )  {
             Text(
                 text = if (date.isEmpty()) "Data i godzina" else date,
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 25.sp,
+                    textAlign = TextAlign.Center,
                     fontFamily = FontFamily(Font(R.font.robotoregular)),
                     fontWeight = FontWeight(400),
-                    color = Color.Gray
-                )
+                    color = if (date.isEmpty()) Color.Gray else Color.Black,
+                ),
+                    maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
-    }
 
     if (showDialog)
     {
@@ -533,9 +534,11 @@ fun MyDateTimePickerv2() {
                         text = "Wybierz Datę",
                         style = TextStyle(
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
                         ),
                         modifier = Modifier.padding(8.dp)
+
                     )
 
                     Box(

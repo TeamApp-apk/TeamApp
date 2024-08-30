@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,13 +73,14 @@ fun PickerExample(onDateTimeSelected: (String) -> Unit) {
                 val locale = Locale("pl", "PL")
                 val formatter = DateTimeFormatter.ofPattern("d MMM", locale)
 
-                (0..30).map { i ->
+                (0..70).map { i ->
                     val date = currentDate.plusDays(i.toLong())
                     val dayOfWeek = if (i == 0) "Dzisiaj" else date.dayOfWeek.getDisplayName(java.time.format.TextStyle.SHORT, locale)
                     val formattedDate = date.format(formatter)
                     "$dayOfWeek $formattedDate"
                 }
             }
+
 
             Row(modifier = Modifier
                 .fillMaxWidth())
@@ -98,7 +100,11 @@ fun PickerExample(onDateTimeSelected: (String) -> Unit) {
                         visibleItemsCount = 3,
                         modifier = Modifier.background(Color.White),
                         textModifier = Modifier.padding(8.dp),
-                        textStyle = TextStyle(fontSize = 24.sp)
+                        textStyle = TextStyle(fontSize = 24.sp),
+                        onScrollToIndex = { index ->
+                            dayPickerState.selectedIndex = index
+                        },
+                        loop = false
                     )
                 }
 
@@ -116,7 +122,10 @@ fun PickerExample(onDateTimeSelected: (String) -> Unit) {
                         visibleItemsCount = 3,
                         modifier = Modifier.background(Color.White),
                         textModifier = Modifier.padding(8.dp),
-                        textStyle = TextStyle(fontSize = 24.sp)
+                        textStyle = TextStyle(fontSize = 24.sp),
+                        onScrollToIndex = { index ->
+                            hourPickerState.selectedIndex = index
+                        }
                     )
                 }
 
@@ -134,7 +143,10 @@ fun PickerExample(onDateTimeSelected: (String) -> Unit) {
                         visibleItemsCount = 3,
                         modifier = Modifier.background(Color.White),
                         textModifier = Modifier.padding(8.dp),
-                        textStyle = TextStyle(fontSize = 24.sp)
+                        textStyle = TextStyle(fontSize = 24.sp),
+                                onScrollToIndex = { index ->
+                            minutesPickerState.selectedIndex = index
+                        }
                     )
                 }
             }
@@ -146,23 +158,33 @@ fun PickerExample(onDateTimeSelected: (String) -> Unit) {
 
             val isToday = selectedDay.startsWith("Dzisiaj")
 
-
-            val selectedHourInt = selectedHour.toInt()
-            val selectedMinuteInt = selectedMinute.toInt()
-
-
             val adjustedHours = if (isToday) {
                 hours.filter { it.toInt() >= currentHour }
             } else {
                 hours
             }
 
-            val adjustedMinutes = if (isToday && selectedHourInt == currentHour) {
+            val adjustedMinutes = if (isToday && selectedHour.toInt() == currentHour) {
                 minutes.filter { it.toInt() >= currentMinute }
             } else {
                 minutes
             }
 
+            LaunchedEffect(isToday, selectedHour) {
+                if (isToday) {
+                    val validHourIndex = adjustedHours.indexOf(selectedHour).coerceAtLeast(0)
+                    hourPickerState.selectedIndex = (validHourIndex)
+                   // Log.e("Picker", "changing value: " + hourPickerState.selectedIndex)
+                }
+            }
+
+            LaunchedEffect(isToday, selectedHour, selectedMinute) {
+                if (isToday && selectedHour.toInt() == currentHour) {
+                    val validMinuteIndex = adjustedMinutes.indexOf(selectedMinute).coerceAtLeast(0)
+                    minutesPickerState.selectedIndex = (validMinuteIndex)
+                    // Log.e("Picker", "changing value: " + minutesPickerState.selectedIndex)
+                }
+            }
 
             val selectedDateTime = if (selectedDay.startsWith("Dzisiaj")) {
                 val currentDateFormatted = currentDate.format(DateTimeFormatter.ofPattern("d MMMM", locale))

@@ -1,4 +1,5 @@
 package com.example.TeamApp.excludedUI
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
@@ -42,14 +43,34 @@ fun Picker(
     textModifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     dividerColor: Color = LocalContentColor.current,
+    onScrollToIndex: (Int) -> Unit = {}, // Add a parameter for the scroll function
+    loop: Boolean = true
 ) {
 
     val visibleItemsMiddle = visibleItemsCount / 2
     val listScrollCount = Integer.MAX_VALUE
     val listScrollMiddle = listScrollCount / 2
-    val listStartIndex = listScrollMiddle - listScrollMiddle % items.size - visibleItemsMiddle + startIndex
+    val listStartIndex = if (loop) {
+        listScrollMiddle - listScrollMiddle % items.size - visibleItemsMiddle + startIndex
+    }
+    else
+    {
+        startIndex
+    }
 
-    fun getItem(index: Int) = items[index % items.size]
+    val paddedItems = if (loop) {
+        items
+    } else {
+        // Add empty strings to the start and end of the list to ensure proper padding
+        val emptyItems = List(visibleItemsMiddle) { "" }
+        emptyItems + items + emptyItems
+    }
+
+    fun getItem(index: Int) = if (loop) {
+        items[index % items.size]
+    } else {
+        paddedItems[index % paddedItems.size]
+    }
 
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = listStartIndex)
     val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
@@ -66,11 +87,24 @@ fun Picker(
     }
 
     LaunchedEffect(listState) {
-        snapshotFlow { listState.firstVisibleItemIndex }
-            .map { index -> (index + visibleItemsMiddle) % items.size}
-            .distinctUntilChanged()
-            .collect { index -> state.selectedIndex = index }
+        if (loop)
+        {
+            snapshotFlow { listState.firstVisibleItemIndex }
+                .map { index -> (index + visibleItemsMiddle) % items.size}
+                .distinctUntilChanged()
+                .collect { index -> state.selectedIndex = index }
+        }
+        else
+        {
+            snapshotFlow { listState.firstVisibleItemIndex }
+                .map { index ->
+                    (index - visibleItemsMiddle + 1).coerceIn(0, items.size - 1)
+                }
+                .distinctUntilChanged()
+                .collect { index -> state.selectedIndex = index }
+        }
     }
+
 
     Box(modifier = modifier) {
 
@@ -83,7 +117,7 @@ fun Picker(
                 .height(itemHeightDp * visibleItemsCount)
                 .fadingEdge(fadingEdgeGradient)
         ) {
-            items(listScrollCount) { index ->
+            items(if (loop) Integer.MAX_VALUE else paddedItems.size) { index ->
                 Text(
                     text = getItem(index),
                     maxLines = 1,
