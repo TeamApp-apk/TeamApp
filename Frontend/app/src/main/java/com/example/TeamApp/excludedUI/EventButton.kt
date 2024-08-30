@@ -42,9 +42,9 @@ fun EventButton(
         Text(
             text = text,
             style = TextStyle(
-                fontSize = 19.sp,
+                fontSize = 20.sp,
                 fontFamily = FontFamily(Font(R.font.robotobold)),
-                fontWeight = FontWeight(600),
+                fontWeight = FontWeight(1000),
                 color = Color(0xFF003366), // Kolor tekstu w przycisku
                 textAlign = TextAlign.Center,
                 letterSpacing = 1.sp
