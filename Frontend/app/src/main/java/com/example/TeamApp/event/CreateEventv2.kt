@@ -70,6 +70,7 @@ import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.excludedUI.EventButton
+import com.example.TeamApp.excludedUI.PickerExample
 import com.example.TeamApp.excludedUI.getPlaceSuggestions
 import java.util.Calendar
 import kotlinx.coroutines.launch
