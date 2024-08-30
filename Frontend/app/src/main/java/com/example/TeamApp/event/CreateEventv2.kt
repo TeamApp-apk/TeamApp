@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -30,6 +32,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -64,7 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
-import androidx.hilt.navigation.compose.hiltViewModel
+//import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
@@ -542,14 +545,14 @@ fun ButtonsColumn() {  // Zmieniłem nazwę na ButtonsColumn, bo teraz to będzi
             .padding(8.dp)
     ) {
         // Sport Dropdown Button
-        SportDropdownButton(
+        SportPopupButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp) // Dystans między przyciskami
         )
 
         // Participants Dropdown Button
-        ParticipantsDropdownButton(
+        ParticipantsPopupButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp) // Dystans między przyciskami
@@ -559,19 +562,20 @@ fun ButtonsColumn() {  // Zmieniłem nazwę na ButtonsColumn, bo teraz to będzi
 
 
 @Composable
-fun SportDropdownButton(modifier: Modifier = Modifier) {
+fun SportPopupButton(modifier: Modifier = Modifier) {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val availableSports = viewModel.getAvailableSports()
-    var expanded by remember { mutableStateOf(false) }
-    val sport by viewModel.sport.observeAsState("")
+    var showDialog by remember { mutableStateOf(false) }
+    val selectedSport by viewModel.sport.observeAsState("")
 
+    // Przycisk, który otwiera popup
     Box(
         modifier = modifier
             .background(
                 Color.White,
                 shape = RoundedCornerShape(16.dp)
-            ) // Białe tło i zaokrąglone rogi
-            .clickable { expanded = !expanded }
+            )
+            .clickable { showDialog = true } // Kliknięcie otwiera popup
             .padding(16.dp)
             .heightIn(min = 28.dp)
     ) {
@@ -581,10 +585,10 @@ fun SportDropdownButton(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = if (sport.isEmpty()) "Dyscyplina" else sport,
+                text = if (selectedSport.isEmpty()) "Dyscyplina" else selectedSport,
                 modifier = Modifier
                     .weight(1f)
-                    .wrapContentSize(Alignment.Center), // Dostosowuje rozmiar do treści
+                    .wrapContentSize(Alignment.Center),
                 style = TextStyle(
                     fontSize = 16.sp,
                     fontFamily = FontFamily(Font(R.font.robotoregular)),
@@ -592,8 +596,8 @@ fun SportDropdownButton(modifier: Modifier = Modifier) {
                     color = Color.Gray,
                     textAlign = TextAlign.Center
                 ),
-                maxLines = 1, // Zapewnia, że tekst nie będzie się łamał
-                overflow = TextOverflow.Ellipsis // Dodaje „...” jeśli tekst jest za długi
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
             Image(
@@ -605,37 +609,75 @@ fun SportDropdownButton(modifier: Modifier = Modifier) {
         }
     }
 
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        availableSports.forEach { sport ->
-            DropdownMenuItem(
-                text = { Text(sport) },
-                onClick = {
-                    viewModel.onSportChange(sport)
-                    expanded = false
+    // Popup dialog z przewijalną listą
+    if (showDialog) {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = Color.White,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Wybierz dyscyplinę",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        ),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                    // Lista przewijalna
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp) // Ograniczenie wysokości popupu
+                    ) {
+                        items(availableSports) { sport ->
+                            Text(
+                                text = sport,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        viewModel.onSportChange(sport)
+                                        showDialog = false // Zamknięcie popupu po wybraniu opcji
+                                    }
+                                    .padding(12.dp),
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    color = Color.Black
+                                )
+                            )
+                        }
+                    }
                 }
-            )
+            }
         }
     }
 }
 
 @Composable
-fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
+fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
     var selectedPeople by remember { mutableStateOf<Int?>(null) }
-    var expanded by remember { mutableStateOf(false) }
-    val viewModel:CreateEventViewModel = ViewModelProvider.createEventViewModel
+    var showDialog by remember { mutableStateOf(false) }
+    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val limit by viewModel.limit.observeAsState("")
 
+    // Przycisk, który otwiera popup
     Box(
         modifier = modifier
             .background(
                 Color.White,
                 shape = RoundedCornerShape(16.dp)
             )
-            .clickable { expanded = !expanded }
+            .clickable { showDialog = true } // Kliknięcie otwiera popup
             .padding(16.dp)
             .heightIn(min = 28.dp)
     ) {
@@ -665,26 +707,56 @@ fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
         }
     }
 
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        (1..22).forEach { peopleCount ->
-            DropdownMenuItem(
-                onClick = {
-                    selectedPeople = peopleCount
-                    viewModel.onLimitChange(peopleCount.toString())
-                    expanded = false
-                },
-                text = {
+    // Popup dialog z przewijalną listą uczestników
+    if (showDialog) {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = Color.White,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
                     Text(
-                        text = peopleCount.toString(),
-                        fontSize = 18.sp,
-                        textAlign = TextAlign.Start
+                        text = "Wybierz liczbę uczestników",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        ),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .align(Alignment.CenterHorizontally)
                     )
+
+                    // Lista przewijalna
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp) // Ograniczenie wysokości popupu
+                    ) {
+                        items((1..22).toList()) { peopleCount ->
+                            Text(
+                                text = peopleCount.toString(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        selectedPeople = peopleCount
+                                        viewModel.onLimitChange(peopleCount.toString())
+                                        showDialog = false // Zamknięcie popupu po wyborze liczby
+                                    }
+                                    .padding(12.dp),
+                                fontSize = 18.sp,
+                                color = Color.Black,
+                                textAlign = TextAlign.Start
+                            )
+                        }
+                    }
                 }
-            )
+            }
         }
     }
 }

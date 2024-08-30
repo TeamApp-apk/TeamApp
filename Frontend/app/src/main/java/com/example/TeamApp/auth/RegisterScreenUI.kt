@@ -167,7 +167,7 @@ fun RegisterScreen(navController: NavController){
             Column {
                 Spacer(modifier = Modifier.height(height * 0.00625f * 5))
                 Spacer(modifier = Modifier.height(height * 0.00625f * 8))
-                UpperTextField(value = "Dolacz do nas!")
+                UpperTextField(value = "Dołącz do nas!", )
                 Spacer(modifier = Modifier.height(height * 0.00625f * 6 ))
                 NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.user_icon), nextFocusRequester = emailFocusRequester, focusRequester = nameFocusRequester)
                 Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
@@ -473,13 +473,14 @@ fun ButtonSignUP(navController: NavController,
                     modifier = Modifier
                         .weight(1f) // Take up remaining space on the left
                         .wrapContentWidth(align = Alignment.CenterHorizontally)
+
                 ) {
                     Text(
                         text = "Zarejestruj się!",
                         fontSize = 16.sp,
                         fontFamily = FontFamily(Font(R.font.robotobold)),
                         fontWeight = FontWeight(500),
-                        color = Color(0xFF003366),
+                        color = Color(0xffe0e0e0),
                         textAlign = TextAlign.Center,
                         letterSpacing = 1.sp
                     )
@@ -533,7 +534,7 @@ fun ClickableLoginTextComponent(modifier: Modifier = Modifier, navController: Na
     val annotatedString = buildAnnotatedString {
         append(initialText)
         pushStringAnnotation(tag = "logintext", annotation = loginText)
-        withStyle(style = SpanStyle(color = Color.Blue, fontFamily =
+        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
         FontFamily(Font(R.font.robotobold)) )) {
             append(loginText)
         }

@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.data.User
-import com.example.TeamApp.event.CreateEventFragment
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.searchThrough.SearchScreen
@@ -83,7 +82,7 @@ class RegisterActivity : ComponentActivity() {
                 delay(450) // Simulate loading time
                 isLoading = false
 
-                delay(360) // Ensure the loading screen transitions out fully before showing main content
+                delay(380) // Ensure the loading screen transitions out fully before showing main content
                 showMainContent = true
             }
 

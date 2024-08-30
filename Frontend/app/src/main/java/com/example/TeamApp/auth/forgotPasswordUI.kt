@@ -135,7 +135,7 @@ fun UpperTextField(value: String){
         style = TextStyle(fontSize = 24.sp * density,
             fontFamily = fontFamily,
             fontWeight = FontWeight(500),
-            color = Color.Black
+            color = Color(0xFF003366),
         )
     )
 
