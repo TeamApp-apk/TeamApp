@@ -17,10 +17,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.TeamApp.R
 
 @Composable
 fun BottomNavBar(navController: NavController) {
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -39,35 +41,46 @@ fun BottomNavBar(navController: NavController) {
                 .height(24.dp)
         ) {
             IconButton(
-                onClick = { navController.navigate("search") },
-                modifier = Modifier.size(24.dp)
+                onClick = {
+                    if (!currentDestination.equals("search")) {
+                        navController.navigate("search")
+                    }
+                },
+                    modifier = Modifier.size(24.dp)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.search),
                     contentDescription = "search",
+                    tint = if (currentDestination == "search") Color(0xFF003366) else Color.Gray,
                     modifier = Modifier.fillMaxSize()
                 )
             }
 
             // Ikona 'pluscircle' (zamieniona miejscami z 'search')
             IconButton(
-                onClick = { navController.navigate("createEvent") },
+                onClick = {  if (!currentDestination.equals("createEvent")) {
+                    navController.navigate("createEvent")
+                } },
                 modifier = Modifier.size(24.dp)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.pluscircle),
                     contentDescription = "circle",
+                    tint = if (currentDestination == "createEvent") Color(0xFF003366) else Color.Gray,
                     modifier = Modifier.fillMaxSize()
                 )
             }
 
             IconButton(
-                onClick = { navController.navigate("profile") },
+                onClick = {  if (!currentDestination.equals("profile")) {
+                    navController.navigate("profile")
+                } },
                 modifier = Modifier.size(24.dp)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.user),
                     contentDescription = "user",
+                    tint = if (currentDestination == "profile") Color(0xFF003366) else Color.Gray,
                     modifier = Modifier.fillMaxSize()
                 )
             }
