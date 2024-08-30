@@ -73,6 +73,7 @@ import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.excludedUI.EventButton
+import com.example.TeamApp.excludedUI.Picker
 import com.example.TeamApp.excludedUI.PickerExample
 import com.example.TeamApp.excludedUI.getPlaceSuggestions
 import java.util.Calendar
@@ -163,7 +164,7 @@ fun CreateEventScreen(navController: NavController) {
                     ) {
                         SearchStreetField()
                         ButtonsColumn()
-                        MyDateTimePicker(onDateChange = { newDate -> viewModel.onDateChange(newDate) })
+                        MyDateTimePickerv2()
                         Spacer(modifier = Modifier.height(25.dp))
                         EventButton(text = "Stwórz", onClick = {
 
@@ -350,6 +351,7 @@ fun DescriptionDialog(
 
 
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchStreetField() {
@@ -462,7 +464,126 @@ fun SuggestionItem(suggestion: String, onSuggestionClick: (String) -> Unit) {
     )
 }
 
+@SuppressLint("DefaultLocale")
+@Composable
+fun MyDateTimePickerv2() {
+    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    var selectedDateTime by remember { mutableStateOf("") }
+    val calendar = Calendar.getInstance()
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+    val minute = calendar.get(Calendar.MINUTE)
+    val date by viewModel.dateTime.observeAsState("")
+    var showDialog by remember { mutableStateOf(false) }
+    val originalFormat = DateTimeFormatter.ofPattern("E d MMM HH:mm", Locale("pl", "PL"))
 
+    val datePickerDialog = DatePickerDialog(
+        LocalContext.current,
+        R.style.CustomTimePickerTheme,
+        { _, pickedYear, pickedMonth, pickedDayOfMonth ->
+            calendar.set(pickedYear, pickedMonth, pickedDayOfMonth)
+            selectedDateTime = "$pickedDayOfMonth/${pickedMonth + 1}/$pickedYear"
+        },
+        year, month, day
+    ).apply {
+        datePicker.minDate = calendar.timeInMillis
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Button(
+            onClick = { showDialog = true },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,
+                contentColor = Color.Black
+            ),
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+                .height(56.dp)
+                .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
+        ) {
+            Text(
+                text = if (date.isEmpty()) "Data i godzina" else date,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    lineHeight = 25.sp,
+                    fontFamily = FontFamily(Font(R.font.robotoregular)),
+                    fontWeight = FontWeight(400),
+                    color = Color.Gray
+                )
+            )
+        }
+    }
+
+    if (showDialog)
+    {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, shape = RoundedCornerShape(16.dp))
+
+            ) {
+                Column {
+                    Text(
+                        text = "Wybierz Datę",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier.padding(8.dp)
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(
+                                Color.White,
+                                shape = RoundedCornerShape(8.dp)
+                            ) // Ensure the background is white
+                            .padding(horizontal = 8.dp) // Add some padding inside the TextField
+                    ) {
+                        PickerExample(
+                            onDateTimeSelected = { selectedDate ->
+                                //val localDateTime = LocalDateTime.parse(selectedDate, originalFormat)
+                                val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("pl"))
+                                selectedDateTime = selectedDate.format(formatter)
+                            }
+                        )
+                    }
+
+                    //Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Button(onClick = { datePickerDialog.show()}) {
+                            Text("Kalendarz")
+                        }
+                        Button(onClick = { showDialog = false }) {
+                            Text("Anuluj")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = {
+                            viewModel.onDateChange(selectedDateTime)
+                            showDialog = false
+                        }) {
+                            Text("Zapisz")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -476,6 +597,7 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val minute = calendar.get(Calendar.MINUTE)
     val date by viewModel.dateTime.observeAsState("")
+
 
     val timePickerDialog = TimePickerDialog(
         LocalContext.current,

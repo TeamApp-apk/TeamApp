@@ -67,9 +67,9 @@ fun Picker(
 
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex }
-            .map { index -> getItem(index + visibleItemsMiddle) }
+            .map { index -> (index + visibleItemsMiddle) % items.size}
             .distinctUntilChanged()
-            .collect { item -> state.selectedItem = item }
+            .collect { index -> state.selectedIndex = index }
     }
 
     Box(modifier = modifier) {
