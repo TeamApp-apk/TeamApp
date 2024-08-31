@@ -7,6 +7,8 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,6 +25,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -30,6 +34,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -44,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
@@ -64,12 +70,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
-import androidx.hilt.navigation.compose.hiltViewModel
+//import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.excludedUI.EventButton
+import com.example.TeamApp.excludedUI.Picker
+import com.example.TeamApp.excludedUI.PickerExample
 import com.example.TeamApp.excludedUI.getPlaceSuggestions
 import java.util.Calendar
 import kotlinx.coroutines.launch
@@ -154,12 +162,13 @@ fun CreateEventScreen(navController: NavController) {
                     )
 
                     Column(
-                        modifier = Modifier.padding(horizontal = 20.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         SearchStreetField()
                         ButtonsColumn()
-                        MyDateTimePicker(onDateChange = { newDate -> viewModel.onDateChange(newDate) })
+                        MyDateTimePickerv2()
                         Spacer(modifier = Modifier.height(25.dp))
                         EventButton(text = "Stwórz", onClick = {
 
@@ -248,7 +257,7 @@ fun DescriptionInputField(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = if (description.isEmpty()) "Dodaj opis" else description,
+            text = if (description.isEmpty()) "Opis" else description,
             textAlign = TextAlign.Center,
             style = TextStyle(
                 color = if (description.isEmpty()) Color.Gray else Color.Black,
@@ -343,6 +352,7 @@ fun DescriptionDialog(
         keyboardController?.show()
     }
 }
+
 
 
 
@@ -459,6 +469,156 @@ fun SuggestionItem(suggestion: String, onSuggestionClick: (String) -> Unit) {
 }
 
 
+@SuppressLint("DefaultLocale")
+@Composable
+fun MyDateTimePickerv2() {
+    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    var selectedDateTime by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf("")}
+    val calendar = Calendar.getInstance()
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+    val minute = calendar.get(Calendar.MINUTE)
+    val date by viewModel.dateTime.observeAsState("")
+    var showDialog by remember { mutableStateOf(false) }
+    val originalFormat = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("pl", "PL"))
+
+    val datePickerDialog = DatePickerDialog(
+        LocalContext.current,
+        R.style.CustomTimePickerTheme,
+        { _, pickedYear, pickedMonth, pickedDayOfMonth ->
+            calendar.set(pickedYear, pickedMonth, pickedDayOfMonth)
+            selectedDate = "$pickedDayOfMonth/${pickedMonth + 1}/$pickedYear"
+        },
+        year, month, day
+    ).apply {
+        datePicker.minDate = calendar.timeInMillis
+        calendar.add(Calendar.DAY_OF_YEAR, 70)
+        datePicker.maxDate = calendar.timeInMillis
+    }
+
+        Button(
+            onClick = { showDialog = true},
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,
+                contentColor = Color.Black
+            ),
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+                .height(56.dp)
+                .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
+        )  {
+            Text(
+                text = if (date.isEmpty()) "Data i godzina" else date,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    lineHeight = 25.sp,
+                    textAlign = TextAlign.Center,
+                    fontFamily = if(date.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontWeight = if(date.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                    color = if(date.isEmpty()) Color.Gray else Color(0xFF003366),
+                ),
+                    maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+    if (showDialog)
+    {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, shape = RoundedCornerShape(16.dp))
+
+            ) {
+                Column {
+                    Text(
+                        text = "Wybierz Datę",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier.padding(8.dp)
+
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(
+                                Color.White,
+                                shape = RoundedCornerShape(8.dp)
+                            ) // Ensure the background is white
+                            .padding(horizontal = 8.dp) // Add some padding inside the TextField
+                    ) {
+                        PickerExample(
+                            selectedDate = selectedDate,
+                            onDateTimeSelected = { selectedDate ->
+                                val localDateTime = LocalDateTime.parse(selectedDate, originalFormat)
+
+                                // Get the current date and time
+                                val currentDateTime = LocalDateTime.now()
+
+                                val finalDateTime = if (localDateTime.isBefore(currentDateTime)) {
+                                    currentDateTime // Use the current time if selectedDate is in the past
+                                } else {
+                                    localDateTime // Use the selected date if it is valid
+                                }
+                                val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("pl"))
+                                selectedDateTime = finalDateTime.format(formatter)
+                            }
+                        )
+                    }
+
+                    //Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                    ) {
+                        Button(onClick = { datePickerDialog.show()},
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xff4fc3f7), // Kolor tła przycisku
+                                contentColor = Color.Black // Kolor tekstu przycisku
+                            )) {
+                            Text("Kalendarz")
+                        }
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Button(
+                            onClick = { showDialog = false },
+                                colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xff4fc3f7), // Kolor tła przycisku
+                            contentColor = Color.Black // Kolor tekstu przycisku
+                        )
+                        ) {
+                            Text("Anuluj")
+
+                        }
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Button(onClick = {
+                            viewModel.onDateChange(selectedDateTime)
+                            showDialog = false
+                        },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xff4fc3f7), // Kolor tła przycisku
+                                contentColor = Color.Black // Kolor tekstu przycisku
+                        )) {
+                            Text("Zapisz")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @SuppressLint("DefaultLocale")
 @Composable
@@ -472,6 +632,7 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
     val hour = calendar.get(Calendar.HOUR_OF_DAY)
     val minute = calendar.get(Calendar.MINUTE)
     val date by viewModel.dateTime.observeAsState("")
+
 
     val timePickerDialog = TimePickerDialog(
         LocalContext.current,
@@ -512,6 +673,7 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
                 contentColor = Color.Black
             ),
             modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
                 .padding(8.dp)
                 .fillMaxWidth()
                 .height(56.dp)
@@ -522,9 +684,9 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 25.sp,
-                    fontFamily = FontFamily(Font(R.font.robotoregular)),
-                    fontWeight = FontWeight(400),
-                    color = Color.Gray
+                    fontFamily = if(date.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontWeight = if(date.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                    color = if(date.isEmpty()) Color.Gray else Color(0xFF003366),
                 )
             )
         }
@@ -541,14 +703,14 @@ fun ButtonsColumn() {  // Zmieniłem nazwę na ButtonsColumn, bo teraz to będzi
             .padding(8.dp)
     ) {
         // Sport Dropdown Button
-        SportDropdownButton(
+        SportPopupButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp) // Dystans między przyciskami
         )
 
         // Participants Dropdown Button
-        ParticipantsDropdownButton(
+        ParticipantsPopupButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp) // Dystans między przyciskami
@@ -558,21 +720,24 @@ fun ButtonsColumn() {  // Zmieniłem nazwę na ButtonsColumn, bo teraz to będzi
 
 
 @Composable
-fun SportDropdownButton(modifier: Modifier = Modifier) {
+fun SportPopupButton(modifier: Modifier = Modifier) {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val availableSports = viewModel.getAvailableSports()
-    var expanded by remember { mutableStateOf(false) }
-    val sport by viewModel.sport.observeAsState("")
-
+    var showDialog by remember { mutableStateOf(false) }
+    val selectedSport by viewModel.sport.observeAsState("")
+    // Przycisk, który otwiera popup
     Box(
         modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
             .background(
                 Color.White,
                 shape = RoundedCornerShape(16.dp)
-            ) // Białe tło i zaokrąglone rogi
-            .clickable { expanded = !expanded }
+            )
+            .clickable { showDialog = true } // Kliknięcie otwiera popup
             .padding(16.dp)
-            .heightIn(min = 28.dp)
+            .heightIn(min = 28.dp),
+        contentAlignment = Alignment.Center
+
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -580,63 +745,96 @@ fun SportDropdownButton(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = if (sport.isEmpty()) "Dyscyplina" else sport,
+                text = if (selectedSport.isEmpty()) "Dyscyplina" else selectedSport,
                 modifier = Modifier
                     .weight(1f)
-                    .wrapContentSize(Alignment.Center), // Dostosowuje rozmiar do treści
+                    .wrapContentSize(Alignment.Center),
                 style = TextStyle(
                     fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.robotoregular)),
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Gray,
+                    fontFamily = if (selectedSport.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontWeight = if(selectedSport.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                    color = if (selectedSport.isEmpty()) Color.Gray else Color(0xFF003366),
                     textAlign = TextAlign.Center
                 ),
-                maxLines = 1, // Zapewnia, że tekst nie będzie się łamał
-                overflow = TextOverflow.Ellipsis // Dodaje „...” jeśli tekst jest za długi
-            )
-
-            Image(
-                painter = painterResource(id = R.drawable.chevron_down),
-                contentDescription = "Activity Icon",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(24.dp)
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
 
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        availableSports.forEach { sport ->
-            DropdownMenuItem(
-                text = { Text(sport) },
-                onClick = {
-                    viewModel.onSportChange(sport)
-                    expanded = false
+    // Popup dialog z przewijalną listą
+    if (showDialog) {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = Color.White,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Wybierz dyscyplinę",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        ),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                    // Lista przewijalna
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp) // Ograniczenie wysokości popupu
+                    ) {
+                        items(availableSports) { sport ->
+                            Text(
+                                text = sport,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        viewModel.onSportChange(sport)
+                                        showDialog = false // Zamknięcie popupu po wybraniu opcji
+                                    }
+                                    .padding(12.dp),
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    color = Color.Black
+                                )
+                            )
+                        }
+                    }
                 }
-            )
+            }
         }
     }
 }
 
 @Composable
-fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
+fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
     var selectedPeople by remember { mutableStateOf<Int?>(null) }
-    var expanded by remember { mutableStateOf(false) }
-    val viewModel:CreateEventViewModel = ViewModelProvider.createEventViewModel
+    var showDialog by remember { mutableStateOf(false) }
+    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val limit by viewModel.limit.observeAsState("")
 
+    // Przycisk, który otwiera popup
     Box(
         modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
             .background(
                 Color.White,
                 shape = RoundedCornerShape(16.dp)
             )
-            .clickable { expanded = !expanded }
+            .clickable { showDialog = true } // Kliknięcie otwiera popup
             .padding(16.dp)
-            .heightIn(min = 28.dp)
+            .heightIn(min = 28.dp),
+        contentAlignment = Alignment.Center
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -645,45 +843,68 @@ fun ParticipantsDropdownButton(modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = if (limit.isEmpty()) "Liczba uczestników" else limit,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).align(Alignment.CenterVertically),
                 style = TextStyle(
                     fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.robotoregular)),
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Gray,
+                    fontFamily = if(limit.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontWeight = if(limit.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                    color = if(limit.isEmpty()) Color.Gray else Color(0xFF003366),
                     textAlign = TextAlign.Center
                 )
-            )
-
-            Image(
-                painter = painterResource(id = R.drawable.chevron_down),
-                contentDescription = "Chevron Icon",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(24.dp)
             )
         }
     }
 
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        (1..22).forEach { peopleCount ->
-            DropdownMenuItem(
-                onClick = {
-                    selectedPeople = peopleCount
-                    viewModel.onLimitChange(peopleCount.toString())
-                    expanded = false
-                },
-                text = {
+    // Popup dialog z przewijalną listą uczestników
+    if (showDialog) {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = Color.White,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
                     Text(
-                        text = peopleCount.toString(),
-                        fontSize = 18.sp,
-                        textAlign = TextAlign.Start
+                        text = "Wybierz liczbę uczestników",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        ),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .align(Alignment.CenterHorizontally)
                     )
+
+                    // Lista przewijalna
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp) // Ograniczenie wysokości popupu
+                    ) {
+                        items((1..22).toList()) { peopleCount ->
+                            Text(
+                                text = peopleCount.toString(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        selectedPeople = peopleCount
+                                        viewModel.onLimitChange(peopleCount.toString())
+                                        showDialog = false // Zamknięcie popupu po wyborze liczby
+                                    }
+                                    .padding(12.dp),
+                                fontSize = 18.sp,
+                                color = Color.Black,
+                                textAlign = TextAlign.Start
+                            )
+                        }
+                    }
                 }
-            )
+            }
         }
     }
 }

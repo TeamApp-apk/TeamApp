@@ -28,15 +28,7 @@ fun ProfileScreen(navController: NavController) {
                 .fillMaxWidth()
                 .padding(10.dp)
         ) {
-            Button(onClick = { viewModel.navigateToSearchThrough(navController) }) {
-                Text(text = "Search")
-            }
-            Button(onClick = { viewModel.navigateToCreateEvent(navController) }) {
-                Text(text = "Create")
-            }
-            Button(onClick = { }, colors = ButtonDefaults.buttonColors(Color.Gray)) {
-                Text(text = "Profile")
-            }
+
         }
         Spacer(modifier = Modifier.height(50.dp)) // Adjust the height as needed
         Column(

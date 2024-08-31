@@ -34,17 +34,17 @@ fun EventButton(
             .height(56.dp)  // Taka sama wysokość jak w SearchStreetField
             .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(size = 70.dp)),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF007BFF), // Kolor tła przycisku
-            contentColor = Color.White // Kolor tekstu przycisku
+            containerColor = Color(0xff4fc3f7), // Kolor tła przycisku
+            contentColor = Color.Black // Kolor tekstu przycisku
         )
 
     ) {
         Text(
             text = text,
             style = TextStyle(
-                fontSize = 16.sp,
-                fontFamily = FontFamily(Font(R.font.robotoregular)),
-                fontWeight = FontWeight(600),
+                fontSize = 20.sp,
+                fontFamily = FontFamily(Font(R.font.robotobold)),
+                fontWeight = FontWeight(1000),
                 color = Color(0xFF003366), // Kolor tekstu w przycisku
                 textAlign = TextAlign.Center,
                 letterSpacing = 1.sp
