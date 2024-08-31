@@ -26,11 +26,15 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import java.time.temporal.ChronoField
 import java.util.Locale
 
 
 @Composable
-fun PickerExample(onDateTimeSelected: (String) -> Unit) {
+fun PickerExample(
+    selectedDate: String?,
+    onDateTimeSelected: (String) -> Unit) {
+
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -66,7 +70,7 @@ fun PickerExample(onDateTimeSelected: (String) -> Unit) {
             val hourPickerState = rememberPickerState()
             val minutesPickerState = rememberPickerState()
             val locale = Locale("pl", "PL")
-
+            val selecteddateFormatter = DateTimeFormatter.ofPattern("d/M/yyyy", locale)
 
             val days = remember {
                 val currentDate = LocalDate.now()
@@ -84,7 +88,7 @@ fun PickerExample(onDateTimeSelected: (String) -> Unit) {
 
             Row(modifier = Modifier
                 .fillMaxWidth())
-                //.background(Color.White))
+
             {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -156,35 +160,66 @@ fun PickerExample(onDateTimeSelected: (String) -> Unit) {
             val selectedMinute = minutes[minutesPickerState.selectedIndex]
 
 
+            selectedDate?.takeIf {it.isNotEmpty()}?.let {
+                try {
+                    Log.e("PickerExample", "new calendar value: " + it)
+
+                    val selectedLocalDate = LocalDate.parse(it, selecteddateFormatter)
+                    val formatter = DateTimeFormatter.ofPattern("d MMMM", Locale("pl"))
+
+                    val selectedDayIndex = days.indexOfFirst { dayString ->
+
+                        val dayWithoutWeekday = formatDate(removeDayOfWeek(dayString))
+                        Log.e("PickerExample", "dayWithoutWeekday: " + dayWithoutWeekday)
+                        val parsedDay = formatter.parse(dayWithoutWeekday)
+                        val dayOfMonth = parsedDay.get(ChronoField.DAY_OF_MONTH)
+                        val monthOfYear = parsedDay.get(ChronoField.MONTH_OF_YEAR)
+                        val year = LocalDate.now().year
+                        val date = LocalDate.of(year, monthOfYear, dayOfMonth)
+
+                        selectedLocalDate.isEqual(date)
+                    }
+
+
+                    if (selectedDayIndex != -1) {
+                        dayPickerState.selectedIndex = selectedDayIndex
+                    }
+                    else{}
+                } catch (e: Exception) {
+                    Log.e("PickerExample", "Error parsing selectedDate: $it", e)
+                }
+            }
+
+
             val isToday = selectedDay.startsWith("Dzisiaj")
 
-            val adjustedHours = if (isToday) {
-                hours.filter { it.toInt() >= currentHour }
-            } else {
-                hours
-            }
-
-            val adjustedMinutes = if (isToday && selectedHour.toInt() == currentHour) {
-                minutes.filter { it.toInt() >= currentMinute }
-            } else {
-                minutes
-            }
-
-            LaunchedEffect(isToday, selectedHour) {
-                if (isToday) {
-                    val validHourIndex = adjustedHours.indexOf(selectedHour).coerceAtLeast(0)
-                    hourPickerState.selectedIndex = (validHourIndex)
-                   // Log.e("Picker", "changing value: " + hourPickerState.selectedIndex)
-                }
-            }
-
-            LaunchedEffect(isToday, selectedHour, selectedMinute) {
-                if (isToday && selectedHour.toInt() == currentHour) {
-                    val validMinuteIndex = adjustedMinutes.indexOf(selectedMinute).coerceAtLeast(0)
-                    minutesPickerState.selectedIndex = (validMinuteIndex)
-                    // Log.e("Picker", "changing value: " + minutesPickerState.selectedIndex)
-                }
-            }
+//            val adjustedHours = if (isToday) {
+//                hours.filter { it.toInt() >= currentHour }
+//            } else {
+//                hours
+//            }
+//
+//            val adjustedMinutes = if (isToday && selectedHour.toInt() == currentHour) {
+//                minutes.filter { it.toInt() >= currentMinute }
+//            } else {
+//                minutes
+//            }
+//
+//            LaunchedEffect(isToday, selectedHour) {
+//                if (isToday) {
+//                    val validHourIndex = adjustedHours.indexOf(selectedHour).coerceAtLeast(0)
+//                    hourPickerState.selectedIndex = (validHourIndex)
+//                   // Log.e("Picker", "changing value: " + hourPickerState.selectedIndex)
+//                }
+//            }
+//
+//            LaunchedEffect(isToday, selectedHour, selectedMinute) {
+//                if (isToday && selectedHour.toInt() == currentHour) {
+//                    val validMinuteIndex = adjustedMinutes.indexOf(selectedMinute).coerceAtLeast(0)
+//                    minutesPickerState.selectedIndex = (validMinuteIndex)
+//                    // Log.e("Picker", "changing value: " + minutesPickerState.selectedIndex)
+//                }
+//            }
 
             val selectedDateTime = if (selectedDay.startsWith("Dzisiaj")) {
                 val currentDateFormatted = currentDate.format(DateTimeFormatter.ofPattern("d MMMM", locale))
@@ -201,6 +236,7 @@ fun formatDate(dateString: String): String {
     val inputFormat = SimpleDateFormat("d MMM", Locale("pl"))
     val outputFormat = SimpleDateFormat("d MMMM", Locale("pl"))
     val date = inputFormat.parse(dateString)
+    Log.e("formatDate", "formatted date" + date)
     return outputFormat.format(date)
 }
 

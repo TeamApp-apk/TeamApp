@@ -474,6 +474,7 @@ fun SuggestionItem(suggestion: String, onSuggestionClick: (String) -> Unit) {
 fun MyDateTimePickerv2() {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     var selectedDateTime by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf("")}
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
@@ -482,18 +483,20 @@ fun MyDateTimePickerv2() {
     val minute = calendar.get(Calendar.MINUTE)
     val date by viewModel.dateTime.observeAsState("")
     var showDialog by remember { mutableStateOf(false) }
-    val originalFormat = DateTimeFormatter.ofPattern("E d MMM HH:mm", Locale("pl", "PL"))
+    val originalFormat = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("pl", "PL"))
 
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
         R.style.CustomTimePickerTheme,
         { _, pickedYear, pickedMonth, pickedDayOfMonth ->
             calendar.set(pickedYear, pickedMonth, pickedDayOfMonth)
-            selectedDateTime = "$pickedDayOfMonth/${pickedMonth + 1}/$pickedYear"
+            selectedDate = "$pickedDayOfMonth/${pickedMonth + 1}/$pickedYear"
         },
         year, month, day
     ).apply {
         datePicker.minDate = calendar.timeInMillis
+        calendar.add(Calendar.DAY_OF_YEAR, 70)
+        datePicker.maxDate = calendar.timeInMillis
     }
 
         Button(
@@ -514,9 +517,9 @@ fun MyDateTimePickerv2() {
                     fontSize = 16.sp,
                     lineHeight = 25.sp,
                     textAlign = TextAlign.Center,
-                    fontFamily = FontFamily(Font(R.font.robotoregular)),
-                    fontWeight = FontWeight(400),
-                    color = if (date.isEmpty()) Color.Gray else Color.Black,
+                    fontFamily = if(date.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontWeight = if(date.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                    color = if(date.isEmpty()) Color.Gray else Color(0xFF003366),
                 ),
                     maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -555,10 +558,20 @@ fun MyDateTimePickerv2() {
                             .padding(horizontal = 8.dp) // Add some padding inside the TextField
                     ) {
                         PickerExample(
+                            selectedDate = selectedDate,
                             onDateTimeSelected = { selectedDate ->
-                                //val localDateTime = LocalDateTime.parse(selectedDate, originalFormat)
+                                val localDateTime = LocalDateTime.parse(selectedDate, originalFormat)
+
+                                // Get the current date and time
+                                val currentDateTime = LocalDateTime.now()
+
+                                val finalDateTime = if (localDateTime.isBefore(currentDateTime)) {
+                                    currentDateTime // Use the current time if selectedDate is in the past
+                                } else {
+                                    localDateTime // Use the selected date if it is valid
+                                }
                                 val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("pl"))
-                                selectedDateTime = selectedDate.format(formatter)
+                                selectedDateTime = finalDateTime.format(formatter)
                             }
                         )
                     }
@@ -571,17 +584,32 @@ fun MyDateTimePickerv2() {
                             .fillMaxWidth()
                             .padding(8.dp)
                     ) {
-                        Button(onClick = { datePickerDialog.show()}) {
+                        Button(onClick = { datePickerDialog.show()},
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xff4fc3f7), // Kolor tła przycisku
+                                contentColor = Color.Black // Kolor tekstu przycisku
+                            )) {
                             Text("Kalendarz")
                         }
-                        Button(onClick = { showDialog = false }) {
+                        Button(
+                            onClick = { showDialog = false },
+                                colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xff4fc3f7), // Kolor tła przycisku
+                            contentColor = Color.Black // Kolor tekstu przycisku
+                        )
+                        ) {
                             Text("Anuluj")
+
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(onClick = {
                             viewModel.onDateChange(selectedDateTime)
                             showDialog = false
-                        }) {
+                        },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xff4fc3f7), // Kolor tła przycisku
+                                contentColor = Color.Black // Kolor tekstu przycisku
+                        )) {
                             Text("Zapisz")
                         }
                     }
