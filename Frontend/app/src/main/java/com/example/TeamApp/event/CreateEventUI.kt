@@ -582,7 +582,7 @@ fun MyDateTimePickerv2() {
                         horizontalArrangement = Arrangement.End,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
+                            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
                     ) {
                         Button(onClick = { datePickerDialog.show()},
                             colors = ButtonDefaults.buttonColors(
@@ -591,6 +591,7 @@ fun MyDateTimePickerv2() {
                             )) {
                             Text("Kalendarz")
                         }
+                        Spacer(modifier = Modifier.width(5.dp))
                         Button(
                             onClick = { showDialog = false },
                                 colors = ButtonDefaults.buttonColors(
@@ -601,7 +602,7 @@ fun MyDateTimePickerv2() {
                             Text("Anuluj")
 
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(5.dp))
                         Button(onClick = {
                             viewModel.onDateChange(selectedDateTime)
                             showDialog = false

@@ -1,5 +1,6 @@
 package com.example.TeamApp.excludedUI
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoField
+import java.util.Locale
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -44,7 +49,8 @@ fun Picker(
     textStyle: TextStyle = LocalTextStyle.current,
     dividerColor: Color = LocalContentColor.current,
     onScrollToIndex: (Int) -> Unit = {}, // Add a parameter for the scroll function
-    loop: Boolean = true
+    loop: Boolean = true,
+    indexforward: Int?
 ) {
 
     val visibleItemsMiddle = visibleItemsCount / 2
@@ -105,6 +111,13 @@ fun Picker(
         }
     }
 
+    LaunchedEffect(indexforward) {
+        indexforward?.let { index ->
+            if (index in items.indices) {
+                listState.scrollToItem(index)
+            }
+        }
+    }
 
     Box(modifier = modifier) {
 

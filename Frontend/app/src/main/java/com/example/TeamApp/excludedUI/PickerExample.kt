@@ -11,6 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +35,7 @@ import java.util.Locale
 fun PickerExample(
     selectedDate: String?,
     onDateTimeSelected: (String) -> Unit) {
-
+    val indexForward = remember { mutableStateOf<Int?>(null) }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -108,7 +109,8 @@ fun PickerExample(
                         onScrollToIndex = { index ->
                             dayPickerState.selectedIndex = index
                         },
-                        loop = false
+                        loop = false,
+                        indexforward = indexForward.value
                     )
                 }
 
@@ -129,7 +131,8 @@ fun PickerExample(
                         textStyle = TextStyle(fontSize = 24.sp),
                         onScrollToIndex = { index ->
                             hourPickerState.selectedIndex = index
-                        }
+                        },
+                        indexforward = null
                     )
                 }
 
@@ -150,7 +153,8 @@ fun PickerExample(
                         textStyle = TextStyle(fontSize = 24.sp),
                                 onScrollToIndex = { index ->
                             minutesPickerState.selectedIndex = index
-                        }
+                        },
+                        indexforward = null
                     )
                 }
             }
@@ -182,7 +186,8 @@ fun PickerExample(
 
 
                     if (selectedDayIndex != -1) {
-                        dayPickerState.selectedIndex = selectedDayIndex
+                        indexForward.value = selectedDayIndex
+
                     }
                     else{}
                 } catch (e: Exception) {
