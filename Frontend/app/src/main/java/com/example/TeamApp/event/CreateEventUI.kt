@@ -7,8 +7,11 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
+import com.airbnb.lottie.compose.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,11 +33,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -49,6 +56,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
@@ -82,6 +90,8 @@ import com.example.TeamApp.excludedUI.EventButton
 import com.example.TeamApp.excludedUI.Picker
 import com.example.TeamApp.excludedUI.PickerExample
 import com.example.TeamApp.excludedUI.getPlaceSuggestions
+import kotlinx.coroutines.Delay
+import kotlinx.coroutines.delay
 import java.util.Calendar
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -91,6 +101,9 @@ import java.util.Locale
 @Composable
 fun CreateEventScreen(navController: NavController) {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    LaunchedEffect (Unit){
+        viewModel.fetchEvents()
+    }
     val sport by viewModel.sport.observeAsState("")
     val address by viewModel.location.observeAsState("")
     val limit by viewModel.limit.observeAsState("")
@@ -100,19 +113,58 @@ fun CreateEventScreen(navController: NavController) {
     val location by viewModel.location.observeAsState("")
     val dateTime by viewModel.dateTime.observeAsState("")
 
+
+    var isLoading by remember { mutableStateOf(false) }
+    var loadingComplete by remember { mutableStateOf(false) }
+    var showTick by remember { mutableStateOf(false) } // Dodany stan do zarządzania animacją ticka
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading_to_tick))
+    var isPlaying by remember { mutableStateOf(false) }
+    val progress by animateLottieCompositionAsState(
+        composition,
+        isPlaying = isPlaying,
+        iterations = 1,
+        speed = 1f,
+        restartOnPlay = false
+    )
+
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
     var snackbarSuccess by remember { mutableStateOf(false) }
 
-    var expanded by remember { mutableStateOf(false) }
+    val transition = updateTransition(targetState = showTick, label = "Tick Transition")
+
+    val buttonScale by transition.animateFloat(
+        transitionSpec = { tween(durationMillis = 300) },
+        label = "Button Scale"
+    ) { show ->
+        if (show) 1f else 0f
+    }
+
+    val tickAlpha by animateFloatAsState(
+        targetValue = if (showTick) 0f else 1f,
+        animationSpec = tween(durationMillis = 300)
+    )
+
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF)
     )
     var showDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit){
-        viewModel.fetchEvents()
+    LaunchedEffect(progress) {
+        if (progress == 1.0f) {
+            isPlaying = false
+            showTick = true // Pokazuje tick po zakończeniu animacji
+            delay(150  ) // Opcjonalne opóźnienie przed przywróceniem przycisku
+            showTick = false
+            isLoading = false
+            loadingComplete = false
+            navController.navigate("search"){
+                popUpTo("search"){inclusive = true}
+            }
+
+            viewModel.resetFields()
+        }
     }
 
     Box(
@@ -122,8 +174,7 @@ fun CreateEventScreen(navController: NavController) {
             .padding(horizontal = 20.dp, vertical = 60.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -165,60 +216,74 @@ fun CreateEventScreen(navController: NavController) {
                     )
 
                     Column(
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp),
+                        modifier = Modifier.padding(horizontal = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         SearchStreetField()
                         ButtonsColumn()
                         MyDateTimePickerv2()
                         Spacer(modifier = Modifier.height(25.dp))
-                        EventButton(text = "Stwórz", onClick = {
 
-                            Log.d("CreateEventScreen", "Submit button clicked")
-                            val participantLimit = limit.toIntOrNull()
-                            Log.e("CreateEventScreen", "Participant limit: $participantLimit")
-                            Log.e("CreateEventScreen", "Sport: $sport")
-                            Log.e("CreateEventScreen", "Address: $address")
-                            Log.e("CreateEventScreen", "Date: $dateTime")
-                            Log.e("CreateEventScreen", "Description: $description")
-                            if (sport.isNotEmpty() && address.isNotEmpty()  && location.isNotEmpty()) {
-                                Log.d("CreateEventScreen", "Valid input")
-                                val newEvent = Event(
-                                    iconResId = Event.sportIcons[sport] ?: "",
-                                    date = dateTime,
-                                    activityName = sport,
-                                    currentParticipants = 0,
-                                    maxParticipants = limit.toInt(),
-                                    location = location
-                                )
-                                viewModel.createEvent(newEvent){ result ->
-                                    if (result == null) {
-                                        snackbarMessage = "Utworzono Event"
-                                        snackbarSuccess = true
-                                        viewModel.resetFields()
-                                    } else {
-                                        snackbarMessage = result
-                                        snackbarSuccess = false
+                        if (isLoading) {
+                            LottieAnimation(
+                                composition = composition,
+                                progress = progress,
+                                modifier = Modifier.size(100.dp)
+                            )
+                            LaunchedEffect(Unit) {
+                                isPlaying = true
+                            }
+                        } else if (showTick) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Success",
+                                tint = Color.Green,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .alpha(tickAlpha)
+                            )
+                        } else {
+                            EventButton(text = "Stwórz", onClick = {
+                                Log.d("CreateEventScreen", "Submit button clicked")
+                                val participantLimit = limit.toIntOrNull()
+                                if (sport.isNotEmpty() && address.isNotEmpty() && location.isNotEmpty()) {
+                                    isLoading = true
+                                    isPlaying = true
+                                    Log.d("CreateEventScreen", "Valid input")
+                                    val newEvent = Event(
+                                        iconResId = Event.sportIcons[sport] ?: "",
+                                        date = dateTime,
+                                        activityName = sport,
+                                        currentParticipants = 0,
+                                        maxParticipants = limit.toInt(),
+                                        location = location
+                                    )
+                                    viewModel.createEvent(newEvent) { result ->
+                                        if (result == null) {
+                                            snackbarMessage = "Utworzono Event"
+                                            snackbarSuccess = true
+                                        } else {
+                                            snackbarMessage = result
+                                            snackbarSuccess = false
+                                        }
+                                        showSnackbar = true
                                     }
+                                } else {
+                                    snackbarMessage = "Uzupełnij wszystkie pola"
+                                    snackbarSuccess = false
                                     showSnackbar = true
                                 }
-
-                            } else {
-                                snackbarMessage = "Uzupełnij wszystkie pola"
-                                snackbarSuccess = false
-                                showSnackbar = true
-                            }
-
-                        })
+                            })
+                        }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-
         }
     }
+
+
 
     if (showDialog) {
         DescriptionDialog(
@@ -230,15 +295,7 @@ fun CreateEventScreen(navController: NavController) {
             }
         )
     }
-    if (showSnackbar) {
-        com.example.TeamApp.excludedUI.CustomSnackbar(
-            success = snackbarSuccess,
-            type = snackbarMessage,
-            onDismiss = {
-                showSnackbar = false
-            }
-        )
-    }
+
 }
 
 @Composable
@@ -746,8 +803,9 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                 Color.White,
                 shape = RoundedCornerShape(16.dp)
             )
-            .clickable { showDialog = true
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+            .clickable {
+                showDialog = true
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
             } // Kliknięcie otwiera popup
             .padding(16.dp)
             .heightIn(min = 28.dp),
@@ -863,7 +921,9 @@ fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
         ) {
             Text(
                 text = if (limit.isEmpty()) "Liczba uczestników" else limit,
-                modifier = Modifier.weight(1f).align(Alignment.CenterVertically),
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically),
                 style = TextStyle(
                     fontSize = 16.sp,
                     fontFamily = if(limit.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),

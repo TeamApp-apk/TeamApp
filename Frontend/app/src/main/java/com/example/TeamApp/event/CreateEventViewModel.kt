@@ -1,7 +1,10 @@
 package com.example.TeamApp.event
 
 import android.util.Log
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -10,6 +13,8 @@ import androidx.navigation.NavController
 import com.example.TeamApp.data.Event
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.Delay
+import kotlinx.coroutines.InternalCoroutinesApi
 import java.time.LocalDateTime
 
 
@@ -18,6 +23,7 @@ class CreateEventViewModel : ViewModel() {
     val activityList =   mutableStateListOf<Event>()
     val sport: LiveData<String> get()= _sport
     private var isDataFetched = false
+    var newlyCreatedEvent by mutableStateOf<Event?>(null)
 
     private val _location = MutableLiveData<String>()
     val location: LiveData<String> get() = _location
@@ -47,8 +53,14 @@ class CreateEventViewModel : ViewModel() {
         db.collection("events").add(event)
             .addOnSuccessListener { Log.d("CreateEventViewModel", "Event successfully created"); callback(null) }
             .addOnFailureListener { e -> Log.w("CreateEventViewModel", "Error creating event", e); callback("Błąd, nie dodano Eventu") }
-        activityList.add(event)
+        activityList.add(0,event)
+        newlyCreatedEvent = event
     }
+    fun clearNewlyCreatedEvent(){
+        newlyCreatedEvent = null
+    }
+
+
     fun fetchEvents() {
         if (isDataFetched) return
         Log.d("CreateEventViewModel", "fetchEvents")
@@ -70,6 +82,7 @@ class CreateEventViewModel : ViewModel() {
                 Log.w("CreateEventViewModel", "Error fetching events", e)
             }
     }
+
 
     fun resetFields() {
         _sport.value = ""
