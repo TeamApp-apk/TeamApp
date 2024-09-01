@@ -75,30 +75,30 @@ fun ActivityCard(
                 ambientColor = Color(0x12535990)
             )
             .padding(4.dp)
-            .width(348.dp)
-            .height(106.dp)
-            .background(backgroundColor, shape = RoundedCornerShape(size = 16.dp))
-            .padding(start = 4.dp, top = 10.dp, end = 4.dp, bottom = 10.dp)
+            .fillMaxWidth()
+            .height(120.dp)
+            .background(backgroundColor, shape = RoundedCornerShape(size = 10.dp))
+            .padding(top = 10.dp, bottom = 10.dp)
     ) {
         Image(
             painter = painterResource(id = iconId),
             contentDescription = "Activity Icon",
             modifier = Modifier
-                .padding(0.dp)
+                .padding(8.dp)
                 .width(84.dp)
-                .height(84.dp)
+                .height(96.dp)
         )
         Spacer(modifier = Modifier.width(4.dp))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp),
+                .padding(8.dp),
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = date,
                     style = TextStyle(
-                        fontSize = 15.sp,
+                        fontSize = 18.sp,
                         fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
                         fontWeight = FontWeight(900),
                         fontStyle = FontStyle.Italic,
@@ -110,7 +110,7 @@ fun ActivityCard(
                 Text(
                     text = "$currentParticipants/$maxParticipants",
                     style = TextStyle(
-                        fontSize = 12.sp,
+                        fontSize = 16.sp,
                         fontFamily = FontFamily(Font(R.font.robotobold)),
                         fontWeight = FontWeight(500),
                         fontStyle = FontStyle.Italic,
@@ -122,14 +122,14 @@ fun ActivityCard(
                     painter = painterResource(id = R.drawable.usersicon),
                     contentDescription = "Participants Icon",
                     modifier = Modifier
-                        .width(25.12.dp)
-                        .height(22.94.dp)
+                        .width(32.dp)
+                        .height(28.dp)
                 )
             }
             Text(
                 text = activityName,
                 style = TextStyle(
-                    fontSize = 14.sp, // Zmieniamy rozmiar czcionki
+                    fontSize = 16.sp, // Zmieniamy rozmiar czcionki
                     lineHeight = 20.sp,
                     fontFamily = FontFamily(Font(R.font.robotobold)),
                     fontWeight = FontWeight(500),
@@ -155,7 +155,7 @@ fun ActivityCard(
                 Text(
                     text = location,
                     style = TextStyle(
-                        fontSize = 12.sp, // Zmieniamy rozmiar czcionki
+                        fontSize = 14.sp, // Zmieniamy rozmiar czcionki
                         fontFamily = FontFamily(Font(R.font.thinitalic)),
                         fontWeight = FontWeight.Black,
                         fontStyle = FontStyle.Italic,
@@ -176,7 +176,7 @@ fun ActivityCard(
 //@Composable
 //fun PreviewActivityCard() {
 //    ActivityCard(
-//        iconResId = R.drawable.dumbbelliconv5,
+//        iconResId = R.drawable.figma_gym_icon,
 //        date = "23 PAŹDZIERNIKA 12:45",
 //        activityName = "Skok ze spadochronem",
 //        currentParticipants = 21,

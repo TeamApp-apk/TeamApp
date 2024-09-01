@@ -29,7 +29,7 @@ fun BottomNavBar(navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp)
-            .background(color = Color(0xFFF2F2F2))
+            .background(color = Color(0xFFFFFFFF))
             .navigationBarsPadding()
             .padding(horizontal = 40.dp, vertical = 8.dp)
     ) {
