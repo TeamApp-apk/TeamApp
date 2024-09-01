@@ -43,7 +43,9 @@ fun BottomNavBar(navController: NavController) {
             IconButton(
                 onClick = {
                     if (!currentDestination.equals("search")) {
-                        navController.navigate("search")
+                        navController.navigate("search") {
+                            popUpTo("search") { inclusive = true }
+                        }
                     }
                 },
                     modifier = Modifier.size(24.dp)
@@ -59,7 +61,10 @@ fun BottomNavBar(navController: NavController) {
             // Ikona 'pluscircle' (zamieniona miejscami z 'search')
             IconButton(
                 onClick = {  if (!currentDestination.equals("createEvent")) {
-                    navController.navigate("createEvent")
+                    navController.navigate("createEvent"){
+                        popUpTo("createEvent"){inclusive = true}
+                    }
+
                 } },
                 modifier = Modifier.size(24.dp)
             ) {
@@ -73,7 +78,10 @@ fun BottomNavBar(navController: NavController) {
 
             IconButton(
                 onClick = {  if (!currentDestination.equals("profile")) {
-                    navController.navigate("profile")
+                    navController.navigate("profile"){
+                        popUpTo("profile"){inclusive = true}
+                    }
+
                 } },
                 modifier = Modifier.size(24.dp)
             ) {

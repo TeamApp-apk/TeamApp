@@ -1,7 +1,9 @@
 package com.example.TeamApp.searchThrough
 import BottomNavBar
 import android.util.Log
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,18 +56,28 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
     var showEmptyMessage by remember { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
     val activityList = remember { viewModel.activityList }
+    val newlyCreatedEvent = viewModel.newlyCreatedEvent
 
-    LaunchedEffect(scrollState) {
-        var previousIndex = 0
-        var previousOffset = 0
-        snapshotFlow { scrollState.firstVisibleItemIndex to scrollState.firstVisibleItemScrollOffset }
-            .collect { (index, offset) ->
-                val isScrollingDown = index > previousIndex || (index == previousIndex && offset > previousOffset)
-                onScroll(isScrollingDown)
-                previousIndex = index
-                previousOffset = offset
+
+    LaunchedEffect(scrollState, newlyCreatedEvent) {
+        if (newlyCreatedEvent != null) {
+            val index = activityList.indexOf(newlyCreatedEvent)
+            if (index >= 0) {
+                scrollState.scrollToItem(0)
+                delay(200)
+                val averageItemSize = scrollState.layoutInfo.visibleItemsInfo
+                    .firstOrNull()?.size ?: 0
+                val currentOffset = scrollState.firstVisibleItemIndex * averageItemSize + scrollState.firstVisibleItemScrollOffset
+                val targetOffset = index * averageItemSize
+                val distance = targetOffset - currentOffset
+                scrollState.animateScrollBy(distance.toFloat(), animationSpec = tween(durationMillis = 500))
+                delay(500)
+                viewModel.clearNewlyCreatedEvent()
             }
+        }
     }
+
+
 
     LaunchedEffect(Unit) {
         if (activityList.isEmpty()) {
@@ -119,13 +131,15 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
                     }
                     activityList.isNotEmpty() -> {
                         items(activityList) { activity ->
+                            val isNewlyCreated = activity == newlyCreatedEvent
                             ActivityCard(
                                 iconResId = activity.iconResId,
                                 date = activity.date,
                                 activityName = activity.activityName,
                                 currentParticipants = activity.currentParticipants,
                                 maxParticipants = activity.maxParticipants,
-                                location = activity.location
+                                location = activity.location,
+                                isHighlighted = isNewlyCreated
                             ) {
                             }
                         }

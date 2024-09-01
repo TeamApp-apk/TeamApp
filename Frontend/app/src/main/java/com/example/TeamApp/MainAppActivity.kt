@@ -57,6 +57,7 @@ class MainAppActivity : ComponentActivity() {
             var isBottomBarVisible by remember { mutableStateOf(true) }
             var isLoading by remember { mutableStateOf(true) }
             var showMainContent by remember { mutableStateOf(false) }
+            var isRefreshing by remember { mutableStateOf(false) }
 
             // Symulacja czasu ładowania
             LaunchedEffect(Unit) {
@@ -66,6 +67,7 @@ class MainAppActivity : ComponentActivity() {
                 delay(380) // Czas przejścia między ekranami
                 showMainContent = true
             }
+
 
             Box(
                 modifier = Modifier

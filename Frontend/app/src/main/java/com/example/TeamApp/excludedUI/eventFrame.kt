@@ -2,12 +2,16 @@ package com.example.TeamApp.excludedUI
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -48,21 +52,32 @@ fun ActivityCard(
     currentParticipants: Int,
     maxParticipants: Int,
     location: String,
+    isHighlighted: Boolean=false,
     onClick: () -> Unit
 ) {
+    val targetColor = if (isHighlighted) Color(0xffbdbdbd) else Variables.LightGray
+    val backgroundColor by animateColorAsState(
+        targetColor,
+        animationSpec = tween(durationMillis = 1000)
+    )
+    val elevation by animateDpAsState(
+        targetValue = if (isHighlighted) 16.dp else 4.dp,
+        animationSpec = tween(durationMillis = 300)
+    )
+
     val context = LocalContext.current
     val iconId = getIconResourceId(context, iconResId)
     Row(
         modifier = Modifier
             .shadow(
-                elevation = 25.dp,
+                elevation = elevation,
                 spotColor = Color(0x12535990),
                 ambientColor = Color(0x12535990)
             )
             .padding(4.dp)
             .width(348.dp)
             .height(106.dp)
-            .background(color = Variables.LightGray, shape = RoundedCornerShape(size = 16.dp))
+            .background(backgroundColor, shape = RoundedCornerShape(size = 16.dp))
             .padding(start = 4.dp, top = 10.dp, end = 4.dp, bottom = 10.dp)
     ) {
         Image(

@@ -90,7 +90,8 @@ dependencies {
     implementation(libs.hilt.android)
 
 
-
+    //Animations
+    implementation (libs.lottie.compose)
 
 
     // Firebase dependencies (using BOM for version management)
