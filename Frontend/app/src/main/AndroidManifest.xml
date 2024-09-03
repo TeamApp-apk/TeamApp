@@ -22,9 +22,6 @@
         android:theme="@style/Theme.TeamApp"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <meta-data
-            android:name="com.tomtom.sdk.maps.key"
-            android:value="zsyHUGt60Fwrh2iSA5IZkUqArQGte2As" />
         <activity
             android:name=".MainAppActivity"
             android:exported="false"
