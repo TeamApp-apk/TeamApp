@@ -98,10 +98,10 @@ fun ActivityCard(
                 Text(
                     text = date,
                     style = TextStyle(
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         fontFamily = FontFamily(Font(R.font.proximanovabold)),
                         fontWeight = FontWeight.ExtraBold,
-                        fontStyle = FontStyle.Italic,
+                        //fontStyle = FontStyle.Italic,
                         color = Variables.P3
                     ),
                     modifier = Modifier.weight(1f) // Wypełnienie dostępnej przestrzeni
@@ -129,7 +129,7 @@ fun ActivityCard(
             Text(
                 text = activityName,
                 style = TextStyle(
-                    fontSize = 16.sp, // Zmieniamy rozmiar czcionki
+                    fontSize = 15.sp, // Zmieniamy rozmiar czcionki
                     lineHeight = 20.sp,
                     fontFamily = FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = FontWeight(500),
