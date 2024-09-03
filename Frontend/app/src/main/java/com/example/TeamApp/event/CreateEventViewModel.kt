@@ -13,6 +13,10 @@ import androidx.navigation.NavController
 import com.example.TeamApp.data.Event
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.tomtom.sdk.location.GeoPoint
+import com.tomtom.sdk.location.poi.StandardCategoryId.Companion.Locale
+import com.tomtom.sdk.search.autocomplete.AutocompleteOptions
+import com.tomtom.sdk.search.online.OnlineSearch
 import kotlinx.coroutines.Delay
 import kotlinx.coroutines.InternalCoroutinesApi
 import java.time.LocalDateTime
@@ -123,5 +127,6 @@ class CreateEventViewModel : ViewModel() {
     fun getAvailableSports():List<String>{
         return Event.sportIcons.keys.toList()
     }
+
 
 }

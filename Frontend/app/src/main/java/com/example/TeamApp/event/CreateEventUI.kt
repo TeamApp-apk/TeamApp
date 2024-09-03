@@ -1,5 +1,6 @@
 package com.example.TeamApp.event
 
+//import androidx.hilt.navigation.compose.hiltViewModel
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -11,8 +12,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import com.airbnb.lottie.compose.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +36,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,18 +56,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -81,22 +76,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
-//import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.*
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.excludedUI.EventButton
-import com.example.TeamApp.excludedUI.Picker
 import com.example.TeamApp.excludedUI.PickerExample
-import com.example.TeamApp.excludedUI.getPlaceSuggestions
-import kotlinx.coroutines.Delay
+import com.tomtom.quantity.Distance
+import com.tomtom.sdk.location.GeoBoundingBox
+import com.tomtom.sdk.location.GeoPoint
+import com.tomtom.sdk.search.SearchCallback
+import com.tomtom.sdk.search.SearchOptions
+import com.tomtom.sdk.search.SearchResponse
+import com.tomtom.sdk.search.autocomplete.AutocompleteOptions
+import com.tomtom.sdk.search.autocomplete.AutocompleteResponse
+import com.tomtom.sdk.search.autocomplete.AutocompleteCallback
+import com.tomtom.sdk.search.common.error.SearchFailure
+import com.tomtom.sdk.search.model.result.AutocompleteSegmentPlainText
+import com.tomtom.sdk.search.online.OnlineSearch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import java.util.Calendar
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Locale
+import java.util.Properties
+import java.util.concurrent.CountDownLatch
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+
 
 @Composable
 fun CreateEventScreen(navController: NavController) {
@@ -246,6 +258,7 @@ fun CreateEventScreen(navController: NavController) {
                             EventButton(text = "Stwórz", onClick = {
                                 Log.d("CreateEventScreen", "Submit button clicked")
                                 val participantLimit = limit.toIntOrNull()
+                                Log.d("CreateEventScreen", "Address: $address")
                                 if (sport.isNotEmpty() && address.isNotEmpty() && location.isNotEmpty()) {
                                     isLoading = true
                                     isPlaying = true
@@ -422,6 +435,13 @@ fun DescriptionDialog(
 }
 
 
+fun getApiKey(context: Context): String {
+    val properties = Properties()
+    context.assets.open("tomtomApi_key.properties").use { inputStream ->
+        properties.load(inputStream)
+    }
+    return properties.getProperty("API_KEY")
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -433,30 +453,68 @@ fun SearchStreetField() {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    val viewModel:CreateEventViewModel = ViewModelProvider.createEventViewModel
-    val location by viewModel.location.observeAsState("")
     val hapticFeedback = LocalHapticFeedback.current
-    query = location
+    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+
+    // Initialize TomTom search API
+    val searchApi = remember { OnlineSearch.create(context, getApiKey(context)) }
+
+    fun performSearch(query: String) {
+        if (query.isNotEmpty()) {
+            val options = SearchOptions(
+                query = query,
+                limit = 5,
+                countryCodes = setOf("POL"),
+            )
+
+            searchApi.search(
+                options,
+                object : SearchCallback {
+                    override fun onSuccess(result: SearchResponse) {
+                        Log.d("SearchStreetField", "Search Success: ${result.results}")
+
+                        val newSuggestions = result.results
+                            .filter { it.place != null }
+                            .mapNotNull {
+                                it.place?.address?.let { address ->
+                                    listOfNotNull(
+                                        address.streetNameAndNumber,
+                                        address.freeformAddress,
+                                    ).joinToString(" ")
+                                }
+                            }
+                        Log.d("SearchStreetField", "Extracted Suggestions: $newSuggestions")
+
+                        suggestions = newSuggestions
+                        expanded = true
+                    }
+
+                    override fun onFailure(failure: SearchFailure) {
+                        // Debugging: Log the failure
+                        Log.e("SearchStreetField", "Search Failure: ${failure.message}")
+
+                        suggestions = emptyList()
+                        expanded = false
+                    }
+                }
+            )
+        } else {
+            suggestions = emptyList()
+            expanded = false
+        }
+    }
 
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         Column {
-            // Pole tekstowe
             TextField(
                 value = query,
                 onValueChange = { newText ->
-                    // Aktualizacja query
                     query = newText
-
-                    // Wywołanie onAddressChange z nowym tekstem
+                    Log.d("SearchStreetField", "Query: $newText")
                     viewModel.onAddressChange(newText)
-                    // Uruchomienie coroutineScope dla uzyskania sugestii
-                    coroutineScope.launch {
-                        suggestions = getPlaceSuggestions(newText)
-                        expanded = suggestions.isNotEmpty()
-                    }
+                    performSearch(newText)
                 },
                 placeholder = {
                     Text(
@@ -468,14 +526,14 @@ fun SearchStreetField() {
                             fontFamily = FontFamily(Font(R.font.robotoregular)),
                             fontWeight = FontWeight.Medium,
                             color = Color.Gray,
-                            textAlign = TextAlign.Start
+                            textAlign = TextAlign.Center
                         )
                     )
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
-                    .height(56.dp),  // Ustawienie jednakowej wysokości
+                    .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = TextFieldDefaults.textFieldColors(
                     focusedIndicatorColor = Color.Transparent,
@@ -487,11 +545,11 @@ fun SearchStreetField() {
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Done
                 ),
-                        keyboardActions = KeyboardActions(
-                onDone = {
-                    focusManager.clearFocus()
-                }
-            ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                    }
+                ),
             )
 
             DropdownMenu(
@@ -506,15 +564,10 @@ fun SearchStreetField() {
                     DropdownMenuItem(
                         text = { Text(suggestion) },
                         onClick = {
-
                             query = suggestion
-                            viewModel.onAddressChange(suggestion)
-                            expanded = false
                             suggestions = emptyList()
+                            expanded = false
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                            (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
-                                ?.hideSoftInputFromWindow((context as Activity).currentFocus?.windowToken, 0)
-
                             focusManager.clearFocus()
                         }
                     )
@@ -522,25 +575,6 @@ fun SearchStreetField() {
             }
         }
     }
-}
-
-
-
-@Composable
-fun SuggestionItem(suggestion: String, onSuggestionClick: (String) -> Unit) {
-    Text(
-        text = suggestion,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable {
-                onSuggestionClick(suggestion)
-            },
-        style = TextStyle(
-            fontSize = 16.sp,
-            color = Color.Black
-        )
-    )
 }
 
 
