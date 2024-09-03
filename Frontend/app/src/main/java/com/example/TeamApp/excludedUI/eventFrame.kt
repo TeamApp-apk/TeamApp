@@ -99,8 +99,8 @@ fun ActivityCard(
                     text = date,
                     style = TextStyle(
                         fontSize = 18.sp,
-                        fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
-                        fontWeight = FontWeight(900),
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                        fontWeight = FontWeight.ExtraBold,
                         fontStyle = FontStyle.Italic,
                         color = Variables.P3
                     ),
@@ -111,7 +111,7 @@ fun ActivityCard(
                     text = "$currentParticipants/$maxParticipants",
                     style = TextStyle(
                         fontSize = 16.sp,
-                        fontFamily = FontFamily(Font(R.font.robotobold)),
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
                         fontWeight = FontWeight(500),
                         fontStyle = FontStyle.Italic,
                         color = Variables.Black,
@@ -131,7 +131,7 @@ fun ActivityCard(
                 style = TextStyle(
                     fontSize = 16.sp, // Zmieniamy rozmiar czcionki
                     lineHeight = 20.sp,
-                    fontFamily = FontFamily(Font(R.font.robotobold)),
+                    fontFamily = FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = FontWeight(500),
                     color = Color(0xFF120D26),
                 ),
@@ -156,8 +156,8 @@ fun ActivityCard(
                     text = location,
                     style = TextStyle(
                         fontSize = 14.sp, // Zmieniamy rozmiar czcionki
-                        fontFamily = FontFamily(Font(R.font.thinitalic)),
-                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily(Font(R.font.proximanovalight)),
+                        fontWeight = FontWeight.Normal,
                         fontStyle = FontStyle.Italic,
                         color = Variables.Black,
                     ),

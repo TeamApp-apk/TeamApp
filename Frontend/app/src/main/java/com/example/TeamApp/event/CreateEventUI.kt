@@ -34,6 +34,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -193,8 +194,8 @@ fun CreateEventScreen(navController: NavController) {
             Text(
                 text = "Stwórz wydarzenie",
                 style = TextStyle(
-                    fontSize = 26.sp,
-                    fontFamily = FontFamily(Font(R.font.robotobold)),
+                    fontSize = 28.sp,
+                    fontFamily = FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = FontWeight(900),
                     color = Color(0xFF003366),
                     textAlign = TextAlign.Center,
@@ -340,7 +341,7 @@ fun DescriptionInputField(
                 color = if (description.isEmpty()) Color.Gray else Color.Black,
                 fontSize = 16.sp
             ),
-            fontFamily = if(description.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+            fontFamily = if(description.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
             fontWeight = if(description.isEmpty()) FontWeight.Medium else FontWeight.Bold,
             color = if(description.isEmpty()) Color.Gray else Color(0xFF003366),
             modifier = Modifier.padding(horizontal = 50.dp),
@@ -450,6 +451,7 @@ fun SearchStreetField() {
     var query by remember { mutableStateOf("") }
     var suggestions by remember { mutableStateOf(listOf<String>()) }
     var expanded by remember { mutableStateOf(false) }
+    var isDialogOpen by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -504,75 +506,124 @@ fun SearchStreetField() {
         }
     }
 
-    Box(
-        modifier = Modifier.fillMaxWidth()
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column {
-            TextField(
-                value = query,
-                onValueChange = { newText ->
-                    query = newText
-                    Log.d("SearchStreetField", "Query: $newText")
-                    viewModel.onAddressChange(newText)
-                    performSearch(newText)
-                },
-                placeholder = {
-                    Text(
-                        text = "Lokalizacja",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontFamily = FontFamily(Font(R.font.robotoregular)),
-                            fontWeight = FontWeight.Medium,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Center
-                        )
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = Color.Black,
-                    containerColor = Color.White
-                ),
-                textStyle = TextStyle(fontSize = 16.sp),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        focusManager.clearFocus()
-                    }
-                ),
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .height(56.dp)
+                .background(Color.White, RoundedCornerShape(16.dp))
+                .clickable { isDialogOpen = true },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (query.isEmpty()) "Lokalizacja" else query,
+                modifier = Modifier.padding(start = 16.dp),
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+                    fontWeight = FontWeight.Medium,
+                    color = if (query.isEmpty()) Color.Gray else Color.Gray
+                )
             )
+        }
 
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White),
-                properties = PopupProperties(focusable = false)
-            ) {
-                suggestions.forEach { suggestion ->
-                    DropdownMenuItem(
-                        text = { Text(suggestion) },
-                        onClick = {
-                            query = suggestion
-                            suggestions = emptyList()
-                            expanded = false
-                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                            focusManager.clearFocus()
+        if (isDialogOpen) {
+            AlertDialog(
+                onDismissRequest = { isDialogOpen = false },
+                title = {
+                    Text(text = "Wpisz lokalizację")
+                },
+                text = {
+                    Column {
+                        TextField(
+                            value = query,
+                            onValueChange = { newText ->
+                                query = newText
+                                Log.d("SearchStreetField", "Query: $newText")
+                                viewModel.onAddressChange(newText)
+                                performSearch(newText)
+                            },
+                            placeholder = {
+                                Text(
+                                    text = "Lokalizacja",
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                    style = TextStyle(
+                                        fontSize = 16.sp,
+                                        fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color.Gray,
+                                        textAlign = TextAlign.Center
+                                    )
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .height(56.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = TextFieldDefaults.textFieldColors(
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = Color.Black,
+                                containerColor = Color.White
+                            ),
+                            textStyle = TextStyle(fontSize = 16.sp),
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    focusManager.clearFocus()
+                                }
+                            ),
+                        )
+
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White),
+                            properties = PopupProperties(focusable = false)
+                        ) {
+                            suggestions.forEach { suggestion ->
+                                DropdownMenuItem(
+                                    text = { Text(suggestion) },
+                                    onClick = {
+                                        query = suggestion
+                                        suggestions = emptyList()
+                                        expanded = false
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        focusManager.clearFocus()
+                                    }
+                                )
+                            }
                         }
-                    )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            isDialogOpen = false
+                            // Perform any additional actions if necessary
+                        }
+                    ) {
+                        Text(text = "Gotowe")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { isDialogOpen = false }
+                    ) {
+                        Text(text = "Anuluj")
+                    }
                 }
-            }
+            )
         }
     }
 }
@@ -625,7 +676,7 @@ fun MyDateTimePickerv2() {
                 fontSize = 16.sp,
                 lineHeight = 25.sp,
                 textAlign = TextAlign.Center,
-                fontFamily = if (date.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                fontFamily = if (date.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
                 fontWeight = if (date.isEmpty()) FontWeight.Medium else FontWeight.Bold,
                 color = if (date.isEmpty()) Color.Gray else Color(0xFF003366),
             ),
@@ -786,7 +837,7 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 25.sp,
-                    fontFamily = if(date.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontFamily = if(date.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = if(date.isEmpty()) FontWeight.Medium else FontWeight.Bold,
                     color = if(date.isEmpty()) Color.Gray else Color(0xFF003366),
                 )
@@ -858,7 +909,7 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                     .wrapContentSize(Alignment.Center),
                 style = TextStyle(
                     fontSize = 16.sp,
-                    fontFamily = if (selectedSport.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontFamily = if (selectedSport.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = if(selectedSport.isEmpty()) FontWeight.Medium else FontWeight.Bold,
                     color = if (selectedSport.isEmpty()) Color.Gray else Color(0xFF003366),
                     textAlign = TextAlign.Center
@@ -960,7 +1011,7 @@ fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
                     .align(Alignment.CenterVertically),
                 style = TextStyle(
                     fontSize = 16.sp,
-                    fontFamily = if(limit.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontFamily = if(limit.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = if(limit.isEmpty()) FontWeight.Medium else FontWeight.Bold,
                     color = if(limit.isEmpty()) Color.Gray else Color(0xFF003366),
                     textAlign = TextAlign.Center

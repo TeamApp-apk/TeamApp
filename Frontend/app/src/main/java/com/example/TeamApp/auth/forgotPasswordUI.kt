@@ -132,8 +132,9 @@ fun UpperTextField(value: String){
     Text(
         text = value,
         modifier = Modifier.width(width * 0.83f).height(28.dp * density),
-        style = TextStyle(fontSize = 24.sp * density,
-            fontFamily = fontFamily,
+        textAlign = TextAlign.Center,
+        style = TextStyle(fontSize = 25.sp * density,
+            fontFamily = FontFamily(Font(R.font.proximanovabold)), // Apply custom font here
             fontWeight = FontWeight(500),
             color = Color(0xFF003366),
         )

@@ -346,7 +346,7 @@ fun ForgotPasswordTextField(navController: NavController) {
         style = TextStyle(
             fontSize = 14.sp,
             lineHeight = 23.sp,
-            fontFamily = FontFamily(Font(R.font.robotoregular)),
+            fontFamily = FontFamily(Font(R.font.proximanovaregular)),
             fontWeight = FontWeight(400),
             color = Color(0xFF003366),
             textAlign = TextAlign.Right,
@@ -408,9 +408,9 @@ fun ButtonSignIN(navController: NavController,
                 ) {
                     Text(
                         text = "Zaloguj się",
-                        fontSize = 16.sp,
-                        fontFamily = FontFamily(Font(R.font.robotobold)),
-                        fontWeight = FontWeight(500),
+                        fontSize = 18.sp,
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                        fontWeight = FontWeight(600),
                         color = Color(0xffe0e0e0),
                         textAlign = TextAlign.Center,
                         letterSpacing = 1.sp
@@ -433,9 +433,14 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier, navController: Nav
     val initialText = "Nie masz jeszcze konta?  "
     val loginText = "Zarejestruj się!"
     val annotatedString = buildAnnotatedString {
-        append(initialText)
+        pushStringAnnotation(tag = "initialText", annotation = initialText)
+        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
+        FontFamily(Font(R.font.proximanovaregular)), fontWeight = FontWeight.Normal)) {
+            append(initialText)
+        }
         pushStringAnnotation(tag = "logintext", annotation = loginText)
-        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontWeight = FontWeight.Bold)) {
+        withStyle(style = SpanStyle(color = Color(0xffe0e0e0),fontFamily =
+        FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight.ExtraBold)) {
             append(loginText)
         }
         pop()
