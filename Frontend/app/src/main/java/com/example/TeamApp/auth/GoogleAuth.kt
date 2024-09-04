@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.TeamApp.R
+import com.example.ui.theme.googleAuthStyle
 
 @Composable
 fun GoogleLoginButton() {
@@ -74,13 +75,7 @@ fun GoogleLoginButton() {
             ) {
                 Text(
                     text = "Zaloguj się przez Google",
-
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.robotoregular)),
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF003366),
-                    textAlign = TextAlign.Center,
-                    letterSpacing = 1.sp
+                    style = googleAuthStyle
                 )
             }
         }

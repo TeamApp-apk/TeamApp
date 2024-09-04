@@ -102,6 +102,7 @@ import kotlinx.coroutines.time.delay
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import com.example.TeamApp.excludedUI.CustomSnackbar
+import com.example.ui.theme.buttonLogIn
 
 
 /*
@@ -477,12 +478,7 @@ fun ButtonSignUP(navController: NavController,
                 ) {
                     Text(
                         text = "Zarejestruj się!",
-                        fontSize = 16.sp,
-                        fontFamily = FontFamily(Font(R.font.robotobold)),
-                        fontWeight = FontWeight(500),
-                        color = Color(0xffe0e0e0),
-                        textAlign = TextAlign.Center,
-                        letterSpacing = 1.sp
+                        style = buttonLogIn
                     )
                 }
                 Image(

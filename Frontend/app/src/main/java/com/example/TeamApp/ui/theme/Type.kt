@@ -8,6 +8,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.TextStyle
@@ -24,6 +25,7 @@ import com.example.TeamApp.R
 import kotlinx.coroutines.CoroutineExceptionHandler
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextAlign
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -51,9 +53,59 @@ val fontFamily = FontFamily(
 
 val textInBoxes = TextStyle (
     fontSize = (12 + (density - 1) * 15 ).sp,
-
 )
 
 val robotoFontFamily = FontFamily(
     Font(R.font.robotoblackitalic, FontWeight.Black)
+)
+
+val textInUpperBoxForgotPassword = TextStyle(
+    fontSize = 24.sp * com.example.TeamApp.auth.density,
+    fontFamily = fontFamily,
+    fontWeight = FontWeight(500),
+    color = Color(0xFF003366),
+)
+
+val textInLowerBoxForgotPassword = TextStyle(
+    fontSize = 15.sp,
+    lineHeight = 25.sp,
+    fontFamily = FontFamily(Font(R.font.robotoregular)),
+    fontWeight = FontWeight(400),
+    color = Color.Black
+)
+
+val sendButton = TextStyle (
+    fontSize = 16.sp,
+    fontFamily = FontFamily(Font(R.font.robotobold)),
+    fontWeight = FontWeight(500),
+    color = Color(0xFF003366),
+    textAlign = TextAlign.Center,
+    letterSpacing = 1.sp
+)
+
+val googleAuthStyle = TextStyle (
+    fontSize = 16.sp,
+    fontFamily = FontFamily(Font(R.font.robotoregular)),
+    fontWeight = FontWeight(500),
+    color = Color(0xFF003366),
+    textAlign = TextAlign.Center,
+    letterSpacing = 1.sp
+)
+
+val forgotPasswordLogin = TextStyle(
+    fontSize = 14.sp,
+    lineHeight = 23.sp,
+    fontFamily = FontFamily(Font(R.font.robotoregular)),
+    fontWeight = FontWeight(400),
+    color = Color(0xFF003366),
+    textAlign = TextAlign.Right,
+)
+
+val buttonLogIn = TextStyle(
+    fontSize = 16.sp,
+    fontFamily = FontFamily(Font(R.font.robotobold)),
+    fontWeight = FontWeight(500),
+    color = Color(0xffe0e0e0),
+    textAlign = TextAlign.Center,
+    letterSpacing = 1.sp
 )
