@@ -14,6 +14,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,8 +34,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -194,7 +198,7 @@ fun CreateEventScreen(navController: NavController) {
             Text(
                 text = "Stwórz wydarzenie",
                 style = TextStyle(
-                    fontSize = 28.sp,
+                    fontSize = 27.sp,
                     fontFamily = FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = FontWeight(900),
                     color = Color(0xFF003366),
@@ -367,7 +371,7 @@ fun DescriptionDialog(
 
     // Get the keyboard controller
     val keyboardController = LocalSoftwareKeyboardController.current
-
+    val hapticFeedback = LocalHapticFeedback.current
     Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier
@@ -377,9 +381,10 @@ fun DescriptionDialog(
         ) {
             Column {
                 Text(
-                    text = "Opisz pokrótce szczegóły wydarzenia...",
+                    text = "Opisz pokrótce szczegóły wydarzenia",
                     style = TextStyle(
                         fontSize = 18.sp,
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
                         fontWeight = FontWeight.Bold
                     ),
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -395,15 +400,20 @@ fun DescriptionDialog(
                         .padding(horizontal = 8.dp) // Add some padding inside the TextField
                 ) {
                     TextField(
+                        textStyle = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+                            fontWeight = FontWeight.Normal
+                        ),
                         value = text,
                         onValueChange = { newText -> text = newText },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .focusRequester(focusRequester), // Attach FocusRequester to the TextField
+                            .focusRequester(focusRequester),
                         shape = RoundedCornerShape(16.dp),
                         colors = TextFieldDefaults.textFieldColors(
-                            focusedIndicatorColor = Color.Transparent, // No underline when focused
-                            unfocusedIndicatorColor = Color.Transparent // No underline when unfocused
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
                         )
                     )
                 }
@@ -411,20 +421,57 @@ fun DescriptionDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+
                 ) {
-                    Button(onClick = onDismiss) {
-                        Text("Anuluj")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = {
-                        viewModel.onDescriptionChange(text)
-                        onSave(text)
-                    }) {
-                        Text("Zapisz")
-                    }
+                    Text(
+                        text = "Anuluj",
+                        fontSize = 22.sp,
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                            ) {
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onDismiss()
+                            }
+                            .padding(8.dp)
+                    )
+                    Divider(
+                        color = Color.Black,
+                        thickness = 6.dp,
+                        modifier = Modifier
+                            .height(20.dp)
+                            .width(1.dp)
+                    )
+                    Text(
+                        text = "Gotowe",
+                        fontSize = 22.sp,
+                        color = Color.Black,
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                            ) {
+                                viewModel.onDescriptionChange(text)
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onSave(text)
+                            }
+                            .padding(8.dp)
+                    )
                 }
+
             }
         }
     }
@@ -457,7 +504,7 @@ fun SearchStreetField() {
     val focusManager = LocalFocusManager.current
     val hapticFeedback = LocalHapticFeedback.current
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
-
+    val focusRequester = remember { FocusRequester() }
     // Initialize TomTom search API
     val searchApi = remember { OnlineSearch.create(context, getApiKey(context)) }
 
@@ -465,7 +512,7 @@ fun SearchStreetField() {
         if (query.isNotEmpty()) {
             val options = SearchOptions(
                 query = query,
-                limit = 5,
+                limit = 4,
                 countryCodes = setOf("POL"),
             )
 
@@ -515,30 +562,47 @@ fun SearchStreetField() {
                 .fillMaxWidth()
                 .padding(8.dp)
                 .height(56.dp)
+                .clip(RoundedCornerShape(16.dp))
                 .background(Color.White, RoundedCornerShape(16.dp))
-                .clickable { isDialogOpen = true },
+                .clickable { isDialogOpen = true
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                           },
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = if (query.isEmpty()) "Lokalizacja" else query,
-                modifier = Modifier.padding(start = 16.dp),
                 style = TextStyle(
                     fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.proximanovaregular)),
-                    fontWeight = FontWeight.Medium,
-                    color = if (query.isEmpty()) Color.Gray else Color.Gray
+                    fontFamily = if (query.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
+                    fontWeight = if(query.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                    color = if (query.isEmpty()) Color.Gray else Color(0xFF003366),
+                    textAlign = TextAlign.Center
                 )
             )
         }
 
         if (isDialogOpen) {
             AlertDialog(
+                containerColor = Color.White,
                 onDismissRequest = { isDialogOpen = false },
                 title = {
-                    Text(text = "Wpisz lokalizację")
+                    Text(
+                        text = "Wpisz lokalizację",
+                        style = TextStyle(
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
                 },
                 text = {
                     Column {
+                        // Use LaunchedEffect to request focus when the dialog opens
+                        LaunchedEffect(Unit) {
+                            // Delay focus request slightly to ensure the Composable is fully initialized
+                            kotlinx.coroutines.delay(100) // 100ms delay
+                            focusRequester.requestFocus()
+                        }
                         TextField(
                             value = query,
                             onValueChange = { newText ->
@@ -547,30 +611,15 @@ fun SearchStreetField() {
                                 viewModel.onAddressChange(newText)
                                 performSearch(newText)
                             },
-                            placeholder = {
-                                Text(
-                                    text = "Lokalizacja",
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Center,
-                                    style = TextStyle(
-                                        fontSize = 16.sp,
-                                        fontFamily = FontFamily(Font(R.font.proximanovaregular)),
-                                        fontWeight = FontWeight.Medium,
-                                        color = Color.Gray,
-                                        textAlign = TextAlign.Center
-                                    )
-                                )
-                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(8.dp)
-                                .height(56.dp),
+                                .height(56.dp)
+                                .focusRequester(focusRequester), // Attach the FocusRequester here
                             shape = RoundedCornerShape(16.dp),
                             colors = TextFieldDefaults.textFieldColors(
                                 focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                cursorColor = Color.Black,
-                                containerColor = Color.White
+                                unfocusedIndicatorColor = Color.Transparent
                             ),
                             textStyle = TextStyle(fontSize = 16.sp),
                             keyboardOptions = KeyboardOptions.Default.copy(
@@ -583,50 +632,94 @@ fun SearchStreetField() {
                             ),
                         )
 
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color.White),
-                            properties = PopupProperties(focusable = false)
-                        ) {
-                            suggestions.forEach { suggestion ->
-                                DropdownMenuItem(
-                                    text = { Text(suggestion) },
-                                    onClick = {
-                                        query = suggestion
-                                        suggestions = emptyList()
-                                        expanded = false
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        focusManager.clearFocus()
+                        if (suggestions.isNotEmpty()) {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                items(suggestions) { suggestion ->
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                query = suggestion
+                                                suggestions = emptyList()
+                                                expanded = false
+                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                focusManager.clearFocus()
+                                            }
+                                            .padding(8.dp)
+                                    ) {
+                                        Text(
+                                            text = suggestion,
+                                            style = TextStyle(
+                                                fontSize = 16.sp,
+                                                color = Color.Black
+                                            )
+                                        )
+                                        Divider(color = Color.Gray, thickness = 1.dp)
                                     }
-                                )
+                                }
                             }
                         }
                     }
                 },
                 confirmButton = {
-                    Button(
-                        onClick = {
-                            isDialogOpen = false
-                            // Perform any additional actions if necessary
-                        }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
                     ) {
-                        Text(text = "Gotowe")
-                    }
-                },
-                dismissButton = {
-                    Button(
-                        onClick = { isDialogOpen = false }
-                    ) {
-                        Text(text = "Anuluj")
+                        Text(
+                            text = "Anuluj",
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontSize = 22.sp,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    isDialogOpen = false
+                                }
+                                .padding(8.dp)
+
+                        )
+                        Divider(
+                            color = Color.Black,
+                            thickness = 6.dp,
+                            modifier = Modifier
+                                .height(20.dp)
+                                .width(1.dp)
+                        )
+                        Text(
+                            text = "Gotowe",
+                            color = Color.Black,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontSize = 22.sp,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    isDialogOpen = false
+                                }
+                                .padding(8.dp)
+                        )
                     }
                 }
             )
         }
     }
 }
+
 
 
 @SuppressLint("DefaultLocale")
@@ -693,14 +786,16 @@ fun MyDateTimePickerv2() {
                     .background(Color.White, shape = RoundedCornerShape(16.dp))
             ) {
                 Column {
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Wybierz Datę",
+                        text = "Wybierz datę i godzinę",
                         style = TextStyle(
-                            fontSize = 18.sp,
+                            fontSize = 20.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         ),
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(horizontal = 20.dp)
                     )
 
                     Box(
@@ -734,39 +829,76 @@ fun MyDateTimePickerv2() {
                     }
 
                     Row(
-                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                            .padding(horizontal = 16.dp)
+                            .offset(y = (-20).dp)
                     ) {
-                        Button(onClick = { datePickerDialog.show() },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xff4fc3f7),
-                                contentColor = Color.Black
-                            )) {
-                            Text("Kalendarz")
-                        }
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Button(
-                            onClick = { showDialog = false },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xff4fc3f7),
-                                contentColor = Color.Black
-                            )
-                        ) {
-                            Text("Anuluj")
-                        }
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Button(onClick = {
-                            viewModel.onDateChange(selectedDateTime)
-                            showDialog = false
-                        },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xff4fc3f7),
-                                contentColor = Color.Black
-                            )) {
-                            Text("Zapisz")
-                        }
+                        Text(
+                            text = "Kalendarz",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                ) {
+                                    datePickerDialog.show()
+                                }
+                                .padding(8.dp)
+                        )
+                        Divider(
+                            color = Color.Black,
+                            thickness = 6.dp,
+                            modifier = Modifier
+                                .height(20.dp)
+                                .width(1.dp)
+                        )
+                        Text(
+                            text = "Anuluj",
+                            fontSize = 20.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                ) {
+                                    showDialog = false
+                                }
+                                .padding(8.dp)
+                        )
+                        Divider(
+                            color = Color.Black,
+                            thickness = 6.dp,
+                            modifier = Modifier
+                                .height(20.dp)
+                                .width(1.dp)
+                        )
+                        Text(
+                            text = "Gotowe",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                ) {
+                                    viewModel.onDateChange(selectedDateTime)
+                                    showDialog = false
+                                }
+                                .padding(8.dp)
+                        )
                     }
                 }
             }
@@ -938,6 +1070,7 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
                             color = Color.Black
                         ),
                         modifier = Modifier
@@ -964,6 +1097,7 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                                     .padding(12.dp),
                                 style = TextStyle(
                                     fontSize = 16.sp,
+                                    fontFamily = FontFamily(Font(R.font.proximanovalight)),
                                     color = Color.Black
                                 )
                             )
@@ -1064,6 +1198,7 @@ fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
                                     }
                                     .padding(12.dp),
                                 fontSize = 18.sp,
+                                fontFamily = FontFamily(Font(R.font.proximanovalight)),
                                 color = Color.Black,
                                 textAlign = TextAlign.Start
                             )

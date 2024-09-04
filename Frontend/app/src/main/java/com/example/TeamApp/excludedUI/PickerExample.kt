@@ -20,7 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import com.example.TeamApp.R
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -95,17 +98,17 @@ fun PickerExample(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(0.7f)
                 ) {
-                    Text(
-                        text = "Dzień",
-                        style = TextStyle(fontSize = 22.sp),
-                    )
                     Picker(
                         state = dayPickerState,
                         items = days,
                         visibleItemsCount = 3,
                         modifier = Modifier.background(Color.White),
                         textModifier = Modifier.padding(8.dp),
-                        textStyle = TextStyle(fontSize = 24.sp),
+                        textStyle = TextStyle(
+                            fontSize = 24.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovalight)), // Wrap Font in FontFamily
+
+                        ),
                         onScrollToIndex = { index ->
                             dayPickerState.selectedIndex = index
                         },
@@ -118,17 +121,17 @@ fun PickerExample(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(0.3f)
                 ) {
-                    Text(
-                        text = "godz",
-                        style = TextStyle(fontSize = 22.sp),
-                    )
+
                     Picker(
                         state = hourPickerState,
                         items = hours,
                         visibleItemsCount = 3,
                         modifier = Modifier.background(Color.White),
                         textModifier = Modifier.padding(8.dp),
-                        textStyle = TextStyle(fontSize = 24.sp),
+                        textStyle = TextStyle(
+                            fontSize = 24.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovalight)), // Wrap Font in FontFamily
+                        ),
                         onScrollToIndex = { index ->
                             hourPickerState.selectedIndex = index
                         },
@@ -140,17 +143,17 @@ fun PickerExample(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(0.3f)
                 ) {
-                    Text(
-                        text = "min",
-                        style = TextStyle(fontSize = 22.sp),
-                    )
+
                     Picker(
                         state = minutesPickerState,
                         items = minutes,
                         visibleItemsCount = 3,
                         modifier = Modifier.background(Color.White),
                         textModifier = Modifier.padding(8.dp),
-                        textStyle = TextStyle(fontSize = 24.sp),
+                        textStyle = TextStyle(
+                            fontSize = 24.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovalight)), // Wrap Font in FontFamily
+                        ),
                                 onScrollToIndex = { index ->
                             minutesPickerState.selectedIndex = index
                         },

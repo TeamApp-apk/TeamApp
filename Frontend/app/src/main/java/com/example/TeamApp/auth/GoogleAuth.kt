@@ -75,7 +75,7 @@ fun GoogleLoginButton() {
                 Text(
                     text = "Zaloguj się przez Google",
 
-                    fontSize = 18.sp,
+                    fontSize = 17.sp,
                     fontFamily = FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = FontWeight(500),
                     color = Color(0xFF003366),
