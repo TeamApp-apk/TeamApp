@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -45,7 +46,7 @@ import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.delay
 
-class MainAppActivity : ComponentActivity() {
+class MainAppActivity : AppCompatActivity() {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,7 +68,7 @@ class MainAppActivity : ComponentActivity() {
             LaunchedEffect(navController) {
                 navController.addOnDestinationChangedListener { _, destination, _ ->
                     isBottomBarVisible = when (destination.route) {
-                        "details" -> false
+                        "details/{activityId}" -> false
                         else -> true
                     }
                 }

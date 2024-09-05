@@ -1,9 +1,15 @@
 package com.example.TeamApp.event
 import DescriptionTextField
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
+import android.view.View
+import android.widget.FrameLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,12 +31,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -45,18 +53,31 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentContainerView
+import androidx.fragment.app.commit
 import androidx.navigation.NavController
+import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.R
+import com.example.TeamApp.data.Coordinates
 import com.example.TeamApp.excludedUI.EventButton
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.tomtom.sdk.location.GeoPoint
 import com.tomtom.sdk.map.display.MapOptions
+import com.tomtom.sdk.map.display.TomTomMap
 import com.tomtom.sdk.map.display.camera.CameraOptions
+import com.tomtom.sdk.map.display.camera.CameraPosition
 import com.tomtom.sdk.map.display.common.screen.Padding
 import com.tomtom.sdk.map.display.map.OnlineCachePolicy
 import com.tomtom.sdk.map.display.style.StyleMode
+import com.tomtom.sdk.map.display.ui.MapFragment
 import com.tomtom.sdk.map.display.ui.MapView
 import java.util.Properties
+import com.example.TeamApp.event.createTomTomMapFragment
+import com.tomtom.sdk.map.display.image.ImageFactory
+import com.tomtom.sdk.map.display.marker.MarkerOptions
 
 
 @Composable
@@ -65,6 +86,7 @@ fun DetailsScreen(navController: NavController, activityId: String) {
     val event = viewModel.getEventById(activityId)
     var geoPoint by remember { mutableStateOf<GeoPoint?>(null) }
     val locationQuery = event?.location ?: ""
+    val locationID = event?.locationID
 
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
@@ -146,19 +168,9 @@ fun DetailsScreen(navController: NavController, activityId: String) {
                     modifier = Modifier.padding(bottom = 20.dp)
                 )
 
-                // Map View
-                if (event != null && event.location != null) {
-                    // Parse the location string into LatLng
-                    val location = parseLocation(event.location)
-
-                    // Display the map only if location is valid
-                    if (location != null) {
-                        TomTomMapView(context = LocalContext.current, coordinates = location)
-                    } else {
-                        Text(text = "Invalid location data")
-                    }
+                if (locationID != null) {
+                    TomTomMapView(context = LocalContext.current, locationID = locationID, selectedAddress = locationQuery)
                 }
-
                 // Join status row
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -207,66 +219,98 @@ fun DetailsScreen(navController: NavController, activityId: String) {
 }
 
 
+//@Composable
+//fun TomTomMapView(
+//    context: Context,
+//    coordinates: GeoPoint,
+//    modifier: Modifier = Modifier
+//) {
+//    val mapOptions = MapOptions(mapKey = getApiKey(context))
+//    val mapFragment = MapFragment.newInstance(mapOptions)
+//
+//}
 @Composable
-fun TomTomMapView(context: Context, coordinates: LatLng) {
-    val localContext = LocalContext.current // Ensure correct LocalContext usage
+fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, selectedAddress: String) {
+    var mapFragment by remember {
+        mutableStateOf<MapFragment?>(null)
+    }
+    var isMapFragmentReady by remember {
+        mutableStateOf(false)
+    }
+    val fragmentManager = (context as FragmentActivity).supportFragmentManager
 
-    AndroidView(
-        factory = { ctx ->
-            // Create MapOptions for initializing MapView
-            val mapOptions = MapOptions(
-                mapKey = getApiKey(localContext), // Retrieve your actual TomTom API key
-                cameraOptions = CameraOptions(
-                    position = GeoPoint(coordinates.latitude, coordinates.longitude), // Set camera position from passed coordinates
-                    zoom = 15.0, // Set zoom level
-                    tilt = 0.0, // Optional tilt
-                    rotation = 0.0 // Optional rotation
-                ),
-                padding = Padding(), // Default padding
-                mapStyle = null, // Optional, or you can set a custom style
-                styleMode = StyleMode.MAIN, // Default style mode
-                onlineCachePolicy = OnlineCachePolicy.Default, // Default caching policy
-                renderToTexture = false // Default value
-            )
-            val mapView = MapView(ctx, mapOptions)
-            mapView.onCreate(null)
-            mapView.getMapAsync { tomTomMap ->
-                try {
-                    // Set camera options to the map
-                    tomTomMap.moveCamera(CameraOptions(
-                        position = GeoPoint(coordinates.latitude, coordinates.longitude), // Dynamic coordinates
-                        zoom = 15.0 // Set zoom level
-                    ))
+    val cords = locationID[selectedAddress]
 
-                    // You can add markers, overlays, or interact with the map here
-                } catch (e: Exception) {
-                    Log.e("TomTomMapView", "Error setting up map: ${e.message}")
-                }
-            }
-
-            // Return the MapView instance
-            mapView
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(220.dp)
+    val mapOptions = MapOptions(
+        mapKey = getApiKey(context),
+        // add more options
     )
-}
 
-fun parseLocation(location: String): LatLng? {
-    return try {
-        val parts = location.split(",").map { it.trim() }
-        if (parts.size == 2) {
-            val latitude = parts[0].toDoubleOrNull()
-            val longitude = parts[1].toDoubleOrNull()
-            if (latitude != null && longitude != null) {
-                LatLng(latitude, longitude)
-            } else null
-        } else null
-    } catch (e: Exception) {
-        null // Handle invalid format
+    LaunchedEffect(Unit) {
+        createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
+            mapFragment = fragment
+            isMapFragmentReady = true
+        }
+    }
+
+    if (isMapFragmentReady) {
+        AndroidView(
+            factory = {
+                mapFragment?.requireView() ?: View(it)
+            },
+            update = {
+                mapFragment?.getMapAsync { tomTomMap ->
+                    if (cords != null) {
+                        tomTomMap.moveCamera(
+                            CameraOptions(
+                                position = GeoPoint(
+                                    cords.latitude,
+                                    cords.longitude
+                                ), // Dynamic coordinates
+                                zoom = 15.0 // Set zoom level
+                            )
+                        )
+
+                        val bitmap =
+                            BitmapFactory.decodeResource(context.resources, R.drawable.pin_icon)
+                        val scaledBitmap =
+                            Bitmap.createScaledBitmap(bitmap, 100, 100, false) // Adjust size here
+                        val markerOptions = MarkerOptions(
+                            coordinate = GeoPoint(
+                                cords.latitude,
+                                cords.longitude
+                            ),
+                            pinImage = ImageFactory.fromBitmap(scaledBitmap),
+                            pinIconImage = ImageFactory.fromBitmap(scaledBitmap),
+                        )
+                        tomTomMap.addMarker(markerOptions)
+
+                        tomTomMap.addMarkerClickListener { }
+
+                        // tomTomMap.addMapClickListener {  }
+                    }
+                }
+            },
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .fillMaxWidth()
+                .height(220.dp) // Adjust the height here
+                .border(2.dp, Color.Black,RoundedCornerShape(16.dp))
+
+        )
     }
 }
+
+
+//@Composable
+//fun ShowWarsawMap() {
+//    val context = LocalContext.current
+//    val warsawCoordinates = GeoPoint(52.2297, 21.0122) // Coordinates for Warsaw
+//
+//    TomTomMapView(context = context, coordinates = warsawCoordinates)
+//}
+
+
 
 
 
