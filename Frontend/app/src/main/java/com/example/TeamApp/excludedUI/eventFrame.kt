@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -79,6 +80,7 @@ fun ActivityCard(
             .height(120.dp)
             .background(backgroundColor, shape = RoundedCornerShape(size = 10.dp))
             .padding(top = 10.dp, bottom = 10.dp)
+            .clickable{onClick()}
     ) {
         Image(
             painter = painterResource(id = iconId),

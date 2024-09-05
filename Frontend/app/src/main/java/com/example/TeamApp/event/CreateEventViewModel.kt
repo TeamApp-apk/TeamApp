@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import com.example.TeamApp.data.Coordinates
 import com.example.TeamApp.data.Event
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -31,6 +32,14 @@ class CreateEventViewModel : ViewModel() {
 
     private val _location = MutableLiveData<String>()
     val location: LiveData<String> get() = _location
+
+    private val _locationID = MutableLiveData<Map<String, Coordinates>>()
+    val locationID: LiveData<Map<String, Coordinates>> get() = _locationID
+
+    fun setLocationID(newLocationID: Map<String, Coordinates>) {
+        _locationID.value = newLocationID
+    }
+
 
     private val _dateTime = MutableLiveData<String>()
     val dateTime: LiveData<String> = _dateTime
@@ -87,6 +96,9 @@ class CreateEventViewModel : ViewModel() {
             }
     }
 
+    fun getEventById(id: String): Event? {
+        return activityList.find { it.id == id }
+    }
 
     fun resetFields() {
         _sport.value = ""

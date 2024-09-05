@@ -139,8 +139,11 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
                                 currentParticipants = activity.currentParticipants,
                                 maxParticipants = activity.maxParticipants,
                                 location = activity.location,
-                                isHighlighted = isNewlyCreated
-                            ) {}
+                                isHighlighted = isNewlyCreated,
+                                onClick = {
+                                    navController.navigate("details/${activity.id}")
+                                }
+                            )
                             Spacer(modifier = Modifier.height(4.dp))
                         }
                     }

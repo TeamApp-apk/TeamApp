@@ -85,7 +85,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.example.TeamApp.R
+import com.example.TeamApp.data.Coordinates
 import com.example.TeamApp.data.Event
+import com.example.TeamApp.data.Suggestion
 import com.example.TeamApp.excludedUI.EventButton
 import com.example.TeamApp.excludedUI.PickerExample
 import com.tomtom.quantity.Distance
@@ -125,6 +127,7 @@ fun CreateEventScreen(navController: NavController) {
     val address by viewModel.location.observeAsState("")
     val limit by viewModel.limit.observeAsState("")
     val description by viewModel.description.observeAsState("")
+    val locationID by viewModel.locationID.observeAsState(emptyMap())
     val availableSports = viewModel.getAvailableSports()
     val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
     val location by viewModel.location.observeAsState("")
@@ -273,8 +276,11 @@ fun CreateEventScreen(navController: NavController) {
                                         date = dateTime,
                                         activityName = sport,
                                         currentParticipants = 0,
-                                        maxParticipants = limit.toInt(),
-                                        location = location
+                                        maxParticipants = participantLimit ?: 0,
+                                        location = address,
+                                        description = description,
+                                        locationID = locationID
+
                                     )
                                     viewModel.createEvent(newEvent) { result ->
                                         if (result == null) {
@@ -496,7 +502,7 @@ fun getApiKey(context: Context): String {
 @Composable
 fun SearchStreetField() {
     var query by remember { mutableStateOf("") }
-    var suggestions by remember { mutableStateOf(listOf<String>()) }
+    var suggestions by remember { mutableStateOf(listOf<Suggestion>()) }
     var expanded by remember { mutableStateOf(false) }
     var isDialogOpen by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -505,7 +511,6 @@ fun SearchStreetField() {
     val hapticFeedback = LocalHapticFeedback.current
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val focusRequester = remember { FocusRequester() }
-    // Initialize TomTom search API
     val searchApi = remember { OnlineSearch.create(context, getApiKey(context)) }
 
     fun performSearch(query: String) {
@@ -525,23 +530,28 @@ fun SearchStreetField() {
                         val newSuggestions = result.results
                             .filter { it.place != null }
                             .mapNotNull {
-                                it.place?.address?.let { address ->
+                                val address = it.place?.address?.let { address ->
                                     listOfNotNull(
                                         address.streetNameAndNumber,
                                         address.freeformAddress,
                                     ).joinToString(" ")
                                 }
+                                val coordinates = it.place.coordinate.let { coord ->
+                                    Coordinates(coord.latitude, coord.longitude)
+                                }
+                                if (address != null) {
+                                    Suggestion(address, coordinates)
+                                } else {
+                                    null
+                                }
                             }
                         Log.d("SearchStreetField", "Extracted Suggestions: $newSuggestions")
-
                         suggestions = newSuggestions
                         expanded = true
                     }
 
                     override fun onFailure(failure: SearchFailure) {
-                        // Debugging: Log the failure
                         Log.e("SearchStreetField", "Search Failure: ${failure.message}")
-
                         suggestions = emptyList()
                         expanded = false
                     }
@@ -564,9 +574,10 @@ fun SearchStreetField() {
                 .height(56.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(Color.White, RoundedCornerShape(16.dp))
-                .clickable { isDialogOpen = true
-                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                           },
+                .clickable {
+                    isDialogOpen = true
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                },
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -597,10 +608,8 @@ fun SearchStreetField() {
                 },
                 text = {
                     Column {
-                        // Use LaunchedEffect to request focus when the dialog opens
                         LaunchedEffect(Unit) {
-                            // Delay focus request slightly to ensure the Composable is fully initialized
-                            kotlinx.coroutines.delay(100) // 100ms delay
+                            kotlinx.coroutines.delay(100)
                             focusRequester.requestFocus()
                         }
                         TextField(
@@ -615,7 +624,7 @@ fun SearchStreetField() {
                                 .fillMaxWidth()
                                 .padding(8.dp)
                                 .height(56.dp)
-                                .focusRequester(focusRequester), // Attach the FocusRequester here
+                                .focusRequester(focusRequester),
                             shape = RoundedCornerShape(16.dp),
                             colors = TextFieldDefaults.textFieldColors(
                                 focusedIndicatorColor = Color.Transparent,
@@ -643,16 +652,21 @@ fun SearchStreetField() {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable {
-                                                query = suggestion
+                                                Log.d("SearchStreetField", "Suggestion clicked: ${suggestion.address}")
+                                                query = suggestion.address
+                                                viewModel.onAddressChange(query)
                                                 suggestions = emptyList()
                                                 expanded = false
                                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 focusManager.clearFocus()
+                                                suggestion.coordinates?.let { coords ->
+                                                    viewModel.setLocationID(mapOf(query to coords))
+                                                }
                                             }
                                             .padding(8.dp)
                                     ) {
                                         Text(
-                                            text = suggestion,
+                                            text = suggestion.address,
                                             style = TextStyle(
                                                 fontSize = 16.sp,
                                                 color = Color.Black
@@ -682,13 +696,12 @@ fun SearchStreetField() {
                                 .clip(RoundedCornerShape(8.dp))
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
-                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                    indication = rememberRipple()
                                 ) {
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                     isDialogOpen = false
                                 }
                                 .padding(8.dp)
-
                         )
                         Divider(
                             color = Color.Black,
@@ -706,7 +719,7 @@ fun SearchStreetField() {
                                 .clip(RoundedCornerShape(8.dp))
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
-                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                    indication = rememberRipple()
                                 ) {
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                     isDialogOpen = false
@@ -719,6 +732,7 @@ fun SearchStreetField() {
         }
     }
 }
+
 
 
 
@@ -737,6 +751,8 @@ fun MyDateTimePickerv2() {
     val date by viewModel.dateTime.observeAsState("")
     var showDialog by remember { mutableStateOf(false) }
     val originalFormat = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("pl", "PL"))
+    val hapticFeedback = LocalHapticFeedback.current
+
 
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
@@ -846,8 +862,9 @@ fun MyDateTimePickerv2() {
                                 .clip(RoundedCornerShape(8.dp))
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
-                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                    indication = rememberRipple()
                                 ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                     datePickerDialog.show()
                                 }
                                 .padding(8.dp)
@@ -871,6 +888,7 @@ fun MyDateTimePickerv2() {
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = rememberRipple() // Efekt "fal" przy kliknięciu
                                 ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                     showDialog = false
                                 }
                                 .padding(8.dp)
@@ -895,6 +913,7 @@ fun MyDateTimePickerv2() {
                                     indication = rememberRipple() // Efekt "fal" przy kliknięciu
                                 ) {
                                     viewModel.onDateChange(selectedDateTime)
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                     showDialog = false
                                 }
                                 .padding(8.dp)
@@ -1088,12 +1107,14 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                             Text(
                                 text = sport,
                                 modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
                                     .fillMaxWidth()
                                     .clickable {
                                         viewModel.onSportChange(sport)
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                         showDialog = false // Zamknięcie popupu po wybraniu opcji
                                     }
+
                                     .padding(12.dp),
                                 style = TextStyle(
                                     fontSize = 16.sp,
@@ -1189,6 +1210,7 @@ fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
                             Text(
                                 text = peopleCount.toString(),
                                 modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
                                     .fillMaxWidth()
                                     .clickable {
                                         selectedPeople = peopleCount

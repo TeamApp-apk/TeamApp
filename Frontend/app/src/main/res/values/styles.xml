@@ -8,7 +8,7 @@
     <!-- Niestandardowy styl dla DatePickerDialog -->
     <style name="CustomDatePickerTheme" parent="Theme.MaterialComponents.Light.Dialog">
         <item name="colorPrimary">#FFFF</item> <!-- Kolor główny dialogu -->
-        <item name="colorAccent">#FF007BFF</item> <!-- Kolor akcentu -->
+        <item name="colorAccent">#000000</item> <!-- Kolor akcentu -->
         <item name="android:textColorPrimary">#000000</item> <!-- Kolor tekstu -->
         <item name="android:datePickerDialogTheme">@style/CustomDatePickerTheme</item> <!-- Powiązanie z DatePicker -->
     </style>
@@ -16,7 +16,7 @@
     <!-- Styl dla TimePickerDialog -->
     <style name="CustomTimePickerTheme" parent="Theme.MaterialComponents.Light.Dialog">
         <item name="colorPrimary">#FFFF</item>
-        <item name="colorAccent">#FF007BFF</item>
+        <item name="colorAccent">#000000</item>
         <item name="android:textColorPrimary">#000000</item>
         <!-- Inne elementy stylu -->
     </style>
