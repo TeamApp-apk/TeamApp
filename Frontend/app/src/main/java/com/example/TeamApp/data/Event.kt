@@ -2,6 +2,7 @@ package com.example.TeamApp.data
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import java.util.UUID
 
 
 data class Event(
@@ -10,11 +11,13 @@ data class Event(
     val activityName: String = "",
     val currentParticipants: Int = 0,
     val maxParticipants: Int = 0,
-    val location: String = ""
+    val location: String = "",
+    val description: String = "",
+    val locationID: Map<String, Coordinates>? = null,
+    val id: String = UUID.randomUUID().toString()
 ) {
-    constructor() : this("", "", "", 0, 0, "")
+    constructor() : this("", "", "", 0, 0, "", "", null, UUID.randomUUID().toString())
 
-    //    private val endDate: LocalDate
     private val participants: MutableList<User> = ArrayList()
 
     companion object {

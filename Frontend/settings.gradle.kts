@@ -16,6 +16,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("https://repositories.tomtom.com/artifactory/maven")
+        }
+        
     }
 }
 

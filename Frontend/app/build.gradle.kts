@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.TeamApp"
-        minSdk = 29
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -46,12 +46,16 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        jniLibs {
+            pickFirsts.add("lib/**/libc++_shared.so")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
+
 
 dependencies {
     // Core AndroidX dependencies
@@ -90,8 +94,22 @@ dependencies {
     implementation(libs.hilt.android)
 
 
+    //Maps
+    implementation("com.tomtom.sdk.maps:map-display:1.11.0"){
+        exclude(group = "com.google.protobuf", module = "protobuf-java")
+        exclude(group = "com.google.protobuf", module = "protobuf-javalite")
+        exclude(group = "com.google.protobuf", module = "protobuf-kotlin")
+    }
+    implementation("com.tomtom.sdk.search:search-online:1.11.0"){
+        exclude(group = "com.google.protobuf", module = "protobuf-java")
+        exclude(group = "com.google.protobuf", module = "protobuf-javalite")
+        exclude(group = "com.google.protobuf", module = "protobuf-kotlin")
+    }
+
+
     //Animations
     implementation (libs.lottie.compose)
+
 
 
     // Firebase dependencies (using BOM for version management)

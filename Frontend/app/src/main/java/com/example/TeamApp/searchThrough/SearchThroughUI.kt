@@ -94,7 +94,7 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
         modifier = Modifier
             .fillMaxSize()
             .background(brush = Brush.linearGradient(colors = gradientColors))
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -139,9 +139,12 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
                                 currentParticipants = activity.currentParticipants,
                                 maxParticipants = activity.maxParticipants,
                                 location = activity.location,
-                                isHighlighted = isNewlyCreated
-                            ) {
-                            }
+                                isHighlighted = isNewlyCreated,
+                                onClick = {
+                                    navController.navigate("details/${activity.id}")
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
                         }
                     }
                 }

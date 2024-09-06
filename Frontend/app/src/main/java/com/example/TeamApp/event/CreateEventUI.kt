@@ -1,5 +1,6 @@
 package com.example.TeamApp.event
 
+//import androidx.hilt.navigation.compose.hiltViewModel
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -11,10 +12,9 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import com.airbnb.lottie.compose.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,11 +34,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,18 +61,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -81,22 +81,41 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
-//import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.*
 import com.example.TeamApp.R
+import com.example.TeamApp.data.Coordinates
 import com.example.TeamApp.data.Event
+import com.example.TeamApp.data.Suggestion
 import com.example.TeamApp.excludedUI.EventButton
-import com.example.TeamApp.excludedUI.Picker
 import com.example.TeamApp.excludedUI.PickerExample
-import com.example.TeamApp.excludedUI.getPlaceSuggestions
-import kotlinx.coroutines.Delay
+import com.tomtom.quantity.Distance
+import com.tomtom.sdk.location.GeoBoundingBox
+import com.tomtom.sdk.location.GeoPoint
+import com.tomtom.sdk.search.SearchCallback
+import com.tomtom.sdk.search.SearchOptions
+import com.tomtom.sdk.search.SearchResponse
+import com.tomtom.sdk.search.autocomplete.AutocompleteOptions
+import com.tomtom.sdk.search.autocomplete.AutocompleteResponse
+import com.tomtom.sdk.search.autocomplete.AutocompleteCallback
+import com.tomtom.sdk.search.common.error.SearchFailure
+import com.tomtom.sdk.search.model.result.AutocompleteSegmentPlainText
+import com.tomtom.sdk.search.online.OnlineSearch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import java.util.Calendar
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 import java.util.Locale
+import java.util.Properties
+import java.util.concurrent.CountDownLatch
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+
 
 @Composable
 fun CreateEventScreen(navController: NavController) {
@@ -108,6 +127,7 @@ fun CreateEventScreen(navController: NavController) {
     val address by viewModel.location.observeAsState("")
     val limit by viewModel.limit.observeAsState("")
     val description by viewModel.description.observeAsState("")
+    val locationID by viewModel.locationID.observeAsState(emptyMap())
     val availableSports = viewModel.getAvailableSports()
     val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
     val location by viewModel.location.observeAsState("")
@@ -181,8 +201,8 @@ fun CreateEventScreen(navController: NavController) {
             Text(
                 text = "Stwórz wydarzenie",
                 style = TextStyle(
-                    fontSize = 26.sp,
-                    fontFamily = FontFamily(Font(R.font.robotobold)),
+                    fontSize = 27.sp,
+                    fontFamily = FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = FontWeight(900),
                     color = Color(0xFF003366),
                     textAlign = TextAlign.Center,
@@ -246,6 +266,7 @@ fun CreateEventScreen(navController: NavController) {
                             EventButton(text = "Stwórz", onClick = {
                                 Log.d("CreateEventScreen", "Submit button clicked")
                                 val participantLimit = limit.toIntOrNull()
+                                Log.d("CreateEventScreen", "Address: $address")
                                 if (sport.isNotEmpty() && address.isNotEmpty() && location.isNotEmpty()) {
                                     isLoading = true
                                     isPlaying = true
@@ -255,8 +276,11 @@ fun CreateEventScreen(navController: NavController) {
                                         date = dateTime,
                                         activityName = sport,
                                         currentParticipants = 0,
-                                        maxParticipants = limit.toInt(),
-                                        location = location
+                                        maxParticipants = participantLimit ?: 0,
+                                        location = address,
+                                        description = description,
+                                        locationID = locationID
+
                                     )
                                     viewModel.createEvent(newEvent) { result ->
                                         if (result == null) {
@@ -327,7 +351,7 @@ fun DescriptionInputField(
                 color = if (description.isEmpty()) Color.Gray else Color.Black,
                 fontSize = 16.sp
             ),
-            fontFamily = if(description.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+            fontFamily = if(description.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
             fontWeight = if(description.isEmpty()) FontWeight.Medium else FontWeight.Bold,
             color = if(description.isEmpty()) Color.Gray else Color(0xFF003366),
             modifier = Modifier.padding(horizontal = 50.dp),
@@ -353,7 +377,7 @@ fun DescriptionDialog(
 
     // Get the keyboard controller
     val keyboardController = LocalSoftwareKeyboardController.current
-
+    val hapticFeedback = LocalHapticFeedback.current
     Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier
@@ -363,9 +387,10 @@ fun DescriptionDialog(
         ) {
             Column {
                 Text(
-                    text = "Opisz pokrótce szczegóły wydarzenia...",
+                    text = "Opisz pokrótce szczegóły wydarzenia",
                     style = TextStyle(
                         fontSize = 18.sp,
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
                         fontWeight = FontWeight.Bold
                     ),
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -381,15 +406,20 @@ fun DescriptionDialog(
                         .padding(horizontal = 8.dp) // Add some padding inside the TextField
                 ) {
                     TextField(
+                        textStyle = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+                            fontWeight = FontWeight.Normal
+                        ),
                         value = text,
                         onValueChange = { newText -> text = newText },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .focusRequester(focusRequester), // Attach FocusRequester to the TextField
+                            .focusRequester(focusRequester),
                         shape = RoundedCornerShape(16.dp),
                         colors = TextFieldDefaults.textFieldColors(
-                            focusedIndicatorColor = Color.Transparent, // No underline when focused
-                            unfocusedIndicatorColor = Color.Transparent // No underline when unfocused
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
                         )
                     )
                 }
@@ -397,20 +427,57 @@ fun DescriptionDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+
                 ) {
-                    Button(onClick = onDismiss) {
-                        Text("Anuluj")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = {
-                        viewModel.onDescriptionChange(text)
-                        onSave(text)
-                    }) {
-                        Text("Zapisz")
-                    }
+                    Text(
+                        text = "Anuluj",
+                        fontSize = 22.sp,
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                            ) {
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onDismiss()
+                            }
+                            .padding(8.dp)
+                    )
+                    Divider(
+                        color = Color.Black,
+                        thickness = 6.dp,
+                        modifier = Modifier
+                            .height(20.dp)
+                            .width(1.dp)
+                    )
+                    Text(
+                        text = "Gotowe",
+                        fontSize = 22.sp,
+                        color = Color.Black,
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                            ) {
+                                viewModel.onDescriptionChange(text)
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onSave(text)
+                            }
+                            .padding(8.dp)
+                    )
                 }
+
             }
         }
     }
@@ -422,126 +489,251 @@ fun DescriptionDialog(
 }
 
 
+fun getApiKey(context: Context): String {
+    val properties = Properties()
+    context.assets.open("tomtomApi_key.properties").use { inputStream ->
+        properties.load(inputStream)
+    }
+    return properties.getProperty("API_KEY")
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchStreetField() {
     var query by remember { mutableStateOf("") }
-    var suggestions by remember { mutableStateOf(listOf<String>()) }
+    var suggestions by remember { mutableStateOf(listOf<Suggestion>()) }
     var expanded by remember { mutableStateOf(false) }
+    var isDialogOpen by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    val viewModel:CreateEventViewModel = ViewModelProvider.createEventViewModel
-    val location by viewModel.location.observeAsState("")
     val hapticFeedback = LocalHapticFeedback.current
-    query = location
+    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val focusRequester = remember { FocusRequester() }
+    val searchApi = remember { OnlineSearch.create(context, getApiKey(context)) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Column {
-            // Pole tekstowe
-            TextField(
-                value = query,
-                onValueChange = { newText ->
-                    // Aktualizacja query
-                    query = newText
+    fun performSearch(query: String) {
+        if (query.isNotEmpty()) {
+            val options = SearchOptions(
+                query = query,
+                limit = 4,
+                countryCodes = setOf("POL"),
+            )
 
-                    // Wywołanie onAddressChange z nowym tekstem
-                    viewModel.onAddressChange(newText)
-                    // Uruchomienie coroutineScope dla uzyskania sugestii
-                    coroutineScope.launch {
-                        suggestions = getPlaceSuggestions(newText)
-                        expanded = suggestions.isNotEmpty()
+            searchApi.search(
+                options,
+                object : SearchCallback {
+                    override fun onSuccess(result: SearchResponse) {
+                        Log.d("SearchStreetField", "Search Success: ${result.results}")
+
+                        val newSuggestions = result.results
+                            .filter { it.place != null }
+                            .mapNotNull {
+                                val address = it.place?.address?.let { address ->
+                                    listOfNotNull(
+                                        address.streetNameAndNumber,
+                                        address.freeformAddress,
+                                    ).joinToString(" ")
+                                }
+                                val coordinates = it.place.coordinate.let { coord ->
+                                    Coordinates(coord.latitude, coord.longitude)
+                                }
+                                if (address != null) {
+                                    Suggestion(address, coordinates)
+                                } else {
+                                    null
+                                }
+                            }
+                        Log.d("SearchStreetField", "Extracted Suggestions: $newSuggestions")
+                        suggestions = newSuggestions
+                        expanded = true
                     }
+
+                    override fun onFailure(failure: SearchFailure) {
+                        Log.e("SearchStreetField", "Search Failure: ${failure.message}")
+                        suggestions = emptyList()
+                        expanded = false
+                    }
+                }
+            )
+        } else {
+            suggestions = emptyList()
+            expanded = false
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .height(56.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.White, RoundedCornerShape(16.dp))
+                .clickable {
+                    isDialogOpen = true
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                 },
-                placeholder = {
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (query.isEmpty()) "Lokalizacja" else query,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontFamily = if (query.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
+                    fontWeight = if(query.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                    color = if (query.isEmpty()) Color.Gray else Color(0xFF003366),
+                    textAlign = TextAlign.Center
+                )
+            )
+        }
+
+        if (isDialogOpen) {
+            AlertDialog(
+                containerColor = Color.White,
+                onDismissRequest = { isDialogOpen = false },
+                title = {
                     Text(
-                        text = "Lokalizacja",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
+                        text = "Wpisz lokalizację",
                         style = TextStyle(
-                            fontSize = 16.sp,
-                            fontFamily = FontFamily(Font(R.font.robotoregular)),
-                            fontWeight = FontWeight.Medium,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Start
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
                         )
                     )
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .height(56.dp),  // Ustawienie jednakowej wysokości
-                shape = RoundedCornerShape(16.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = Color.Black,
-                    containerColor = Color.White
-                ),
-                textStyle = TextStyle(fontSize = 16.sp),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done
-                ),
-                        keyboardActions = KeyboardActions(
-                onDone = {
-                    focusManager.clearFocus()
-                }
-            ),
-            )
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White),
-                properties = PopupProperties(focusable = false)
-            ) {
-                suggestions.forEach { suggestion ->
-                    DropdownMenuItem(
-                        text = { Text(suggestion) },
-                        onClick = {
-
-                            query = suggestion
-                            viewModel.onAddressChange(suggestion)
-                            expanded = false
-                            suggestions = emptyList()
-                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                            (context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
-                                ?.hideSoftInputFromWindow((context as Activity).currentFocus?.windowToken, 0)
-
-                            focusManager.clearFocus()
+                text = {
+                    Column {
+                        LaunchedEffect(Unit) {
+                            kotlinx.coroutines.delay(100)
+                            focusRequester.requestFocus()
                         }
-                    )
+                        TextField(
+                            value = query,
+                            onValueChange = { newText ->
+                                query = newText
+                                Log.d("SearchStreetField", "Query: $newText")
+                                viewModel.onAddressChange(newText)
+                                performSearch(newText)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .height(56.dp)
+                                .focusRequester(focusRequester),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = TextFieldDefaults.textFieldColors(
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            ),
+                            textStyle = TextStyle(fontSize = 16.sp),
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    focusManager.clearFocus()
+                                }
+                            ),
+                        )
+
+                        if (suggestions.isNotEmpty()) {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                items(suggestions) { suggestion ->
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                Log.d("SearchStreetField", "Suggestion clicked: ${suggestion.address}")
+                                                query = suggestion.address
+                                                viewModel.onAddressChange(query)
+                                                suggestions = emptyList()
+                                                expanded = false
+                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                focusManager.clearFocus()
+                                                suggestion.coordinates?.let { coords ->
+                                                    viewModel.setLocationID(mapOf(query to coords))
+                                                }
+                                            }
+                                            .padding(8.dp)
+                                    ) {
+                                        Text(
+                                            text = suggestion.address,
+                                            style = TextStyle(
+                                                fontSize = 16.sp,
+                                                color = Color.Black
+                                            )
+                                        )
+                                        Divider(color = Color.Gray, thickness = 1.dp)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        Text(
+                            text = "Anuluj",
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontSize = 22.sp,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple()
+                                ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    isDialogOpen = false
+                                }
+                                .padding(8.dp)
+                        )
+                        Divider(
+                            color = Color.Black,
+                            thickness = 6.dp,
+                            modifier = Modifier
+                                .height(20.dp)
+                                .width(1.dp)
+                        )
+                        Text(
+                            text = "Gotowe",
+                            color = Color.Black,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontSize = 22.sp,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple()
+                                ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    isDialogOpen = false
+                                }
+                                .padding(8.dp)
+                        )
+                    }
                 }
-            }
+            )
         }
     }
 }
 
 
-
-@Composable
-fun SuggestionItem(suggestion: String, onSuggestionClick: (String) -> Unit) {
-    Text(
-        text = suggestion,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .clickable {
-                onSuggestionClick(suggestion)
-            },
-        style = TextStyle(
-            fontSize = 16.sp,
-            color = Color.Black
-        )
-    )
-}
 
 
 @SuppressLint("DefaultLocale")
@@ -559,6 +751,8 @@ fun MyDateTimePickerv2() {
     val date by viewModel.dateTime.observeAsState("")
     var showDialog by remember { mutableStateOf(false) }
     val originalFormat = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("pl", "PL"))
+    val hapticFeedback = LocalHapticFeedback.current
+
 
     val datePickerDialog = DatePickerDialog(
         LocalContext.current,
@@ -591,7 +785,7 @@ fun MyDateTimePickerv2() {
                 fontSize = 16.sp,
                 lineHeight = 25.sp,
                 textAlign = TextAlign.Center,
-                fontFamily = if (date.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                fontFamily = if (date.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
                 fontWeight = if (date.isEmpty()) FontWeight.Medium else FontWeight.Bold,
                 color = if (date.isEmpty()) Color.Gray else Color(0xFF003366),
             ),
@@ -608,14 +802,16 @@ fun MyDateTimePickerv2() {
                     .background(Color.White, shape = RoundedCornerShape(16.dp))
             ) {
                 Column {
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Wybierz Datę",
+                        text = "Wybierz datę i godzinę",
                         style = TextStyle(
-                            fontSize = 18.sp,
+                            fontSize = 20.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         ),
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(horizontal = 20.dp)
                     )
 
                     Box(
@@ -649,39 +845,79 @@ fun MyDateTimePickerv2() {
                     }
 
                     Row(
-                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                            .padding(horizontal = 16.dp)
+                            .offset(y = (-20).dp)
                     ) {
-                        Button(onClick = { datePickerDialog.show() },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xff4fc3f7),
-                                contentColor = Color.Black
-                            )) {
-                            Text("Kalendarz")
-                        }
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Button(
-                            onClick = { showDialog = false },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xff4fc3f7),
-                                contentColor = Color.Black
-                            )
-                        ) {
-                            Text("Anuluj")
-                        }
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Button(onClick = {
-                            viewModel.onDateChange(selectedDateTime)
-                            showDialog = false
-                        },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xff4fc3f7),
-                                contentColor = Color.Black
-                            )) {
-                            Text("Zapisz")
-                        }
+                        Text(
+                            text = "Kalendarz",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple()
+                                ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    datePickerDialog.show()
+                                }
+                                .padding(8.dp)
+                        )
+                        Divider(
+                            color = Color.Black,
+                            thickness = 6.dp,
+                            modifier = Modifier
+                                .height(20.dp)
+                                .width(1.dp)
+                        )
+                        Text(
+                            text = "Anuluj",
+                            fontSize = 20.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showDialog = false
+                                }
+                                .padding(8.dp)
+                        )
+                        Divider(
+                            color = Color.Black,
+                            thickness = 6.dp,
+                            modifier = Modifier
+                                .height(20.dp)
+                                .width(1.dp)
+                        )
+                        Text(
+                            text = "Gotowe",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                ) {
+                                    viewModel.onDateChange(selectedDateTime)
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showDialog = false
+                                }
+                                .padding(8.dp)
+                        )
                     }
                 }
             }
@@ -752,7 +988,7 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
                 style = TextStyle(
                     fontSize = 16.sp,
                     lineHeight = 25.sp,
-                    fontFamily = if(date.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontFamily = if(date.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = if(date.isEmpty()) FontWeight.Medium else FontWeight.Bold,
                     color = if(date.isEmpty()) Color.Gray else Color(0xFF003366),
                 )
@@ -824,7 +1060,7 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                     .wrapContentSize(Alignment.Center),
                 style = TextStyle(
                     fontSize = 16.sp,
-                    fontFamily = if (selectedSport.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontFamily = if (selectedSport.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = if(selectedSport.isEmpty()) FontWeight.Medium else FontWeight.Bold,
                     color = if (selectedSport.isEmpty()) Color.Gray else Color(0xFF003366),
                     textAlign = TextAlign.Center
@@ -853,6 +1089,7 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                         style = TextStyle(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
                             color = Color.Black
                         ),
                         modifier = Modifier
@@ -870,15 +1107,18 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                             Text(
                                 text = sport,
                                 modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
                                     .fillMaxWidth()
                                     .clickable {
                                         viewModel.onSportChange(sport)
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                         showDialog = false // Zamknięcie popupu po wybraniu opcji
                                     }
+
                                     .padding(12.dp),
                                 style = TextStyle(
                                     fontSize = 16.sp,
+                                    fontFamily = FontFamily(Font(R.font.proximanovalight)),
                                     color = Color.Black
                                 )
                             )
@@ -926,7 +1166,7 @@ fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
                     .align(Alignment.CenterVertically),
                 style = TextStyle(
                     fontSize = 16.sp,
-                    fontFamily = if(limit.isEmpty()) FontFamily(Font(R.font.robotoregular)) else FontFamily(Font(R.font.robotobold)),
+                    fontFamily = if(limit.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = if(limit.isEmpty()) FontWeight.Medium else FontWeight.Bold,
                     color = if(limit.isEmpty()) Color.Gray else Color(0xFF003366),
                     textAlign = TextAlign.Center
@@ -970,6 +1210,7 @@ fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
                             Text(
                                 text = peopleCount.toString(),
                                 modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
                                     .fillMaxWidth()
                                     .clickable {
                                         selectedPeople = peopleCount
@@ -979,6 +1220,7 @@ fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
                                     }
                                     .padding(12.dp),
                                 fontSize = 18.sp,
+                                fontFamily = FontFamily(Font(R.font.proximanovalight)),
                                 color = Color.Black,
                                 textAlign = TextAlign.Start
                             )

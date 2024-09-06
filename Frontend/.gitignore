@@ -53,6 +53,10 @@ replay_pid*
 .idea/**/gradle.xml
 .idea/**/libraries
 
+# Ignore API key file
+/app/src/main/assets/tomtomApi_key.properties
+Frontend/app/src/main/assets/tomtomApi_key.properties
+
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
 # since they will be recreated, and may cause churn.  Uncomment if using

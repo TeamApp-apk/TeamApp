@@ -5,13 +5,16 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -28,8 +31,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.TeamApp.auth.RegisterScreen
 import com.example.TeamApp.event.CreateEventScreen
+import com.example.TeamApp.event.DetailsScreen
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.settings.SettingsScreen
@@ -40,7 +46,7 @@ import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.delay
 
-class MainAppActivity : ComponentActivity() {
+class MainAppActivity : AppCompatActivity() {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +65,16 @@ class MainAppActivity : ComponentActivity() {
             var showMainContent by remember { mutableStateOf(false) }
             var isRefreshing by remember { mutableStateOf(false) }
 
-            // Symulacja czasu ładowania
+            LaunchedEffect(navController) {
+                navController.addOnDestinationChangedListener { _, destination, _ ->
+                    isBottomBarVisible = when (destination.route) {
+                        "details/{activityId}" -> false
+                        else -> true
+                    }
+                }
+                //isBottomBarVisible = true
+            }
+
             LaunchedEffect(Unit) {
                 delay(450) // Czas ładowania
                 isLoading = false
@@ -68,13 +83,11 @@ class MainAppActivity : ComponentActivity() {
                 showMainContent = true
             }
 
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Brush.linearGradient(colors = gradientColors))
             ) {
-                // Ekran ładowania
                 AnimatedVisibility(
                     visible = isLoading,
                     enter = slideInVertically(
@@ -95,7 +108,6 @@ class MainAppActivity : ComponentActivity() {
                     LoadingScreen() // Funkcja wyświetlająca animację ładowania
                 }
 
-                // Główna zawartość aplikacji
                 AnimatedVisibility(
                     visible = showMainContent,
                     enter = slideInVertically(
@@ -148,6 +160,7 @@ class MainAppActivity : ComponentActivity() {
                                 ) { SearchScreen(navController) { isScrollingDown ->
                                     isBottomBarVisible = !isScrollingDown
                                 } }
+
                                 composable(
                                     route = "profile",
                                     enterTransition = { fadeIn(animationSpec = tween(300)) },
@@ -155,6 +168,7 @@ class MainAppActivity : ComponentActivity() {
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
                                 ) { ProfileScreen(navController) }
+
                                 composable(
                                     route = "settings",
                                     enterTransition = { fadeIn(animationSpec = tween(300)) },
@@ -163,7 +177,39 @@ class MainAppActivity : ComponentActivity() {
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
                                 ) { SettingsScreen(navController) }
 
-                                // Add other destinations here
+                                composable(
+                                    route = "details/{activityId}",
+                                    arguments = listOf(navArgument("activityId") { type = NavType.StringType }),
+                                    enterTransition = {
+                                        slideInHorizontally(
+                                            initialOffsetX = { fullWidth -> fullWidth },
+                                            animationSpec = tween(300)
+                                        ) + fadeIn(animationSpec = tween(300))
+                                    },
+                                    exitTransition = {
+                                        slideOutHorizontally(
+                                            targetOffsetX = { fullWidth -> -fullWidth },
+                                            animationSpec = tween(300)
+                                        ) + fadeOut(animationSpec = tween(300))
+                                    },
+                                    popEnterTransition = {
+                                        slideInHorizontally(
+                                            initialOffsetX = { fullWidth -> -fullWidth },
+                                            animationSpec = tween(300)
+                                        ) + fadeIn(animationSpec = tween(300))
+                                    },
+                                    popExitTransition = {
+                                        slideOutHorizontally(
+                                            targetOffsetX = { fullWidth -> fullWidth },
+                                            animationSpec = tween(300)
+                                        ) + fadeOut(animationSpec = tween(300))
+                                    }
+                                ) { backStackEntry ->
+                                    val activityId = backStackEntry.arguments?.getString("activityId") ?: return@composable
+                                    DetailsScreen(navController, activityId)
+                                }
+
+                                // Dodaj inne ekrany tutaj
                             }
                         }
                     }
@@ -171,5 +217,6 @@ class MainAppActivity : ComponentActivity() {
             }
         }
     }
+
 
 }

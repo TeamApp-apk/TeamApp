@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <uses-permission
         android:name="com.google.android.gms.permission.AD_ID"
         tools:node="remove" />
@@ -27,31 +31,6 @@
             android:name=".auth.ForgotPasswordActivity"
             android:exported="false"
             android:label="@string/title_activity_forgot_password"
-            android:theme="@style/Theme.TeamApp" />
-        <activity
-            android:name=".settings.SettingActivity"
-            android:exported="false"
-            android:label="@string/title_activity_setting"
-            android:theme="@style/Theme.TeamApp" />
-        <activity
-            android:name=".searchThrough.SearchThroughActivity"
-            android:exported="false"
-            android:label="@string/title_activity_search_through"
-            android:theme="@style/Theme.TeamApp" />
-        <activity
-            android:name=".profile.ProfileActivity"
-            android:exported="false"
-            android:label="@string/title_activity_profile"
-            android:theme="@style/Theme.TeamApp" />
-        <activity
-            android:name=".profile.ProfileActivity.kt"
-            android:exported="false"
-            android:label="@string/title_activity_profile_activity.kt"
-            android:theme="@style/Theme.TeamApp" />
-        <activity
-            android:name=".event.CreateEventActivity"
-            android:exported="false"
-            android:label="@string/title_activity_create_event"
             android:theme="@style/Theme.TeamApp" />
         <activity
             android:name=".auth.LoginActivity"

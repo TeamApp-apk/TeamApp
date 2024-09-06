@@ -551,7 +551,9 @@ fun LoadingSpinner(isLoading: Boolean) {
     if (isLoading) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize().background(Color(0x80000000))
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0x80000000))
         ) {
             CircularProgressIndicator(
                 color = Color.White,

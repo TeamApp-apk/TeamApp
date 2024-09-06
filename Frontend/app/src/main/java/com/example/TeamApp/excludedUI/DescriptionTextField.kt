@@ -26,11 +26,11 @@ fun DescriptionTextField(
     label: String,
     modifier: Modifier = Modifier,
     isEditable: Boolean,
+    text: String = "", // Dodany parametr text do ustawienia opisu
     maxLength: Int = 250,
-    maxLines: Int = 12 // Ograniczenie maksymalnej liczby linii
+    maxLines: Int = 12
 ) {
-    // Stan tekstu
-    var text by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf(text) }
 
     Column(
         modifier = modifier
@@ -39,19 +39,18 @@ fun DescriptionTextField(
     ) {
         if (isEditable) {
             BasicTextField(
-                value = text,
+                value = description,
                 onValueChange = { newText ->
-                    // Liczba aktualnych linii
                     val lines = newText.split("\n").size
                     if (newText.length <= maxLength && lines <= maxLines) {
-                        text = newText
+                        description = newText
                     }
                 },
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))  // Zaokrąglenie rogów na 16.dp
-                    .background(Color.White), // Białe tło
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White),
                 textStyle = TextStyle(
                     color = Color.Black,
                     fontSize = 16.sp
@@ -60,35 +59,32 @@ fun DescriptionTextField(
                     Box(
                         Modifier
                             .background(Color.Transparent)
-                            .padding(16.dp) // Dodanie wewnętrznego paddingu 16.dp
+                            .padding(16.dp)
                     ) {
-                        if (text.isEmpty()) {
+                        if (description.isEmpty()) {
                             Text(
                                 text = label,
                                 style = TextStyle(color = Color.Gray)
                             )
                         }
-                        innerTextField() // Wyświetlanie pola tekstowego
+                        innerTextField()
                     }
                 }
             )
-
-            // Informacja o liczbie znaków
             Text(
-                text = "${text.length} / $maxLength",
+                text = "${description.length} / $maxLength",
                 modifier = Modifier.padding(top = 4.dp),
                 style = TextStyle(color = Color.Gray)
             )
         } else {
-            // Tryb tylko do odczytu
             BasicTextField(
-                value = text,
+                value = description,
                 onValueChange = {},
                 readOnly = true,
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth()
-                    .background(Color.Transparent), // Przezroczyste tło
+                    .background(Color.Transparent),
                 textStyle = TextStyle(
                     color = Color.Black,
                     fontSize = 16.sp
@@ -97,21 +93,22 @@ fun DescriptionTextField(
                     Box(
                         Modifier
                             .background(Color.Transparent)
-                            .padding(16.dp) // Dodanie wewnętrznego paddingu 16.dp
+                            .padding(16.dp)
                     ) {
-                        if (text.isEmpty()) {
+                        if (description.isEmpty()) {
                             Text(
                                 text = "Brak opisu",
                                 style = TextStyle(color = Color.Gray)
                             )
                         }
-                        innerTextField() // Pole tekstowe w trybie tylko do odczytu
+                        innerTextField()
                     }
                 }
             )
         }
     }
 }
+
 
 
 

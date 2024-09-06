@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -75,33 +76,34 @@ fun ActivityCard(
                 ambientColor = Color(0x12535990)
             )
             .padding(4.dp)
-            .width(348.dp)
-            .height(106.dp)
-            .background(backgroundColor, shape = RoundedCornerShape(size = 16.dp))
-            .padding(start = 4.dp, top = 10.dp, end = 4.dp, bottom = 10.dp)
+            .fillMaxWidth()
+            .height(120.dp)
+            .background(backgroundColor, shape = RoundedCornerShape(size = 10.dp))
+            .padding(top = 10.dp, bottom = 10.dp)
+            .clickable{onClick()}
     ) {
         Image(
             painter = painterResource(id = iconId),
             contentDescription = "Activity Icon",
             modifier = Modifier
-                .padding(0.dp)
+                .padding(8.dp)
                 .width(84.dp)
-                .height(84.dp)
+                .height(96.dp)
         )
         Spacer(modifier = Modifier.width(4.dp))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(4.dp),
+                .padding(8.dp),
         ) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = date,
                     style = TextStyle(
-                        fontSize = 15.sp,
-                        fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
-                        fontWeight = FontWeight(900),
-                        fontStyle = FontStyle.Italic,
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                        fontWeight = FontWeight.ExtraBold,
+                        //fontStyle = FontStyle.Italic,
                         color = Variables.P3
                     ),
                     modifier = Modifier.weight(1f) // Wypełnienie dostępnej przestrzeni
@@ -110,8 +112,8 @@ fun ActivityCard(
                 Text(
                     text = "$currentParticipants/$maxParticipants",
                     style = TextStyle(
-                        fontSize = 12.sp,
-                        fontFamily = FontFamily(Font(R.font.robotobold)),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
                         fontWeight = FontWeight(500),
                         fontStyle = FontStyle.Italic,
                         color = Variables.Black,
@@ -122,16 +124,16 @@ fun ActivityCard(
                     painter = painterResource(id = R.drawable.usersicon),
                     contentDescription = "Participants Icon",
                     modifier = Modifier
-                        .width(25.12.dp)
-                        .height(22.94.dp)
+                        .width(32.dp)
+                        .height(28.dp)
                 )
             }
             Text(
                 text = activityName,
                 style = TextStyle(
-                    fontSize = 14.sp, // Zmieniamy rozmiar czcionki
+                    fontSize = 15.sp, // Zmieniamy rozmiar czcionki
                     lineHeight = 20.sp,
-                    fontFamily = FontFamily(Font(R.font.robotobold)),
+                    fontFamily = FontFamily(Font(R.font.proximanovabold)),
                     fontWeight = FontWeight(500),
                     color = Color(0xFF120D26),
                 ),
@@ -155,9 +157,9 @@ fun ActivityCard(
                 Text(
                     text = location,
                     style = TextStyle(
-                        fontSize = 12.sp, // Zmieniamy rozmiar czcionki
-                        fontFamily = FontFamily(Font(R.font.thinitalic)),
-                        fontWeight = FontWeight.Black,
+                        fontSize = 14.sp, // Zmieniamy rozmiar czcionki
+                        fontFamily = FontFamily(Font(R.font.proximanovalight)),
+                        fontWeight = FontWeight.Normal,
                         fontStyle = FontStyle.Italic,
                         color = Variables.Black,
                     ),
@@ -176,7 +178,7 @@ fun ActivityCard(
 //@Composable
 //fun PreviewActivityCard() {
 //    ActivityCard(
-//        iconResId = R.drawable.dumbbelliconv5,
+//        iconResId = R.drawable.figma_gym_icon,
 //        date = "23 PAŹDZIERNIKA 12:45",
 //        activityName = "Skok ze spadochronem",
 //        currentParticipants = 21,

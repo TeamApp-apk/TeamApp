@@ -32,6 +32,7 @@ lifecycleRuntimeKtxVersion = "2.3.1"
 lifecycleViewmodelCompose = "2.8.3"
 lifecycleViewmodelKtx = "2.8.4"
 lottieCompose = "6.0.0"
+mapDisplay = "1.11.0"
 materialIconsExtended = "<version>"
 materialIconsExtendedVersion = "1.0.0"
 navigationComposeVersion = "2.5.3"
@@ -94,6 +95,7 @@ firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analy
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
+map-display = { module = "com.tomtom.sdk.maps:map-display", version.ref = "mapDisplay" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 

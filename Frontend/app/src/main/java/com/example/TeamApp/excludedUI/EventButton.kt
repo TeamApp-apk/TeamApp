@@ -11,6 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -26,8 +28,12 @@ fun EventButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val hapticFeedback = LocalHapticFeedback.current
     Button(
-        onClick = onClick,
+        onClick = {
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+            onClick()
+        },
         modifier = Modifier
             .padding(vertical = 20.dp, horizontal = 0.dp)
             .fillMaxWidth()
@@ -43,7 +49,7 @@ fun EventButton(
             text = text,
             style = TextStyle(
                 fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.robotobold)),
+                fontFamily = FontFamily(Font(R.font.proximanovabold)),
                 fontWeight = FontWeight(1000),
                 color = Color(0xFF003366), // Kolor tekstu w przycisku
                 textAlign = TextAlign.Center,
