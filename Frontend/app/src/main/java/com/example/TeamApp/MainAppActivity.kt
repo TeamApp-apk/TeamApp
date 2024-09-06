@@ -34,6 +34,7 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.example.TeamApp.auth.RegisterScreen
+import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.event.DetailsScreen
 import com.example.TeamApp.profile.ProfileScreen
@@ -45,6 +46,14 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import kotlinx.coroutines.delay
+
+val user = User(
+    name = "Jan",
+    email = "jan@example.com",
+    birthDay = "01/01/1990",
+    gender = "Male",
+    avatar = "testavatar"
+)
 
 class MainAppActivity : AppCompatActivity() {
     @OptIn(ExperimentalAnimationApi::class)
@@ -167,7 +176,7 @@ class MainAppActivity : AppCompatActivity() {
                                     exitTransition = { fadeOut(animationSpec = tween(300)) },
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
-                                ) { ProfileScreen(navController) }
+                                ) { ProfileScreen(navController, user) }
 
                                 composable(
                                     route = "settings",

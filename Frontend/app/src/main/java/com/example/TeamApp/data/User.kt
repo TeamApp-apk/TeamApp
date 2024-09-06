@@ -4,12 +4,23 @@ class User {
     // Getters and Setters
     var name: String? = null
     var email: String? = null
+    var birthDay: String? = null
+    var gender: String? = null;
+    var avatar: String? = null;
     //age do dodania
     constructor()
 
     constructor(name: String?, email: String?) {
         this.name = name
         this.email = email
+    }
+
+    constructor(name: String?, email: String?, birthDay: String?, gender: String?, avatar: String?) {
+        this.name = name
+        this.email = email
+        this.birthDay = birthDay
+        this.gender = gender
+        this.avatar = avatar
     }
 
     override fun toString(): String {
