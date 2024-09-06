@@ -78,7 +78,9 @@ class CreateEventViewModel : ViewModel() {
         if (isDataFetched) return
         Log.d("CreateEventViewModel", "fetchEvents")
         val db = Firebase.firestore
-        db.collection("events").get()
+        db.collection("events")
+            .orderBy("date", com.google.firebase.firestore.Query.Direction.ASCENDING)
+            .get()
             .addOnSuccessListener { result ->
                 activityList.clear()
                 for (document in result) {
