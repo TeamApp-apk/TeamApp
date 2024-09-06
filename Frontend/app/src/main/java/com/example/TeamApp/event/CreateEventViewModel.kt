@@ -6,21 +6,18 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.data.Coordinates
 import com.example.TeamApp.data.Event
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.Filter.greaterThan
 import com.google.firebase.firestore.firestore
-import com.tomtom.sdk.location.GeoPoint
-import com.tomtom.sdk.location.poi.StandardCategoryId.Companion.Locale
-import com.tomtom.sdk.search.autocomplete.AutocompleteOptions
-import com.tomtom.sdk.search.online.OnlineSearch
-import kotlinx.coroutines.Delay
-import kotlinx.coroutines.InternalCoroutinesApi
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 class CreateEventViewModel : ViewModel() {
@@ -78,8 +75,12 @@ class CreateEventViewModel : ViewModel() {
         if (isDataFetched) return
         Log.d("CreateEventViewModel", "fetchEvents")
         val db = Firebase.firestore
+        val originalFormat = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("pl", "PL"))
+        val date = LocalDateTime.now()
+        val text = date.format(originalFormat)
         db.collection("events")
             .orderBy("date", com.google.firebase.firestore.Query.Direction.ASCENDING)
+            .where(greaterThan("date", text))
             .get()
             .addOnSuccessListener { result ->
                 activityList.clear()
