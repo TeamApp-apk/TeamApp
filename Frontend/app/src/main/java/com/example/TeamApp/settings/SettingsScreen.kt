@@ -1,6 +1,9 @@
 package com.example.TeamApp.settings
 
 
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -188,10 +191,21 @@ fun SettingsScreenv2() {
                     .background(color = Color(0xFFD9D9D))
 
             )
+            val context = LocalContext.current
             Text(modifier = Modifier
                 .width(340.dp)
                 .height(25.dp)
-                .clickable { },
+                .clickable { val intent = Intent()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                        intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    } else {
+                        // Wersje starsze od Androida 8.0 (Oreo)
+                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        intent.data = android.net.Uri.fromParts("package", context.packageName, null)
+                    }
+                    context.startActivity(intent) },
 
                 text = "Ustawienia powiadomień",
                 style = TextStyle(
