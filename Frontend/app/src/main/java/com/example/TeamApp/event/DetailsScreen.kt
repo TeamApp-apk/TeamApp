@@ -87,6 +87,8 @@ fun DetailsScreen(navController: NavController, activityId: String) {
     var geoPoint by remember { mutableStateOf<GeoPoint?>(null) }
     val locationQuery = event?.location ?: ""
     val locationID = event?.locationID
+    val cachedMapFragment = viewModel.mapFragment // Pobierz zbuforowany fragment z ViewModel
+
 
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
@@ -98,7 +100,7 @@ fun DetailsScreen(navController: NavController, activityId: String) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush = Brush.linearGradient(colors = gradientColors))
+            .background(color = Color(0xFFF2F2F2))
             .padding(horizontal = 16.dp, vertical = 36.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -169,7 +171,7 @@ fun DetailsScreen(navController: NavController, activityId: String) {
                 )
 
                 if (locationID != null) {
-                    TomTomMapView(context = LocalContext.current, locationID = locationID, selectedAddress = locationQuery)
+                    TomTomMapView(context = LocalContext.current, locationID = locationID, selectedAddress = locationQuery, cachedMapFragment = cachedMapFragment)
                 }
                 // Join status row
                 Row(
@@ -230,47 +232,38 @@ fun DetailsScreen(navController: NavController, activityId: String) {
 //
 //}
 @Composable
-fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, selectedAddress: String) {
-    var mapFragment by remember {
-        mutableStateOf<MapFragment?>(null)
-    }
-    var isMapFragmentReady by remember {
-        mutableStateOf(false)
-    }
+fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, selectedAddress: String, cachedMapFragment: MapFragment?) {
+    var mapFragment by remember { mutableStateOf(cachedMapFragment) }
+    var isMapFragmentReady by remember { mutableStateOf(cachedMapFragment != null) }
     val fragmentManager = (context as FragmentActivity).supportFragmentManager
 
     val cords = locationID[selectedAddress]
 
-    val mapOptions = MapOptions(
-        mapKey = getApiKey(context),
-        // add more options
-    )
-
-    LaunchedEffect(Unit) {
-        createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
-            mapFragment = fragment
-            isMapFragmentReady = true
+    if (!isMapFragmentReady) {
+        val mapOptions = MapOptions(
+            mapKey = getApiKey(context),
+        )
+        Log.d("MapFragment", "MapFragment created")
+        LaunchedEffect(Unit) {
+            createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
+                mapFragment = fragment
+                isMapFragmentReady = true
+            }
         }
     }
 
     if (isMapFragmentReady) {
         AndroidView(
-            factory = {
-                mapFragment?.requireView() ?: View(it)
-            },
+            factory = { mapFragment?.requireView() ?: View(it) },
             update = {
                 mapFragment?.getMapAsync { tomTomMap ->
                     if (cords != null) {
                         tomTomMap.moveCamera(
                             CameraOptions(
-                                position = GeoPoint(
-                                    cords.latitude,
-                                    cords.longitude
-                                ), // Dynamic coordinates
-                                zoom = 15.0 // Set zoom level
+                                position = GeoPoint(cords.latitude, cords.longitude),
+                                zoom = 15.0
                             )
                         )
-
                         val bitmap =
                             BitmapFactory.decodeResource(context.resources, R.drawable.pin_icon)
                         val scaledBitmap =
@@ -286,20 +279,18 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
                         tomTomMap.addMarker(markerOptions)
 
                         tomTomMap.addMarkerClickListener { }
-
-                        // tomTomMap.addMapClickListener {  }
                     }
                 }
             },
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
                 .fillMaxWidth()
-                .height(220.dp) // Adjust the height here
-                .border(2.dp, Color.Black,RoundedCornerShape(16.dp))
-
+                .height(220.dp)
+                .border(2.dp, Color.Black, RoundedCornerShape(16.dp))
         )
     }
 }
+
 
 
 //@Composable

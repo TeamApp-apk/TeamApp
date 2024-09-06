@@ -1,6 +1,7 @@
 package com.example.TeamApp.event
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -16,6 +17,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.tomtom.sdk.location.GeoPoint
 import com.tomtom.sdk.location.poi.StandardCategoryId.Companion.Locale
+import com.tomtom.sdk.map.display.ui.MapFragment
 import com.tomtom.sdk.search.autocomplete.AutocompleteOptions
 import com.tomtom.sdk.search.online.OnlineSearch
 import kotlinx.coroutines.Delay
@@ -32,6 +34,14 @@ class CreateEventViewModel : ViewModel() {
 
     private val _location = MutableLiveData<String>()
     val location: LiveData<String> get() = _location
+
+    private var _mapFragment: MutableState<MapFragment?> = mutableStateOf(null)
+    val mapFragment: MapFragment?
+        get() = _mapFragment.value
+    fun setMapFragment(fragment: MapFragment) {
+        _mapFragment.value = fragment
+    }
+
 
     private val _locationID = MutableLiveData<Map<String, Coordinates>>()
     val locationID: LiveData<Map<String, Coordinates>> get() = _locationID

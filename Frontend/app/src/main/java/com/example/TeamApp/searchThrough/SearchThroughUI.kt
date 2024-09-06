@@ -40,12 +40,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.TeamApp.excludedUI.ActivityCard
 import com.example.TeamApp.event.CreateEventViewModel
 import com.example.TeamApp.event.ViewModelProvider
+import com.example.TeamApp.event.createTomTomMapFragment
+import com.example.TeamApp.event.getApiKey
+import com.tomtom.sdk.map.display.MapOptions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import java.time.format.DateTimeFormatter
@@ -57,7 +61,7 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
     val scrollState = rememberLazyListState()
     val activityList = remember { viewModel.activityList }
     val newlyCreatedEvent = viewModel.newlyCreatedEvent
-
+    val context = LocalContext.current
 
     LaunchedEffect(scrollState, newlyCreatedEvent) {
         if (newlyCreatedEvent != null) {
@@ -81,7 +85,7 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
 
     LaunchedEffect(Unit) {
         if (activityList.isEmpty()) {
-            delay(2000) // Delay 2 seconds before checking
+            delay(1000) // Delay 2 seconds before checking
             showEmptyMessage = activityList.isEmpty()
         }
     }
