@@ -8,6 +8,7 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
+import androidx.compose.animation.core.StartOffsetType.Companion.Delay
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -81,6 +82,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
@@ -93,6 +95,7 @@ import com.example.TeamApp.excludedUI.PickerExample
 import com.tomtom.quantity.Distance
 import com.tomtom.sdk.location.GeoBoundingBox
 import com.tomtom.sdk.location.GeoPoint
+import com.tomtom.sdk.map.display.MapOptions
 import com.tomtom.sdk.search.SearchCallback
 import com.tomtom.sdk.search.SearchOptions
 import com.tomtom.sdk.search.SearchResponse
@@ -121,6 +124,7 @@ import kotlin.coroutines.resumeWithException
 fun CreateEventScreen(navController: NavController) {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     LaunchedEffect (Unit){
+        delay(1000)
         viewModel.fetchEvents()
     }
     val sport by viewModel.sport.observeAsState("")
@@ -132,7 +136,7 @@ fun CreateEventScreen(navController: NavController) {
     val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
     val location by viewModel.location.observeAsState("")
     val dateTime by viewModel.dateTime.observeAsState("")
-
+    val context = LocalContext.current
 
     var isLoading by remember { mutableStateOf(false) }
     var loadingComplete by remember { mutableStateOf(false) }
@@ -184,6 +188,21 @@ fun CreateEventScreen(navController: NavController) {
             }
 
             viewModel.resetFields()
+        }
+    }
+    LaunchedEffect(Unit){
+        Log.d("CreateEventScreen", "LaunchedEffect Unit")
+        kotlinx.coroutines.delay(1000)
+        val fragmentManager = (context as FragmentActivity).supportFragmentManager
+        val mapOptions = MapOptions(
+            mapKey = getApiKey(context),
+            // add more options
+        )
+
+        // Tworzymy map fragment i zapisujemy go we ViewModelu
+        createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
+            Log.d("CreateEventScreen", "Map fragment created")
+            viewModel.setMapFragment(fragment)
         }
     }
 
