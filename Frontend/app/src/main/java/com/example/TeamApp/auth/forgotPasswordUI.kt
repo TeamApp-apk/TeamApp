@@ -60,6 +60,7 @@ import com.example.compose.primaryLight
 import com.example.compose.secondaryLight
 import com.example.ui.theme.fontFamily
 import com.example.TeamApp.excludedUI.CustomSnackbar
+import com.example.ui.theme.*
 
 @Composable
 fun ForgotPasswordScreen(navController: NavController){
@@ -132,12 +133,7 @@ fun UpperTextField(value: String){
     Text(
         text = value,
         modifier = Modifier.width(width * 0.83f).height(28.dp * density),
-        textAlign = TextAlign.Center,
-        style = TextStyle(fontSize = 25.sp * density,
-            fontFamily = FontFamily(Font(R.font.proximanovabold)), // Apply custom font here
-            fontWeight = FontWeight(500),
-            color = Color(0xFF003366),
-        )
+        style = textInUpperBoxForgotPassword
     )
 
 }
@@ -145,9 +141,8 @@ fun UpperTextField(value: String){
 fun LowerTextField(value: String){
     Text(text = value, modifier = Modifier
         .width(244.dp)
-        .height(50.dp), style = TextStyle(fontSize = 15.sp, lineHeight = 25.sp, fontFamily =
-    FontFamily(Font(R.font.robotoregular)), fontWeight = FontWeight(400), color = Color.Black
-    )
+        .height(50.dp),
+        style = textInLowerBoxForgotPassword
     )
 
 }
@@ -244,14 +239,7 @@ fun ButtonWithSend(onSnackbarMessageChanged: (String?) -> Unit,
             ) {
                 Text(
                     text = "SEND",
-
-                    fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.robotobold)),
-                    fontWeight = FontWeight(500),
-                    color = Color(0xFF003366),
-                    textAlign = TextAlign.Center,
-                    letterSpacing = 1.sp
-
+                    style = sendButton,
                 )
             }
             Image(painter = painterResource(id = R.drawable.arrow_right_icon), contentDescription = "Send", contentScale = ContentScale.Fit,

@@ -80,7 +80,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.TeamApp.excludedUI.CustomSnackbar
+import com.example.ui.theme.buttonLogIn
 import com.example.ui.theme.fontFamily
+import com.example.ui.theme.forgotPasswordLogin
 import kotlinx.coroutines.delay
 
 @Composable
@@ -221,8 +223,6 @@ fun ToggleSwitch(){
         , modifier = Modifier
             .width(32.dp)
             .height(16.dp)
-
-
     )
 }
 
@@ -343,14 +343,7 @@ fun ForgotPasswordTextField(navController: NavController) {
                 viewModel.getToChangePasswordScreen(navController)
             },
         text = "Zapomniałeś hasła?",
-        style = TextStyle(
-            fontSize = 14.sp,
-            lineHeight = 23.sp,
-            fontFamily = FontFamily(Font(R.font.proximanovaregular)),
-            fontWeight = FontWeight(400),
-            color = Color(0xFF003366),
-            textAlign = TextAlign.Right,
-        )
+        style = forgotPasswordLogin
     )
 }
 
@@ -408,12 +401,7 @@ fun ButtonSignIN(navController: NavController,
                 ) {
                     Text(
                         text = "Zaloguj się",
-                        fontSize = 18.sp,
-                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                        fontWeight = FontWeight(600),
-                        color = Color(0xffe0e0e0),
-                        textAlign = TextAlign.Center,
-                        letterSpacing = 1.sp
+                        style = buttonLogIn
                     )
                 }
                 Image(
@@ -433,14 +421,9 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier, navController: Nav
     val initialText = "Nie masz jeszcze konta?  "
     val loginText = "Zarejestruj się!"
     val annotatedString = buildAnnotatedString {
-        pushStringAnnotation(tag = "initialText", annotation = initialText)
-        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
-        FontFamily(Font(R.font.proximanovaregular)), fontWeight = FontWeight.Normal)) {
-            append(initialText)
-        }
+        append(initialText)
         pushStringAnnotation(tag = "logintext", annotation = loginText)
-        withStyle(style = SpanStyle(color = Color(0xffe0e0e0),fontFamily =
-        FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight.ExtraBold)) {
+        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontWeight = FontWeight.Bold)) {
             append(loginText)
         }
         pop()

@@ -119,7 +119,7 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
                     .fillMaxWidth()
                     .weight(1f) // Ensure LazyColumn fills the remaining space
                 , state = scrollState
-            ) {
+            )  {
                 when {
                     showEmptyMessage -> {
                         item {
