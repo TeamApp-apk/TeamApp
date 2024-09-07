@@ -1,14 +1,12 @@
 package com.example.TeamApp.event
 
 //import androidx.hilt.navigation.compose.hiltViewModel
+import UserViewModel
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.util.Log
-import android.view.inputmethod.InputMethodManager
-import androidx.compose.animation.core.StartOffsetType.Companion.Delay
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -40,10 +38,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -81,47 +75,34 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.PopupProperties
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Coordinates
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.data.Suggestion
+import com.example.TeamApp.data.User
 import com.example.TeamApp.excludedUI.EventButton
 import com.example.TeamApp.excludedUI.PickerExample
-import com.tomtom.quantity.Distance
-import com.tomtom.sdk.location.GeoBoundingBox
-import com.tomtom.sdk.location.GeoPoint
 import com.tomtom.sdk.map.display.MapOptions
 import com.tomtom.sdk.search.SearchCallback
 import com.tomtom.sdk.search.SearchOptions
 import com.tomtom.sdk.search.SearchResponse
-import com.tomtom.sdk.search.autocomplete.AutocompleteOptions
-import com.tomtom.sdk.search.autocomplete.AutocompleteResponse
-import com.tomtom.sdk.search.autocomplete.AutocompleteCallback
 import com.tomtom.sdk.search.common.error.SearchFailure
-import com.tomtom.sdk.search.model.result.AutocompleteSegmentPlainText
 import com.tomtom.sdk.search.online.OnlineSearch
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 import java.util.Properties
-import java.util.concurrent.CountDownLatch
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
+import java.util.UUID
 
 
 @Composable
-fun CreateEventScreen(navController: NavController) {
+fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel) {
+    val user by userViewModel.user.observeAsState()
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     LaunchedEffect (Unit){
         delay(1000)
@@ -191,19 +172,8 @@ fun CreateEventScreen(navController: NavController) {
         }
     }
     LaunchedEffect(Unit){
-        Log.d("CreateEventScreen", "LaunchedEffect Unit")
-        kotlinx.coroutines.delay(1000)
-        val fragmentManager = (context as FragmentActivity).supportFragmentManager
-        val mapOptions = MapOptions(
-            mapKey = getApiKey(context),
-            // add more options
-        )
-
-        // Tworzymy map fragment i zapisujemy go we ViewModelu
-        createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
-            Log.d("CreateEventScreen", "Map fragment created")
-            viewModel.setMapFragment(fragment)
-        }
+        delay(1000)
+        viewModel.initializeMapIfNeeded(context)
     }
 
     Box(
@@ -290,17 +260,22 @@ fun CreateEventScreen(navController: NavController) {
                                     isLoading = true
                                     isPlaying = true
                                     Log.d("CreateEventScreen", "Valid input")
+                                    Log.d("CreateEventScreen", "Valid input")
+                                    val creatorID = user?.userID ?: "" // Używamy wartości domyślnej, gdy user jest null
+                                    val participantsList = if (creatorID.isNotEmpty()) listOf(creatorID) else emptyList() // Dodajemy creatorID do listy, tylko jeśli nie jest pusty
                                     val newEvent = Event(
+                                        participants = participantsList,
+                                        creatorID = creatorID.takeIf { it.isNotEmpty() }, // Jeśli creatorID nie jest pusty, ustawiamy go, inaczej null
                                         iconResId = Event.sportIcons[sport] ?: "",
                                         date = dateTime,
                                         activityName = sport,
-                                        currentParticipants = 0,
+                                        currentParticipants = participantsList.size, // Liczba uczestników na podstawie wielkości listy
                                         maxParticipants = participantLimit ?: 0,
                                         location = address,
                                         description = description,
                                         locationID = locationID
-
                                     )
+
                                     viewModel.createEvent(newEvent) { result ->
                                         if (result == null) {
                                             snackbarMessage = "Utworzono Event"

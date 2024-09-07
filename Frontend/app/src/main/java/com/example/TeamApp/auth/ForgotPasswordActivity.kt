@@ -39,7 +39,7 @@ class ForgotPasswordActivity : ComponentActivity() {
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = "changePassword") {
                 composable("changePassword"){ ForgotPasswordScreen(navController) }
-                composable("createEvent") { CreateEventScreen(navController) }
+                //composable("createEvent") { CreateEventScreen(navController, ) }
                 composable("register") { RegisterScreen(navController) }
                 //dodalem to user zeby moc zobaczyc czy bedzie mi dzialalo korzystanie z tej metody getResourceId
                 composable("profile"){ ProfileScreen(navController, user) }

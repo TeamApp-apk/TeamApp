@@ -116,10 +116,10 @@ fun ProfileScreen(navController: NavController, user: User) {
                             .fillMaxWidth(),
                         horizontalAlignment = Alignment.Start
                     ){
-                        UserProfileButton(iconId = R.drawable.mapicon, mainText = "Twoje wydarzenia", bottomText = "Zarządzaj swoimi wydarzeniami")
-                        UserProfileButton(iconId = R.drawable.settingsicon, mainText = "Ustawienia", bottomText = "Ustawienia konta")
-                        UserProfileButton(iconId = R.drawable.contactusicon, mainText = "Napisz do nas", bottomText = "Skontaktuj się z nami")
-                        UserProfileButton(iconId = R.drawable.shareicon, mainText = "Udostępnij", bottomText = "Niech wszyscy wiedzą")
+                        //UserProfileButton(iconId = R.drawable.mapicon, mainText = "Twoje wydarzenia", bottomText = "Zarządzaj swoimi wydarzeniami")
+                        UserProfileButton(iconId = R.drawable.settingsicon, mainText = "Ustawienia", bottomText = "Ustawienia konta",navController, "settings")
+                        //UserProfileButton(iconId = R.drawable.contactusicon, mainText = "Napisz do nas", bottomText = "Skontaktuj się z nami")
+                        //UserProfileButton(iconId = R.drawable.shareicon, mainText = "Udostępnij", bottomText = "Niech wszyscy wiedzą")
                     }
                 }
             }

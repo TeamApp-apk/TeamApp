@@ -1,5 +1,7 @@
 package com.example.TeamApp.data
 
+import java.util.UUID
+
 class User {
     // Getters and Setters
     var name: String? = null
@@ -7,6 +9,7 @@ class User {
     var birthDay: String? = null
     var gender: String? = null;
     var avatar: String? = null;
+    val userID: String = UUID.randomUUID().toString()
     //age do dodania
     constructor()
 
@@ -26,6 +29,9 @@ class User {
     override fun toString(): String {
         return "User{" +
                 "name='" + name + '\'' +
-                ", email='" + email + '\''
+                ", email='" + email + '\'' +
+                ", userID='" + userID + '\'' +  // Dodajemy userID do toString()
+                '}'
     }
+
 }

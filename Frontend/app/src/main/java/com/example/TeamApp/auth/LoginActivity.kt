@@ -100,7 +100,6 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
                 ){
                     composable("register") { RegisterScreen(navController) }
                     composable("login") { LoginScreen(navController) }
-                    composable("createEvent") { CreateEventScreen(navController) }
                     composable("forgotPassword") { ForgotPasswordScreen(navController) }
                 }
             }

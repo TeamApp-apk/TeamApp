@@ -27,14 +27,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.TeamApp.R
 
 @Composable
-fun UserProfileButton(iconId: Int, mainText: String, bottomText: String){
+fun UserProfileButton(iconId: Int, mainText: String, bottomText: String, navController: NavController, route: String ){
     Box(
         modifier = Modifier
             .background(color = Color(0xFFF2F2F2))
-            .clickable { }
+            .clickable { navController.navigate(route) }
     ){
         Row(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -84,8 +85,8 @@ fun UserProfileButton(iconId: Int, mainText: String, bottomText: String){
     }
 }
 
-@Preview
-@Composable
-fun previewUserProfileButton(){
-    UserProfileButton(iconId = R.drawable.mapicon, mainText = "Twoje wydarzenia", bottomText = "Zarządzaj swoimi wydarzeniami")
-}
+//@Preview
+//@Composable
+//fun previewUserProfileButton(){
+//    UserProfileButton(iconId = R.drawable.mapicon, mainText = "Twoje wydarzenia", bottomText = "Zarządzaj swoimi wydarzeniami")
+//}
