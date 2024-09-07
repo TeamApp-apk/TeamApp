@@ -213,11 +213,12 @@ class LoginViewModel : ViewModel() {
                                 Log.d("Register", "Registration successful")
                                 db.collection("users").add(user)
                                 _registerSuccess.value = true
-
-                                navController.navigate("CreateEvent") {
-                                    popUpTo("register") { inclusive = true }
-                                }
                                 callback(null)
+                                val context = navController.context
+                                val intent = Intent(context, MainAppActivity::class.java)
+                                // Dodaj flagi, aby zamknąć bieżącą aktywność po przejściu do nowej
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                context.startActivity(intent)
                             } else {
                                 Log.e("Register", "Registration failed: ${task.exception?.message}")
                                 errorMessage = when (val exception = task.exception) {
