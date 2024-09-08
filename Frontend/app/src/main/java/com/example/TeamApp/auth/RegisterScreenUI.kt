@@ -101,6 +101,7 @@ import com.example.ui.theme.textInBoxes
 import kotlinx.coroutines.time.delay
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.TeamApp.excludedUI.CustomSnackbar
 import com.example.ui.theme.buttonLogIn
 
@@ -162,10 +163,11 @@ fun RegisterScreen(navController: NavController){
     Surface(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier
 
-        .fillMaxSize()
-        .background(brush = Brush.linearGradient(colors = gradientColors))
-        .padding(horizontal = width * 0.078f) ){
+            .fillMaxSize()
+            .background(brush = Brush.linearGradient(colors = gradientColors))
+            .padding(horizontal = width * 0.078f) ){
             Column {
+                ConstraintLayout()
                 Spacer(modifier = Modifier.height(height * 0.00625f * 5))
                 Spacer(modifier = Modifier.height(height * 0.00625f * 8))
                 UpperTextField(value = "Dołącz do nas!", )
@@ -216,6 +218,22 @@ fun RegisterScreen(navController: NavController){
         )
     }
 }
+
+@Composable
+fun ConstraintLayout () {
+    ConstraintLayout {
+        // Create guideline from the start of the parent at 10% the width of the Composable
+        val startGuideline = createGuidelineFromStart(0.1f)
+        DividerTextComponent()
+        // Create guideline from the end of the parent at 10% the width of the Composable
+        val endGuideline = createGuidelineFromEnd(0.1f)
+        //  Create guideline from 16 dp from the top of the parent
+        val topGuideline = createGuidelineFromTop(16.dp)
+        //  Create guideline from 16 dp from the bottom of the parent
+        val bottomGuideline = createGuidelineFromBottom(16.dp)
+    }
+}
+
 //@Composable
 //@Preview
 //fun FinalRegisterScreenPreview(){
@@ -234,9 +252,10 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter, nextFocusReque
 
 
     TextField(
-        modifier = Modifier.fillMaxWidth()
-        .height(height * 0.00625f * 8 * density )
-        .focusRequester(focusRequester),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height * 0.00625f * 8 * density)
+            .focusRequester(focusRequester),
         label = { Text(
             text = labelValue,
             ) },
@@ -276,7 +295,8 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter, nextFocusReque
 
         ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription = "", modifier = Modifier.padding(1.dp)
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier
+                .padding(1.dp)
                 .width(22.dp)
                 .height(22.dp))
         },
@@ -298,9 +318,10 @@ fun PasswordTextField(labelValue: String, painterResource: Painter, nextFocusReq
     val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier.fillMaxWidth().
-        height(height * 0.00625f * 8 * density )
-        .focusRequester(focusRequester),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height * 0.00625f * 8 * density)
+            .focusRequester(focusRequester),
         label = { Text(
             text = labelValue,
         ) },
@@ -329,7 +350,10 @@ fun PasswordTextField(labelValue: String, painterResource: Painter, nextFocusReq
             containerColor = Color.White
         ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription = "", modifier = Modifier.padding(1.dp).width(22.dp).height(22.dp))
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier
+                .padding(1.dp)
+                .width(22.dp)
+                .height(22.dp))
         },
         shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f)),
         trailingIcon = {
@@ -365,7 +389,8 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
     val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .height(height * 0.00625f * 8 * density)
             .focusRequester(focusRequester),
         label = { Text(
@@ -395,7 +420,10 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
             containerColor = Color.White
         ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription = "", modifier = Modifier.padding(1.dp).width(22.dp).height(22.dp))
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier
+                .padding(1.dp)
+                .width(22.dp)
+                .height(22.dp))
         },
         shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f)),
         trailingIcon = {
@@ -500,22 +528,19 @@ fun DividerTextComponent() {
     val width = configuration.screenWidthDp.dp
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = height * 0.00625f * 2 ),
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Divider(
             modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = width * 0.02f),
+                .weight(1f),
             color = secondaryLight,
             thickness = 1.dp
         )
         Text(text = "lub", fontSize = 14.sp)
         Divider(
             modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = width * 0.02f),
+                .weight(1f),
             color = secondaryLight,
             thickness = 1.dp
         )

@@ -51,14 +51,6 @@ val fontFamily = FontFamily(
     )
 )
 
-val textInBoxes = TextStyle (
-    fontSize = (12 + (density - 1) * 15 ).sp,
-)
-
-val robotoFontFamily = FontFamily(
-    Font(R.font.robotoblackitalic, FontWeight.Black)
-)
-
 val textInUpperBoxForgotPassword = TextStyle(
     fontSize = 24.sp * com.example.TeamApp.auth.density,
     fontFamily = fontFamily,
@@ -75,17 +67,17 @@ val textInLowerBoxForgotPassword = TextStyle(
 )
 
 val sendButton = TextStyle (
-    fontSize = 16.sp,
-    fontFamily = FontFamily(Font(R.font.robotobold)),
-    fontWeight = FontWeight(500),
+    fontSize = 18.sp,
+    fontFamily = FontFamily(Font(R.font.proximanovabold)),
+    fontWeight = FontWeight(600),
     color = Color(0xFF003366),
     textAlign = TextAlign.Center,
     letterSpacing = 1.sp
 )
 
 val googleAuthStyle = TextStyle (
-    fontSize = 16.sp,
-    fontFamily = FontFamily(Font(R.font.robotoregular)),
+    fontSize = 18.sp,
+    fontFamily = FontFamily(Font(R.font.proximanovabold)),
     fontWeight = FontWeight(500),
     color = Color(0xFF003366),
     textAlign = TextAlign.Center,
@@ -103,8 +95,8 @@ val forgotPasswordLogin = TextStyle(
 
 val buttonLogIn = TextStyle(
     fontSize = 16.sp,
-    fontFamily = FontFamily(Font(R.font.robotobold)),
-    fontWeight = FontWeight(500),
+    fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+    fontWeight = FontWeight.Normal,
     color = Color(0xffe0e0e0),
     textAlign = TextAlign.Center,
     letterSpacing = 1.sp
