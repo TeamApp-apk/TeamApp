@@ -41,7 +41,11 @@ import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.event.DetailsScreen
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.searchThrough.SearchScreen
+import com.example.TeamApp.settings.SendMessageScreen
 import com.example.TeamApp.settings.SettingsScreen
+import com.example.TeamApp.settings.SettingsScreenv2
+import com.example.TeamApp.settings.TermsOfUse
+import com.example.TeamApp.settings.YourEventsScreen
 import com.example.TeamApp.ui.LoadingScreen
 import com.example.TeamApp.utils.SystemUiUtils
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -191,7 +195,7 @@ class MainAppActivity : AppCompatActivity() {
                                     exitTransition = { fadeOut(animationSpec = tween(300)) },
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
-                                ) { SettingsScreen(navController) }
+                                ) { SettingsScreenv2() }
 
                                 composable(
                                     route = "details/{activityId}",
@@ -225,7 +229,29 @@ class MainAppActivity : AppCompatActivity() {
                                     DetailsScreen(navController, activityId)
                                 }
 
-                                // Dodaj inne ekrany tutaj
+                                composable(
+                                    route = "yourEvents",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { YourEventsScreen(navController) }
+
+                                composable(
+                                    route = "termsOfUse",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { TermsOfUse() }
+
+                                composable(
+                                    route = "sendUsMessage",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { SendMessageScreen() }
                             }
                         }
                     }

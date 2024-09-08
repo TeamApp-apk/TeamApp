@@ -19,6 +19,15 @@ import java.time.LocalDate
 
 
 class ProfileViewModel:ViewModel(){
+
+    private val _user = MutableLiveData<User>()
+    val user: LiveData<User> get() = _user
+
+    // Example function to set user data
+    fun setUser(userData: User) {
+        _user.value = userData
+    }
+
     fun navigateToCreateEvent(navController: NavController) {
         navController.navigate("createEvent"){
             popUpTo("profile"){inclusive = true}
