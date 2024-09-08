@@ -54,14 +54,6 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
-val user = User(
-    name = "Jan",
-    email = "jan@example.com",
-    birthDay = "01/01/1990",
-    gender = "Male",
-    avatar = "testavatar"
-)
-
 class MainAppActivity : AppCompatActivity() {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -187,7 +179,7 @@ class MainAppActivity : AppCompatActivity() {
                                     exitTransition = { fadeOut(animationSpec = tween(300)) },
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
-                                ) { ProfileScreen(navController,user ) }
+                                ) { ProfileScreen(navController) }
 
                                 composable(
                                     route = "settings",

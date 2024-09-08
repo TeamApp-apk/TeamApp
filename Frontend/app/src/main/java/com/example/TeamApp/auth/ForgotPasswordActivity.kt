@@ -42,7 +42,7 @@ class ForgotPasswordActivity : ComponentActivity() {
                 //composable("createEvent") { CreateEventScreen(navController, ) }
                 composable("register") { RegisterScreen(navController) }
                 //dodalem to user zeby moc zobaczyc czy bedzie mi dzialalo korzystanie z tej metody getResourceId
-                composable("profile"){ ProfileScreen(navController, user) }
+                composable("profile"){ ProfileScreen(navController) }
                 composable("settings"){ SettingsScreen(navController) }
                 //composable("search"){ SearchScreen(navController) }
             }

@@ -1,6 +1,7 @@
 package com.example.TeamApp.profile
 
 import android.content.Context
+import android.provider.ContactsContract.Profile
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,6 +32,7 @@ import com.example.TeamApp.data.User
 import com.example.TeamApp.excludedUI.UserProfileButton
 import com.example.TeamApp.excludedUI.Variables
 import com.example.compose.TeamAppTheme
+import com.example.TeamApp.profile.ProfileViewModel
 
 
 
@@ -41,110 +43,117 @@ fun getIconResourceId(context: Context, iconName: String): Int {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController, user: User) {
+fun ProfileScreen(navController: NavController) {
     val context = LocalContext.current
-    val iconId = getIconResourceId(context, user.avatar!!)
-
+    val profileViewModel: ProfileViewModel = viewModel()
+    val user by profileViewModel.user.observeAsState()
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF),
     )
-    val viewModel: ProfileViewModel = viewModel()
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(brush = Brush.linearGradient(colors = gradientColors))
-        .padding(start = 6.dp, end = 6.dp, top = 28.dp, bottom = 72.dp)
-    ){
+    user?.let { userData ->
+        val iconId = getIconResourceId(context, userData.avatar!!)
         Box(modifier = Modifier
             .fillMaxSize()
-            .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+            .background(brush = Brush.linearGradient(colors = gradientColors))
+            .padding(start = 6.dp, end = 6.dp, top = 28.dp, bottom = 72.dp)
         ){
-            Column(modifier = Modifier
+            Box(modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                .background(color = Color.White, shape = RoundedCornerShape(16.dp))
             ){
-                Image(
-                    painter = painterResource(iconId),
-                    contentDescription = "Profile picture",
-                    modifier = Modifier
-                        .padding(bottom = 12.dp)
-                        .size(160.dp)
-                )
-                Text(
-                    text = "Witaj ${user.name}!",
-                    style = TextStyle(
-                        fontSize = 24.sp,
-                        fontFamily = FontFamily(Font(R.font.proximanovaregular)),
-                        fontWeight = FontWeight(700),
-                        color = Variables.Black,
-                        textAlign = TextAlign.Center,
+                Column(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    Image(
+                        painter = painterResource(iconId),
+                        contentDescription = "Profile picture",
+                        modifier = Modifier
+                            .padding(bottom = 12.dp)
+                            .size(160.dp)
                     )
-                )
-                Button(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier
-                        .padding(top = 8.dp)
-                        .wrapContentWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFF2F2F2)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
                     Text(
-                        text = "Edytuj profil",
+                        text = "Witaj ${userData.name}!",
                         style = TextStyle(
                             fontSize = 24.sp,
                             fontFamily = FontFamily(Font(R.font.proximanovaregular)),
-                            fontWeight = FontWeight(600),
+                            fontWeight = FontWeight(700),
                             color = Variables.Black,
                             textAlign = TextAlign.Center,
                         )
                     )
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 32.dp)
-                        .background(
-                            Color(0xFFF2F2F2),
-                            shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
-                        )
-                ){
-                    Column(
+                    Button(
+                        onClick = { /*TODO*/ },
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.Start
+                            .padding(top = 8.dp)
+                            .wrapContentWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFF2F2F2)
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = "Edytuj profil",
+                            style = TextStyle(
+                                fontSize = 24.sp,
+                                fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+                                fontWeight = FontWeight(600),
+                                color = Variables.Black,
+                                textAlign = TextAlign.Center,
+                            )
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 32.dp)
+                            .background(
+                                Color(0xFFF2F2F2),
+                                shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
+                            )
                     ){
-                        UserProfileButton(iconId = R.drawable.mapicon, mainText = "Twoje wydarzenia", bottomText = "Zarządzaj swoimi wydarzeniami", navController, "yourEvents")
-                        HorizontalDivider(
+                        Column(
                             modifier = Modifier
-                                .padding(horizontal = 8.dp)
                                 .fillMaxWidth(),
-                            thickness = 1.dp,
-                            color = Color(0xFFD9D9D9)
-                        )
-                        UserProfileButton(iconId = R.drawable.settingsicon, mainText = "Ustawienia", bottomText = "Ustawienia konta",navController, "settings")
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .fillMaxWidth(),
-                            thickness = 1.dp,
-                            color = Color(0xFFD9D9D9)
-                        )
-                        UserProfileButton(iconId = R.drawable.contactusicon, mainText = "Napisz do nas", bottomText = "Skontaktuj się z nami", navController, "sendUsMessage")
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .fillMaxWidth(),
-                            thickness = 1.dp,
-                            color = Color(0xFFD9D9D9)
-                        )
-                        UserProfileButton(iconId = R.drawable.shareicon, mainText = "Udostępnij", bottomText = "Niech wszyscy wiedzą", navController, "")
+                            horizontalAlignment = Alignment.Start
+                        ){
+                            UserProfileButton(iconId = R.drawable.mapicon, mainText = "Twoje wydarzenia", bottomText = "Zarządzaj swoimi wydarzeniami", navController, "yourEvents")
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .fillMaxWidth(),
+                                thickness = 1.dp,
+                                color = Color(0xFFD9D9D9)
+                            )
+                            UserProfileButton(iconId = R.drawable.settingsicon, mainText = "Ustawienia", bottomText = "Ustawienia konta",navController, "settings")
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .fillMaxWidth(),
+                                thickness = 1.dp,
+                                color = Color(0xFFD9D9D9)
+                            )
+                            UserProfileButton(iconId = R.drawable.contactusicon, mainText = "Napisz do nas", bottomText = "Skontaktuj się z nami", navController, "sendUsMessage")
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .fillMaxWidth(),
+                                thickness = 1.dp,
+                                color = Color(0xFFD9D9D9)
+                            )
+                            UserProfileButton(iconId = R.drawable.shareicon, mainText = "Udostępnij", bottomText = "Niech wszyscy wiedzą", navController, "")
+                        }
                     }
                 }
             }
         }
+    } ?: run {
+        // Wyświetl coś, gdy użytkownik jest null
+        Text(text = "Nie znaleziono użytkownika!")
     }
+
+
 }
 
