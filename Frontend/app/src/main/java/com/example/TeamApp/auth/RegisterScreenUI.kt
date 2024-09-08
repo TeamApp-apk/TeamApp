@@ -322,6 +322,10 @@ fun PasswordTextField(labelValue: String, painterResource: Painter, nextFocusReq
             .focusRequester(focusRequester),
         label = { Text(
             text = labelValue,
+            style = TextStyle(
+                fontFamily = FontFamily(Font(R.font.proximanovaregular)), // Apply custom font here
+                fontSize = 16.sp // Adjust font size if needed
+            )
         ) },
         value = password,
         onValueChange = { newText ->
@@ -535,7 +539,7 @@ fun DividerTextComponent() {
             color = secondaryLight,
             thickness = 1.dp
         )
-        Text(text = "lub", fontSize = 14.sp)
+        Text(text = "lub", fontSize = 14.sp, fontFamily = FontFamily(Font(R.font.proximanovaregular)))
         Divider(
             modifier = Modifier
                 .weight(1f),
@@ -551,10 +555,15 @@ fun ClickableLoginTextComponent(modifier: Modifier = Modifier, navController: Na
     val initialText = "Masz już konto?  "
     val loginText = "Zaloguj się!"
     val annotatedString = buildAnnotatedString {
-        append(initialText)
+        pushStringAnnotation(tag = "initialText", annotation = initialText)
+        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
+        FontFamily(Font(R.font.proximanovaregular)), fontWeight = FontWeight(100)
+        )) {
+            append(initialText)
+        }
         pushStringAnnotation(tag = "logintext", annotation = loginText)
         withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
-        FontFamily(Font(R.font.robotobold)) )) {
+        FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight(900) )) {
             append(loginText)
         }
         pop()

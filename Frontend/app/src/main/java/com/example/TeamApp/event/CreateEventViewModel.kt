@@ -58,9 +58,6 @@ class CreateEventViewModel : ViewModel() {
         }
     }
 
-
-
-
     private val _locationID = MutableLiveData<Map<String, Coordinates>>()
     val locationID: LiveData<Map<String, Coordinates>> get() = _locationID
 
