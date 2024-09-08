@@ -61,7 +61,7 @@ val textInUpperBoxForgotPassword = TextStyle(
 val textInLowerBoxForgotPassword = TextStyle(
     fontSize = 15.sp,
     lineHeight = 25.sp,
-    fontFamily = FontFamily(Font(R.font.robotoregular)),
+    fontFamily = FontFamily(Font(R.font.proximanovabold)),
     fontWeight = FontWeight(400),
     color = Color.Black
 )
@@ -87,7 +87,7 @@ val googleAuthStyle = TextStyle (
 val forgotPasswordLogin = TextStyle(
     fontSize = 14.sp,
     lineHeight = 23.sp,
-    fontFamily = FontFamily(Font(R.font.robotoregular)),
+    fontFamily = FontFamily(Font(R.font.proximanovabold)),
     fontWeight = FontWeight(400),
     color = Color(0xFF003366),
     textAlign = TextAlign.Right,

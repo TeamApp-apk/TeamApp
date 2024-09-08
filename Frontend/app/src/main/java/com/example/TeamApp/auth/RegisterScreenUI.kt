@@ -97,7 +97,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.secondaryLight
 import com.example.TeamApp.R
-import com.example.ui.theme.textInBoxes
 import kotlinx.coroutines.time.delay
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
@@ -167,7 +166,6 @@ fun RegisterScreen(navController: NavController){
             .background(brush = Brush.linearGradient(colors = gradientColors))
             .padding(horizontal = width * 0.078f) ){
             Column {
-                ConstraintLayout()
                 Spacer(modifier = Modifier.height(height * 0.00625f * 5))
                 Spacer(modifier = Modifier.height(height * 0.00625f * 8))
                 UpperTextField(value = "Dołącz do nas!", )
