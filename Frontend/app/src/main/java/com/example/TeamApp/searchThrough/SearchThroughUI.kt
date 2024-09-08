@@ -84,8 +84,8 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
 
 
     LaunchedEffect(Unit) {
+        delay(1000)
         if (activityList.isEmpty()) {
-            delay(1000) // Delay 2 seconds before checking
             showEmptyMessage = activityList.isEmpty()
         }
     }

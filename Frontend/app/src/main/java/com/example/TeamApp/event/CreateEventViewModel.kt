@@ -25,6 +25,7 @@ import com.tomtom.sdk.search.autocomplete.AutocompleteOptions
 import com.tomtom.sdk.search.online.OnlineSearch
 import kotlinx.coroutines.Delay
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 class CreateEventViewModel : ViewModel() {
     private val _sport = MutableLiveData<String>()
