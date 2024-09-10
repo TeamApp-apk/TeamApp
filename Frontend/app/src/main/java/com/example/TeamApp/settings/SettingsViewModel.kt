@@ -24,6 +24,7 @@ class SettingsViewModel : ViewModel() {
     fun navigateToForgotPasswordActivity(navController: NavController) {
 
     }
+
     fun logout(context: Context) {
         FirebaseAuth.getInstance().signOut()
         val intent = Intent(context, RegisterActivity::class.java)
@@ -31,6 +32,25 @@ class SettingsViewModel : ViewModel() {
         context.startActivity(intent)
         if (context is Activity) {
             (context as Activity).finish()
+        }
+    }
+
+    fun deleteAccount(context: Context) {
+        val user = FirebaseAuth.getInstance().currentUser
+
+        user?.delete()?.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Log.e("Settings", "udalo sie usunac konto")
+                // Account deleted successfully, navigate to RegisterActivity
+                val intent = Intent(context, RegisterActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                context.startActivity(intent)
+                if (context is Activity) {
+                    (context as Activity).finish()
+                }
+            } else {
+                Log.e("Settings", "Account deletion failed. Email: ${user.email ?: "No email available"}")
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.TeamApp.settings
 
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
@@ -65,6 +66,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
+import com.example.TeamApp.event.CreateEventViewModel
 import com.example.compose.primaryLight
 import com.example.compose.secondaryLight
 import com.example.ui.theme.fontFamily
@@ -73,7 +75,9 @@ import com.example.TeamApp.excludedUI.CustomSnackbar
 
 
 @Composable
-fun SettingsScreenv2() {
+fun SettingsScreenv2(navController: NavController) {
+    val viewModel: SettingsViewModel = ViewModelProvider.SettingsViewModel
+    val context = LocalContext.current
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF)
@@ -117,6 +121,7 @@ fun SettingsScreenv2() {
                     modifier = Modifier
                         .width(303.dp)
                         .height(25.dp),
+
                     text = "Ustawienia",
                     style = TextStyle(
                         fontSize = 20.sp,
@@ -230,7 +235,7 @@ fun SettingsScreenv2() {
             Text(modifier = Modifier
                 .width(340.dp)
                 .height(25.dp)
-                .clickable { },
+                .clickable {navController.navigate("ForgotPassword") },
 
                 text = "Zmień hasło",
                 style = TextStyle(
@@ -255,7 +260,7 @@ fun SettingsScreenv2() {
             Text(modifier = Modifier
                 .width(340.dp)
                 .height(25.dp)
-                .clickable { },
+                .clickable {viewModel.logout(context)},
 
                 text = "Wyloguj się",
                 style = TextStyle(
@@ -280,7 +285,7 @@ fun SettingsScreenv2() {
             Text(modifier = Modifier
                 .width(340.dp)
                 .height(25.dp)
-                .clickable { },
+                .clickable {viewModel.deleteAccount(context)},
 
                 text = "Usuń konto",
                 style = TextStyle(
@@ -308,10 +313,10 @@ fun SettingsScreenv2() {
         }
     }
 }
-@Composable
-@Preview(showBackground = false)
-    fun SettingsScreenPreview(){
-        SettingsScreenv2()
-    }
+//@Composable
+//@Preview(showBackground = false)
+//    fun SettingsScreenPreview(){
+//        SettingsScreenv2()
+//    }
 
 

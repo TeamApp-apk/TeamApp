@@ -34,6 +34,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.TeamApp.auth.ForgotPasswordScreen
 import com.example.TeamApp.auth.RegisterScreen
 import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventScreen
@@ -187,7 +188,7 @@ class MainAppActivity : AppCompatActivity() {
                                     exitTransition = { fadeOut(animationSpec = tween(300)) },
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
-                                ) { SettingsScreenv2() }
+                                ) { SettingsScreenv2(navController) }
 
                                 composable(
                                     route = "filterScreen",
@@ -252,6 +253,14 @@ class MainAppActivity : AppCompatActivity() {
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
                                 ) { SendMessageScreen() }
+
+                                composable(
+                                    route = "ForgotPassword",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { ForgotPasswordScreen(navController) }
                             }
                         }
                     }
