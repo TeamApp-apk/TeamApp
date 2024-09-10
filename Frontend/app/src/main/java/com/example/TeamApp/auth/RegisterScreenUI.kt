@@ -97,10 +97,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.secondaryLight
 import com.example.TeamApp.R
-import com.example.ui.theme.textInBoxes
 import kotlinx.coroutines.time.delay
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.TeamApp.excludedUI.CustomSnackbar
 import com.example.ui.theme.buttonLogIn
 
@@ -162,9 +162,9 @@ fun RegisterScreen(navController: NavController){
     Surface(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier
 
-        .fillMaxSize()
-        .background(brush = Brush.linearGradient(colors = gradientColors))
-        .padding(horizontal = width * 0.078f) ){
+            .fillMaxSize()
+            .background(brush = Brush.linearGradient(colors = gradientColors))
+            .padding(horizontal = width * 0.078f) ){
             Column {
                 Spacer(modifier = Modifier.height(height * 0.00625f * 5))
                 Spacer(modifier = Modifier.height(height * 0.00625f * 8))
@@ -216,6 +216,22 @@ fun RegisterScreen(navController: NavController){
         )
     }
 }
+
+@Composable
+fun ConstraintLayout () {
+    ConstraintLayout {
+        // Create guideline from the start of the parent at 10% the width of the Composable
+        val startGuideline = createGuidelineFromStart(0.1f)
+        DividerTextComponent()
+        // Create guideline from the end of the parent at 10% the width of the Composable
+        val endGuideline = createGuidelineFromEnd(0.1f)
+        //  Create guideline from 16 dp from the top of the parent
+        val topGuideline = createGuidelineFromTop(16.dp)
+        //  Create guideline from 16 dp from the bottom of the parent
+        val bottomGuideline = createGuidelineFromBottom(16.dp)
+    }
+}
+
 //@Composable
 //@Preview
 //fun FinalRegisterScreenPreview(){
@@ -234,9 +250,10 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter, nextFocusReque
 
 
     TextField(
-        modifier = Modifier.fillMaxWidth()
-        .height(height * 0.00625f * 8 * density )
-        .focusRequester(focusRequester),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height * 0.00625f * 8 * density)
+            .focusRequester(focusRequester),
         label = { Text(
             text = labelValue,
             ) },
@@ -276,7 +293,8 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter, nextFocusReque
 
         ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription = "", modifier = Modifier.padding(1.dp)
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier
+                .padding(1.dp)
                 .width(22.dp)
                 .height(22.dp))
         },
@@ -298,11 +316,16 @@ fun PasswordTextField(labelValue: String, painterResource: Painter, nextFocusReq
     val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier.fillMaxWidth().
-        height(height * 0.00625f * 8 * density )
-        .focusRequester(focusRequester),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height * 0.00625f * 8 * density)
+            .focusRequester(focusRequester),
         label = { Text(
             text = labelValue,
+            style = TextStyle(
+                fontFamily = FontFamily(Font(R.font.proximanovaregular)), // Apply custom font here
+                fontSize = 16.sp // Adjust font size if needed
+            )
         ) },
         value = password,
         onValueChange = { newText ->
@@ -329,7 +352,10 @@ fun PasswordTextField(labelValue: String, painterResource: Painter, nextFocusReq
             containerColor = Color.White
         ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription = "", modifier = Modifier.padding(1.dp).width(22.dp).height(22.dp))
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier
+                .padding(1.dp)
+                .width(22.dp)
+                .height(22.dp))
         },
         shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f)),
         trailingIcon = {
@@ -365,7 +391,8 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
     val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .height(height * 0.00625f * 8 * density)
             .focusRequester(focusRequester),
         label = { Text(
@@ -395,7 +422,10 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
             containerColor = Color.White
         ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription = "", modifier = Modifier.padding(1.dp).width(22.dp).height(22.dp))
+            Icon(painter = painterResource, contentDescription = "", modifier = Modifier
+                .padding(1.dp)
+                .width(22.dp)
+                .height(22.dp))
         },
         shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f)),
         trailingIcon = {
@@ -500,22 +530,19 @@ fun DividerTextComponent() {
     val width = configuration.screenWidthDp.dp
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = height * 0.00625f * 2 ),
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Divider(
             modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = width * 0.02f),
+                .weight(1f),
             color = secondaryLight,
             thickness = 1.dp
         )
-        Text(text = "lub", fontSize = 14.sp)
+        Text(text = "lub", fontSize = 14.sp, fontFamily = FontFamily(Font(R.font.proximanovaregular)))
         Divider(
             modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = width * 0.02f),
+                .weight(1f),
             color = secondaryLight,
             thickness = 1.dp
         )
@@ -528,10 +555,15 @@ fun ClickableLoginTextComponent(modifier: Modifier = Modifier, navController: Na
     val initialText = "Masz już konto?  "
     val loginText = "Zaloguj się!"
     val annotatedString = buildAnnotatedString {
-        append(initialText)
+        pushStringAnnotation(tag = "initialText", annotation = initialText)
+        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
+        FontFamily(Font(R.font.proximanovaregular)), fontWeight = FontWeight(100)
+        )) {
+            append(initialText)
+        }
         pushStringAnnotation(tag = "logintext", annotation = loginText)
         withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
-        FontFamily(Font(R.font.robotobold)) )) {
+        FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight(900) )) {
             append(loginText)
         }
         pop()

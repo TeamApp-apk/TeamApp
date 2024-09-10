@@ -1,6 +1,7 @@
 package com.example.TeamApp
 
 import BottomNavBar
+import UserViewModel
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
@@ -29,19 +30,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.TeamApp.auth.RegisterScreen
+import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.event.DetailsScreen
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.searchThrough.FiltersScreen
+import com.example.TeamApp.settings.SendMessageScreen
 import com.example.TeamApp.settings.SettingsScreen
+import com.example.TeamApp.settings.SettingsScreenv2
+import com.example.TeamApp.settings.TermsOfUse
+import com.example.TeamApp.settings.YourEventsScreen
 import com.example.TeamApp.ui.LoadingScreen
 import com.example.TeamApp.utils.SystemUiUtils
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
 class MainAppActivity : AppCompatActivity() {
@@ -56,12 +66,13 @@ class MainAppActivity : AppCompatActivity() {
                 Color(0xFFE8E8E8),
                 Color(0xFF007BFF)
             )
-
             val navController = rememberAnimatedNavController()
             var isBottomBarVisible by remember { mutableStateOf(true) }
             var isLoading by remember { mutableStateOf(true) }
             var showMainContent by remember { mutableStateOf(false) }
             var isRefreshing by remember { mutableStateOf(false) }
+            val userViewModel: UserViewModel = viewModel()
+
 
             LaunchedEffect(navController) {
                 navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -72,8 +83,11 @@ class MainAppActivity : AppCompatActivity() {
                 }
                 //isBottomBarVisible = true
             }
-
             LaunchedEffect(Unit) {
+                val firebaseUser = FirebaseAuth.getInstance().currentUser
+                firebaseUser?.email?.let { email ->
+                    userViewModel.fetchUserFromFirestore(email)
+                }
                 delay(450) // Czas ładowania
                 isLoading = false
 
@@ -103,7 +117,7 @@ class MainAppActivity : AppCompatActivity() {
                         )
                     ) + fadeOut(animationSpec = tween(durationMillis = 1000))
                 ) {
-                    LoadingScreen() // Funkcja wyświetlająca animację ładowania
+                    LoadingScreen()
                 }
 
                 AnimatedVisibility(
@@ -147,7 +161,7 @@ class MainAppActivity : AppCompatActivity() {
                                     exitTransition = { fadeOut(animationSpec = tween(300)) },
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
-                                ) { CreateEventScreen(navController) }
+                                ) { CreateEventScreen(navController,userViewModel) }
 
                                 composable(
                                     route = "search",
@@ -173,7 +187,7 @@ class MainAppActivity : AppCompatActivity() {
                                     exitTransition = { fadeOut(animationSpec = tween(300)) },
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
-                                ) { SettingsScreen(navController) }
+                                ) { SettingsScreenv2() }
 
                                 composable(
                                     route = "filterScreen",
@@ -215,7 +229,29 @@ class MainAppActivity : AppCompatActivity() {
                                     DetailsScreen(navController, activityId)
                                 }
 
-                                // Dodaj inne ekrany tutaj
+                                composable(
+                                    route = "yourEvents",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { YourEventsScreen(navController) }
+
+                                composable(
+                                    route = "termsOfUse",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { TermsOfUse() }
+
+                                composable(
+                                    route = "sendUsMessage",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { SendMessageScreen() }
                             }
                         }
                     }

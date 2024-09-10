@@ -133,6 +133,7 @@ fun UpperTextField(value: String){
     Text(
         text = value,
         modifier = Modifier.width(width * 0.83f).height(28.dp * density),
+        textAlign = TextAlign.Center,
         style = textInUpperBoxForgotPassword
     )
 

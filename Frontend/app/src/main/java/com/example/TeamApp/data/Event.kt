@@ -1,11 +1,10 @@
 package com.example.TeamApp.data
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 
 data class Event(
+    val participants: List<Any> = ArrayList(),
+    val creatorID:String? =null,
     val iconResId: String = "",
     val date: String = "",
     val activityName: String = "",
@@ -16,9 +15,8 @@ data class Event(
     val locationID: Map<String, Coordinates>? = null,
     val id: String = UUID.randomUUID().toString()
 ) {
-    constructor() : this("", "", "", 0, 0, "", "", null, UUID.randomUUID().toString())
+    constructor() : this(emptyList(),null,"", "", "", 0, 0, "", "", null, UUID.randomUUID().toString())
 
-    private val participants: MutableList<User> = ArrayList()
 
     companion object {
         val sportIcons: Map<String, String> = mapOf(

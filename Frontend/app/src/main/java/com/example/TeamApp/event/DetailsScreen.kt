@@ -117,11 +117,8 @@ fun DetailsScreen(navController: NavController, activityId: String) {
             ) {
                 // Header
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 24.dp)
+                    modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 5.dp).fillMaxWidth()
                 ) {
                     IconButton(
                         onClick = { navController.popBackStack() },
@@ -132,19 +129,17 @@ fun DetailsScreen(navController: NavController, activityId: String) {
                             contentDescription = "Back Icon"
                         )
                     }
-
                     Text(
                         text = "Szczegóły wydarzenia",
                         style = TextStyle(
-                            fontSize = 22.sp,
-                            fontFamily = FontFamily(Font(R.font.robotobold)),
+                            fontSize = 24.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
                             fontWeight = FontWeight(900),
                             color = Color(0xFF003366),
-                            textAlign = TextAlign.Start,
-                            lineHeight = 25.sp,
-                        ),
-                        modifier = Modifier.align(Alignment.CenterVertically)
+                            textAlign = TextAlign.End,
+                        )
                     )
+
                 }
 
                 // Event details

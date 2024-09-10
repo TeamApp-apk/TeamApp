@@ -155,5 +155,6 @@ dependencies {
     implementation (libs.androidx.lifecycle.runtime.ktx.v231)
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
+    implementation( "androidx.constraintlayout:constraintlayout-compose:1.0.1")
 
 }

@@ -9,10 +9,19 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.settings.SettingsScreen
 import com.example.TeamApp.utils.SystemUiUtils
+
+val user = User(
+    name = "Jan",
+    email = "jan@example.com",
+    birthDay = "01/01/1990",
+    gender = "Male",
+    avatar = "testavatar"
+)
 
 class ForgotPasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,8 +38,9 @@ class ForgotPasswordActivity : ComponentActivity() {
             val navController = rememberNavController()
             NavHost(navController = navController, startDestination = "changePassword") {
                 composable("changePassword"){ ForgotPasswordScreen(navController) }
-                composable("createEvent") { CreateEventScreen(navController) }
+                //composable("createEvent") { CreateEventScreen(navController, ) }
                 composable("register") { RegisterScreen(navController) }
+                //dodalem to user zeby moc zobaczyc czy bedzie mi dzialalo korzystanie z tej metody getResourceId
                 composable("profile"){ ProfileScreen(navController) }
                 composable("settings"){ SettingsScreen(navController) }
                 //composable("search"){ SearchScreen(navController) }
