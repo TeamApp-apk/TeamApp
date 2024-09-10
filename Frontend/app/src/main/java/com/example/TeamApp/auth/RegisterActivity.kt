@@ -32,10 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.data.User
-import com.example.TeamApp.event.CreateEventScreen
-import com.example.TeamApp.profile.ProfileScreen
-import com.example.TeamApp.searchThrough.SearchScreen
-import com.example.TeamApp.settings.SettingsScreen
 import com.example.TeamApp.ui.LoadingScreen
 import com.example.TeamApp.utils.SystemUiUtils
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -46,7 +42,6 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.ktx.firestore
 import kotlinx.coroutines.delay
