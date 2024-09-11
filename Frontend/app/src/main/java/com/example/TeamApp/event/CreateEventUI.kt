@@ -646,12 +646,17 @@ fun SearchStreetField() {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable {
-                                                Log.d("SearchStreetField", "Suggestion clicked: ${suggestion.address}")
+                                                Log.d(
+                                                    "SearchStreetField",
+                                                    "Suggestion clicked: ${suggestion.address}"
+                                                )
                                                 query = suggestion.address
                                                 viewModel.onAddressChange(query)
                                                 suggestions = emptyList()
                                                 expanded = false
-                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                hapticFeedback.performHapticFeedback(
+                                                    HapticFeedbackType.LongPress
+                                                )
                                                 focusManager.clearFocus()
                                                 suggestion.coordinates?.let { coords ->
                                                     viewModel.setLocationID(mapOf(query to coords))

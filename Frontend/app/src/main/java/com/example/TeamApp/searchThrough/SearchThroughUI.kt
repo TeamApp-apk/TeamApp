@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -104,19 +105,35 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(90.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
-                verticalAlignment = Alignment.CenterVertically,
+                    .height(90.dp), // Set equal height for both elements
+                horizontalArrangement = Arrangement.SpaceBetween, // Ensure elements are placed at the start and end
+                verticalAlignment = Alignment.CenterVertically // Align elements vertically in the center
             ) {
-                CurrentCity(value = "WARSZAWA", modifier = Modifier.weight(1f))
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(90.dp)
-                .padding(8.dp),
-            ) {
-                SearchBar(navController = navController)
+                // First column containing SearchBar aligned to the start
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.Start, // Align content to the start within the column
+                    verticalArrangement = Arrangement.Center // Center vertically inside the column
+                ) {
+                    SearchBar(
+                        navController = navController,
+                        modifier = Modifier
+                    )
+                }
+
+                // Second column containing CurrentCity aligned to the end
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.End, // Align content to the end within the column
+                    verticalArrangement = Arrangement.Center // Center vertically inside the column
+                ) {
+                    CurrentCity(
+                        value = "WARSZAWA",
+                        modifier = Modifier
+                    )
+                }
             }
 
             LazyColumn(
@@ -217,104 +234,19 @@ fun SearchBar(navController: NavController, modifier: Modifier = Modifier) {
     val configuration = LocalConfiguration.current
     val height = configuration.screenHeightDp.dp
 
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(
-                Color.White,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .clickable {
-                navController.navigate("filterScreen")
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-            } // Kliknięcie otwiera popup
-            .padding(16.dp)
-            .height(28.dp )
-            .heightIn(min = 28.dp),
-        contentAlignment = Alignment.Center
-
+    IconButton(
+        onClick = {
+            navController.navigate("filterScreen")
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+        },
+        modifier = Modifier
+            .size(36.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.search),
-                contentDescription = "search",
-                tint = Color.Gray,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Szukaj",
-                modifier = Modifier
-                    .weight(1f),
-                    //.wrapContentSize(Alignment.Center),
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontFamily =  FontFamily(Font(R.font.proximanovaregular)) ,
-                    fontWeight =  FontWeight.Medium,
-                    color = Color.Gray,
-                    textAlign = TextAlign.Start
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        Icon(
+            painter = painterResource(id = R.drawable.sliders),
+            contentDescription = "search",
+            tint = Color(0xFF003366),
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
-
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun SearchBar(navController: NavController, modifier: Modifier = Modifier) {
-//
-//    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
-//    val hapticFeedback = LocalHapticFeedback.current
-//    val configuration = LocalConfiguration.current
-//    val height = configuration.screenHeightDp.dp
-//
-//    val textValue = remember { mutableStateOf("") }
-//    val width = configuration.screenWidthDp.dp
-//    val focusManager = LocalFocusManager.current
-//
-//
-//    TextField(
-//        modifier = Modifier.fillMaxWidth()
-//            .height(height * 0.00625f * 8 * density )
-//            ,
-//        label = { Text("Szukaj") },
-//        value = textValue.value,
-//        onValueChange = {newText ->
-//            val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
-//            if (allowedCharsRegex.matches(newText)) {
-//                textValue.value = newText
-//            }
-//
-//        },
-//        keyboardOptions = KeyboardOptions.Default.copy(
-//            imeAction = ImeAction.Done,
-//            keyboardType = KeyboardType.Password
-//        ),
-//        keyboardActions = KeyboardActions(
-//            onDone = {
-//                focusManager.clearFocus()
-//            }
-//        ),
-//        colors = TextFieldDefaults.textFieldColors(
-//            focusedIndicatorColor = Color.Transparent,
-//            unfocusedIndicatorColor = Color.Transparent,
-//            containerColor = Color.White
-//
-//        ),
-//        leadingIcon = {
-//            Icon(
-//                painter = painterResource(id = R.drawable.search),
-//                contentDescription = "search",
-//                tint = Color.Gray,
-//                modifier = Modifier.size(24.dp)
-//            )
-//        },
-//        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f))
-//    )
-//}

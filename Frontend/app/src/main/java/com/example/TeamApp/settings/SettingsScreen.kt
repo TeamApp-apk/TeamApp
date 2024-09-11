@@ -1,15 +1,12 @@
 package com.example.TeamApp.settings
 
 
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,63 +18,38 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.TabRowDefaults.Divider
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
-import com.example.TeamApp.event.CreateEventViewModel
-import com.example.compose.primaryLight
-import com.example.compose.secondaryLight
-import com.example.ui.theme.fontFamily
-import com.example.TeamApp.excludedUI.CustomSnackbar
-
-
+import com.example.TeamApp.excludedUI.ConfirmationDialog
+import com.example.TeamApp.excludedUI.DeleteAccountDialog
 
 @Composable
 fun SettingsScreenv2(navController: NavController) {
     val viewModel: SettingsViewModel = ViewModelProvider.SettingsViewModel
     val context = LocalContext.current
+    var showConfirmation by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF)
@@ -285,7 +257,7 @@ fun SettingsScreenv2(navController: NavController) {
             Text(modifier = Modifier
                 .width(340.dp)
                 .height(25.dp)
-                .clickable {viewModel.deleteAccount(context)},
+                .clickable {showConfirmation = true},
 
                 text = "Usuń konto",
                 style = TextStyle(
@@ -311,6 +283,20 @@ fun SettingsScreenv2(navController: NavController) {
 
 
         }
+    }
+    if(showConfirmation)
+    {
+        ConfirmationDialog(
+            onDismiss = { showConfirmation = false },
+            onSave = { showConfirmation = false; showDialog = true; viewModel.onPasswordChanged("") })
+    }
+
+    if(showDialog)
+    {
+        DeleteAccountDialog(
+            painterResource (id=R.drawable.lock_icon),
+            onDismiss = { showDialog = false; viewModel.onPasswordChanged("") },
+            onSave = { showDialog = false; viewModel.deleteAccount(context)})
     }
 }
 //@Composable
