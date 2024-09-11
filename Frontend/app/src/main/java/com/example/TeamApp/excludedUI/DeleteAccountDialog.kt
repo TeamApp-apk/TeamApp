@@ -144,9 +144,9 @@ fun DeleteAccountDialog(painterResource: Painter,
                             }
                         ),
                         colors = TextFieldDefaults.textFieldColors(
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            containerColor = Color.White
+                            focusedIndicatorColor = Color.Gray, // Set to grey when focused
+                            unfocusedIndicatorColor = Color.LightGray, // Set to light grey when not focused
+                            containerColor = Color.White // Background color inside the TextField
                         ),
                         leadingIcon = {
                             Icon(painter = painterResource, contentDescription = "", modifier = Modifier

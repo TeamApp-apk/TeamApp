@@ -61,6 +61,7 @@ fun ConfirmationDialog(
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
+
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
                         .fillMaxWidth()
