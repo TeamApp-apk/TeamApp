@@ -26,6 +26,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -37,6 +40,7 @@ import com.example.TeamApp.chat.sendMessage
 import com.google.firebase.firestore.FirebaseFirestore
 
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(eventId: String, currentUserId: String) {
@@ -44,6 +48,8 @@ fun ChatScreen(eventId: String, currentUserId: String) {
     val messages = remember { mutableStateListOf<Message>() }
     var messageText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
+    val hapticFeedback = LocalHapticFeedback.current
+
 
     LaunchedEffect(eventId) {
         val messagesRef = db.collection("events").document(eventId).collection("messages")
@@ -110,6 +116,10 @@ fun ChatScreen(eventId: String, currentUserId: String) {
 
             IconButton(
                 onClick = {
+                    // Perform haptic feedback
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+
+
                     if (messageText.isNotBlank()) {
                         sendMessage(eventId, currentUserId, messageText)
                         messageText = "" // Clear text field after sending message
