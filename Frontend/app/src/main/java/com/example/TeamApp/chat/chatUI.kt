@@ -1,6 +1,7 @@
 import android.util.Log
 import android.util.Size
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +54,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.graphics.Color
 
 import androidx.compose.ui.platform.LocalContext
+import com.google.android.gms.tasks.Tasks
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,7 +65,8 @@ fun ChatScreen(eventId: String, currentUserId: String) {
     var activityName by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
     val hapticFeedback = LocalHapticFeedback.current
-
+    var showParticipantsDialog by remember { mutableStateOf(false) }
+    var participants by remember { mutableStateOf<List<String>>(emptyList()) }
     // Updated sportIcons map with drawable resource IDs
     val sportIcons: Map<String, Int> = mapOf(
         "Badminton" to R.drawable.figma_badminton_icon,
@@ -91,6 +96,9 @@ fun ChatScreen(eventId: String, currentUserId: String) {
     LaunchedEffect(eventId) {
         getEventNameById(eventId) { name ->
             activityName = name
+        }
+        fetchParticipants(eventId) { participantList ->
+            participants = participantList
         }
     }
 
@@ -132,7 +140,7 @@ fun ChatScreen(eventId: String, currentUserId: String) {
                     Image(
                         painter = painterResource(id = iconResourceId),
                         contentDescription = activityName,
-                        modifier = Modifier.size(40.dp) // Adjust size of the icon
+                        modifier = Modifier.size(40.dp).border(width = 1.dp, color = Color.Blue)// Adjust size of the icon
                     )
                     Spacer(modifier = Modifier.weight(1f)) // Pushes the text to the center
                     Text(
@@ -146,7 +154,7 @@ fun ChatScreen(eventId: String, currentUserId: String) {
                     Spacer(modifier = Modifier.weight(1f)) // Balance for centering the text
                 }
             },
-            modifier = Modifier.fillMaxWidth().clickable {  },
+            modifier = Modifier.fillMaxWidth().clickable {showParticipantsDialog = true  },
             colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF007BFF))  // Set the top bar color
         )
 
@@ -212,6 +220,24 @@ fun ChatScreen(eventId: String, currentUserId: String) {
             }
         }
     }
+    if (showParticipantsDialog) {
+        AlertDialog(
+            onDismissRequest = { showParticipantsDialog = false },
+            title = { Text("Participants") },
+            text = {
+                Column {
+                    participants.forEach { participant ->
+                        Text(text = participant)
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = { showParticipantsDialog = false }) {
+                    Text("Close")
+                }
+            }
+        )
+    }
 }
 
 
@@ -233,13 +259,65 @@ fun getEventNameById(eventId: String, onResult: (String?) -> Unit) {
             onResult(null) // Handle failure
         }
 }
+fun fetchParticipants(eventId: String, onResult: (List<String>) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    val participantsRef = db.collection("events").document(eventId).collection("participants")
 
+    participantsRef.get()
+        .addOnSuccessListener { result ->
+            if (result.isEmpty) {
+                Log.d("Firestore", "No participants found")
+                onResult(emptyList())
+                return@addOnSuccessListener
+            }
+
+            // Extract user IDs
+            val userIds = result.documents.mapNotNull { it.getString("userID") }
+
+            // If no user IDs are found, return empty list
+            if (userIds.isEmpty()) {
+                Log.d("Firestore", "No user IDs found")
+                onResult(emptyList())
+                return@addOnSuccessListener
+            }
+
+            // Fetch user names based on user IDs
+            val userNames = mutableListOf<String>()
+            val userCollection = db.collection("users")
+            val nameFetchTasks = userIds.map { userId ->
+                userCollection.document(userId).get()
+                    .addOnSuccessListener { userDocument ->
+                        val userName = userDocument.getString("name")
+                        if (userName != null) {
+                            userNames.add(userName)
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("Firestore", "Error fetching user data for ID: $userId", exception)
+                    }
+            }
+
+            // Wait for all name fetch tasks to complete
+            Tasks.whenAllComplete(nameFetchTasks).addOnCompleteListener {
+                if (it.isSuccessful) {
+                    onResult(userNames)
+                } else {
+                    Log.e("Firestore", "Error fetching user names", it.exception)
+                    onResult(emptyList())
+                }
+            }
+        }
+        .addOnFailureListener { exception ->
+            Log.e("Firestore", "Error fetching participants", exception)
+            onResult(emptyList())
+        }
+}
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewChatScreen() {
     // Replace `eventId` and `currentUserId` with test values
-    val testEventId = "1DKd6noTqjcw8k13EXzH"
+    val testEventId = "YUCN1qQeFfEcJ4LXHVuL"
     val testUserId = "testUser123"
 
     // Call the `ChatScreen` function in `Preview`
