@@ -56,7 +56,7 @@ fun MessageItem(
     // Calculate time difference for separator
     val showTimestampSeparator = previousMessageTimestamp?.let {
         val currentTimestamp = message.timestamp?.toDate()?.time ?: 0
-        (currentTimestamp - it) > 300000// 10 seconds in milliseconds
+        (currentTimestamp - it) > 300000// 5mins in milli
     } ?: true
 
     Column {

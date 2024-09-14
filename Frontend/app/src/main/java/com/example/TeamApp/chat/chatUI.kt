@@ -25,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -41,15 +40,27 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 
 
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(eventId: String, currentUserId: String) {
     val db = FirebaseFirestore.getInstance()
     val messages = remember { mutableStateListOf<Message>() }
     var messageText by remember { mutableStateOf("") }
+    var activityName by remember { mutableStateOf<String?>(null) }
     val listState = rememberLazyListState()
     val hapticFeedback = LocalHapticFeedback.current
 
+    // Fetch the event name when eventId is passed
+    LaunchedEffect(eventId) {
+        getEventNameById(eventId) { name ->
+            activityName = name
+        }
+    }
 
     LaunchedEffect(eventId) {
         val messagesRef = db.collection("events").document(eventId).collection("messages")
@@ -76,6 +87,18 @@ fun ChatScreen(eventId: String, currentUserId: String) {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
+        // Add a top bar with the activity name
+        TopAppBar(
+            title = {
+                Text(
+                    text = activityName ?: "Loading...",  // Display activity name or "Loading..."
+                    color = Color.White
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.Black)  // Set the top bar color
+        )
+
         LazyColumn(
             state = listState,
             modifier = Modifier
@@ -119,7 +142,6 @@ fun ChatScreen(eventId: String, currentUserId: String) {
                     // Perform haptic feedback
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
 
-
                     if (messageText.isNotBlank()) {
                         sendMessage(eventId, currentUserId, messageText)
                         messageText = "" // Clear text field after sending message
@@ -139,14 +161,31 @@ fun ChatScreen(eventId: String, currentUserId: String) {
     }
 }
 
+fun getEventNameById(eventId: String, onResult: (String?) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    val eventRef = db.collection("events").document(eventId)
+
+    eventRef.get()
+        .addOnSuccessListener { document ->
+            if (document != null && document.exists()) {
+                val activityName = document.getString("activityName")
+                onResult(activityName) // Return the activity name
+            } else {
+                onResult(null) // Document does not exist
+            }
+        }
+        .addOnFailureListener { exception ->
+            onResult(null) // Handle failure
+        }
+}
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewChatScreen() {
-    // Zamień `eventId` i `currentUserId` na wartości testowe
-    val testEventId = "3175bf2e-0fbd-4d3e-b63e-a7797c173b8a"
+    // Replace `eventId` and `currentUserId` with test values
+    val testEventId = "1DKd6noTqjcw8k13EXzH"
     val testUserId = "testUser123"
 
-    // Wywołanie funkcji `ChatScreen` w `Preview`
+    // Call the `ChatScreen` function in `Preview`
     ChatScreen(eventId = testEventId, currentUserId = testUserId)
 }
