@@ -1,7 +1,12 @@
 import android.util.Log
+import android.util.Size
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -45,6 +50,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.graphics.Color
 
+import androidx.compose.ui.platform.LocalContext
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(eventId: String, currentUserId: String) {
@@ -55,12 +62,40 @@ fun ChatScreen(eventId: String, currentUserId: String) {
     val listState = rememberLazyListState()
     val hapticFeedback = LocalHapticFeedback.current
 
+    // Updated sportIcons map with drawable resource IDs
+    val sportIcons: Map<String, Int> = mapOf(
+        "Badminton" to R.drawable.figma_badminton_icon,
+        "Bilard" to R.drawable.figma_pool_icon,
+        "Bieganie" to R.drawable.figma_running_icon,
+        "Boks" to R.drawable.figma_boxing_icon,
+        "Jazda na deskorolce" to R.drawable.figma_skate_icon,
+        "Jazda na rolkach" to R.drawable.figma_rollerskates_icon,
+        "Kajakarstwo" to R.drawable.figma_kayak_icon,
+        "Kolarstwo" to R.drawable.figma_cycling_icon,
+        "Koszykówka" to R.drawable.figma_basketball_icon,
+        "Kręgle" to R.drawable.figma_bowling_icon,
+        "Kulturystyka" to R.drawable.figma_calistenics_icon,
+        "Łyżwiarstwo" to R.drawable.figma_iceskate_icon,
+        "Piłka nożna" to R.drawable.figma_soccer_icon,
+        "Pingpong" to R.drawable.figma_pingpong_icon,
+        "Pływanie" to R.drawable.figma_swimming_icon,
+        "Rzutki" to R.drawable.figma_dart_icon,
+        "Siatkówka" to R.drawable.figma_volleyball_icon,
+        "Siłownia" to R.drawable.figma_gym_icon,
+        "Szermierka" to R.drawable.figma_fencing_icon,
+        "Tenis" to R.drawable.figma_tennis_icon,
+        "Wędkarstwo" to R.drawable.figma_fising_icon
+    )
+
     // Fetch the event name when eventId is passed
     LaunchedEffect(eventId) {
         getEventNameById(eventId) { name ->
             activityName = name
         }
     }
+
+    // Get the icon resource ID directly from the map
+    val iconResourceId = sportIcons[activityName] ?: R.drawable.chevron_down  // Default icon if not found
 
     LaunchedEffect(eventId) {
         val messagesRef = db.collection("events").document(eventId).collection("messages")
@@ -87,17 +122,35 @@ fun ChatScreen(eventId: String, currentUserId: String) {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Add a top bar with the activity name
+        // Add a top bar with the activity name and sport icon
         TopAppBar(
             title = {
-                Text(
-                    text = activityName ?: "Loading...",  // Display activity name or "Loading..."
-                    color = Color.White
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth() // Make sure the Row takes full width
+                ) {
+                    Image(
+                        painter = painterResource(id = iconResourceId),
+                        contentDescription = activityName,
+                        modifier = Modifier.size(40.dp) // Adjust size of the icon
+                    )
+                    Spacer(modifier = Modifier.weight(1f)) // Pushes the text to the center
+                    Text(
+                        text = activityName ?: "Loading...",  // Display activity name or "Loading..."
+                        color = Color.White,
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                        fontSize = androidx.compose.ui.unit.TextUnit(28f, androidx.compose.ui.unit.TextUnitType.Sp), // Set the font size
+                        modifier = Modifier.padding(end = 48.dp),
+                         // Padding to account for the icon size
+                    )
+                    Spacer(modifier = Modifier.weight(1f)) // Balance for centering the text
+                }
             },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.Black)  // Set the top bar color
+            modifier = Modifier.fillMaxWidth().clickable {  },
+            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF007BFF))  // Set the top bar color
         )
+
+
 
         LazyColumn(
             state = listState,
@@ -161,6 +214,8 @@ fun ChatScreen(eventId: String, currentUserId: String) {
     }
 }
 
+
+
 fun getEventNameById(eventId: String, onResult: (String?) -> Unit) {
     val db = FirebaseFirestore.getInstance()
     val eventRef = db.collection("events").document(eventId)
@@ -178,6 +233,7 @@ fun getEventNameById(eventId: String, onResult: (String?) -> Unit) {
             onResult(null) // Handle failure
         }
 }
+
 
 @Preview(showBackground = true)
 @Composable
