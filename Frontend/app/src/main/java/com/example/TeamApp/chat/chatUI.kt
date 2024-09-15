@@ -3,6 +3,7 @@ import android.util.Size
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,9 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -51,9 +54,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 
 import androidx.compose.ui.platform.LocalContext
+import com.example.TeamApp.auth.ui.theme.TeamAppTheme
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.tasks.Tasks
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -103,7 +109,8 @@ fun ChatScreen(eventId: String, currentUserId: String) {
     }
 
     // Get the icon resource ID directly from the map
-    val iconResourceId = sportIcons[activityName] ?: R.drawable.chevron_down  // Default icon if not found
+    val iconResourceId =
+        sportIcons[activityName] ?: R.drawable.chevron_down  // Default icon if not found
 
     LaunchedEffect(eventId) {
         val messagesRef = db.collection("events").document(eventId).collection("messages")
@@ -129,116 +136,160 @@ fun ChatScreen(eventId: String, currentUserId: String) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Add a top bar with the activity name and sport icon
-        TopAppBar(
-            title = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth() // Make sure the Row takes full width
-                ) {
-                    Image(
-                        painter = painterResource(id = iconResourceId),
-                        contentDescription = activityName,
-                        modifier = Modifier.size(40.dp).border(width = 1.dp, color = Color.Blue)// Adjust size of the icon
-                    )
-                    Spacer(modifier = Modifier.weight(1f)) // Pushes the text to the center
-                    Text(
-                        text = activityName ?: "Loading...",  // Display activity name or "Loading..."
-                        color = Color.White,
-                        fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                        fontSize = androidx.compose.ui.unit.TextUnit(28f, androidx.compose.ui.unit.TextUnitType.Sp), // Set the font size
-                        modifier = Modifier.padding(end = 48.dp),
-                         // Padding to account for the icon size
-                    )
-                    Spacer(modifier = Modifier.weight(1f)) // Balance for centering the text
-                }
-            },
-            modifier = Modifier.fillMaxWidth().clickable {showParticipantsDialog = true  },
-            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF007BFF))  // Set the top bar color
-        )
 
 
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Add a top bar with the activity name and sport icon
+            TopAppBar(
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth() // Make sure the Row takes full width
+                    ) {
+                        // Left Arrow with Padding
+                        Image(
+                            painter = painterResource(id = R.drawable.chevron_left_white),
+                            contentDescription = "back",
+                            modifier = Modifier
+                                .size(40.dp)
+                                // Add padding to match desired space
+                                .clickable { /* Handle back click */ }
+                        )
 
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(8.dp)
-        ) {
-            var previousMessageTimestamp: Long? = null
+                        Spacer(modifier = Modifier.weight(1f)) // Pushes the text and icon to the center
 
-            items(messages) { message ->
-                MessageItem(
-                    message = message,
-                    currentUserId = currentUserId,
-                    previousMessageTimestamp = previousMessageTimestamp
-                )
-                // Update previous message timestamp
-                previousMessageTimestamp = message.timestamp?.toDate()?.time
-            }
-        }
+                        // Centered Text and Icon
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.weight(8f) // Adjust the weight to center it properly
+                        ) {
+                            Image(
+                                painter = painterResource(id = iconResourceId),
+                                contentDescription = activityName,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color.White
+                                    ) // Adjust size of the icon
+                            )
+                            Spacer(modifier = Modifier.width(8.dp)) // Spacing between icon and text
+                            Text(
+                                text = activityName
+                                    ?: "Loading...", // Display activity name or "Loading..."
+                                color = Color.White,
+                                fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                                fontSize = androidx.compose.ui.unit.TextUnit(
+                                    28f,
+                                    androidx.compose.ui.unit.TextUnitType.Sp
+                                ) // Set the font size
+                            )
+                        }
 
-        Row(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically // Center alignment
-        ) {
-            OutlinedTextField(
-                value = messageText,
-                onValueChange = { messageText = it },
-                placeholder = { Text("Napisz wiadomość...") },
-                modifier = Modifier.weight(1f),
-                singleLine = true,
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    containerColor = Color.Transparent,
-                    focusedBorderColor = Color.Black
-                )
-            )
+                        Spacer(modifier = Modifier.weight(1f)) // Balances the layout
 
-            IconButton(
-                onClick = {
-                    // Perform haptic feedback
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                    if (messageText.isNotBlank()) {
-                        sendMessage(eventId, currentUserId, messageText)
-                        messageText = "" // Clear text field after sending message
+                        // Info Icon on the Right with Padding
+                        Image(
+                            painter = painterResource(id = R.drawable.info),
+                            contentDescription = "info",
+                            modifier = Modifier
+                                .size(40.dp)
+                                .padding(end = 4.dp) // Add padding around the info icon to match the arrow
+                                .clickable { showParticipantsDialog = true }
+                        )
                     }
                 },
                 modifier = Modifier
-                    .padding(start = 8.dp)
-                    .size(48.dp)
+                    .fillMaxWidth(),
+
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF007BFF)) // Set the top bar color
+            )
+
+
+
+
+
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(8.dp)
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.sendmessage),
-                    contentDescription = "send message",
-                    modifier = Modifier.size(40.dp) // Adjust icon size
+                var previousMessageTimestamp: Long? = null
+
+                items(messages) { message ->
+                    MessageItem(
+                        message = message,
+                        currentUserId = currentUserId,
+                        previousMessageTimestamp = previousMessageTimestamp
+                    )
+                    // Update previous message timestamp
+                    previousMessageTimestamp = message.timestamp?.toDate()?.time
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically // Center alignment
+            ) {
+                OutlinedTextField(
+                    value = messageText,
+                    onValueChange = { messageText = it },
+                    placeholder = { Text("Napisz wiadomość...") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        containerColor = Color.Transparent,
+                        focusedBorderColor = Color.Black
+                    )
                 )
+
+                IconButton(
+                    onClick = {
+                        // Perform haptic feedback
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+
+                        if (messageText.isNotBlank()) {
+                            sendMessage(eventId, currentUserId, messageText)
+                            messageText = "" // Clear text field after sending message
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .size(48.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.sendmessage),
+                        contentDescription = "send message",
+                        modifier = Modifier.size(40.dp) // Adjust icon size
+                    )
+                }
             }
         }
-    }
-    if (showParticipantsDialog) {
-        AlertDialog(
-            onDismissRequest = { showParticipantsDialog = false },
-            title = { Text("Participants") },
-            text = {
-                Column {
-                    participants.forEach { participant ->
-                        Text(text = participant)
+        if (showParticipantsDialog) {
+            AlertDialog(
+                onDismissRequest = { showParticipantsDialog = false },
+                title = { Text("Participants") },
+                text = {
+                    Column {
+                        participants.forEach { participant ->
+                            Text(text = participant)
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = { showParticipantsDialog = false }) {
+                        Text("Close")
                     }
                 }
-            },
-            confirmButton = {
-                Button(onClick = { showParticipantsDialog = false }) {
-                    Text("Close")
-                }
-            }
-        )
+            )
+        }
     }
-}
+
 
 
 
@@ -318,8 +369,19 @@ fun fetchParticipants(eventId: String, onResult: (List<String>) -> Unit) {
 fun PreviewChatScreen() {
     // Replace `eventId` and `currentUserId` with test values
     val testEventId = "YUCN1qQeFfEcJ4LXHVuL"
-    val testUserId = "testUser123"
+    val testUserId = "huj"
+
 
     // Call the `ChatScreen` function in `Preview`
     ChatScreen(eventId = testEventId, currentUserId = testUserId)
+}
+@Composable
+fun TransparentStatusBar() {
+    val systemUiController = rememberSystemUiController()
+
+    // Make the status bar transparent
+    systemUiController.setSystemBarsColor(
+        color = Color.Transparent, // Set status bar color to transparent
+        darkIcons = false // Adjust icons for light or dark status bar (true for dark icons on light background)
+    )
 }
