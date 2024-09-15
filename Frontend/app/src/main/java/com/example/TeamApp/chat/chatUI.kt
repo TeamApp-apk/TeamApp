@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -55,6 +56,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 
 import androidx.compose.ui.platform.LocalContext
@@ -234,19 +236,38 @@ fun ChatScreen(eventId: String, currentUserId: String) {
                 modifier = Modifier
                     .padding(8.dp)
                     .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically // Center alignment
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                OutlinedTextField(
-                    value = messageText,
-                    onValueChange = { messageText = it },
-                    placeholder = { Text("Napisz wiadomość...") },
-                    modifier = Modifier.weight(1f),
-                    singleLine = true,
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        containerColor = Color.Transparent,
-                        focusedBorderColor = Color.Black
+                // Use Box to make the TextField grow based on its content
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                         // Add border if needed
+                         // Make corners rounded
+                ) {
+                    OutlinedTextField(
+                        value = messageText,
+                        onValueChange = { messageText = it },
+                        placeholder = { Text("Napisz wiadomość...") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 48.dp) // Set minimum height
+                            .padding(
+                                horizontal = 4.dp,
+                                vertical = 12.dp
+                            ), // Adjust padding inside the text field
+                        singleLine = false, // Allow multiple lines
+                        maxLines = 5, // Limit to 5 lines max
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            containerColor = Color.Transparent,
+                            focusedBorderColor = Color.Black,
+                            unfocusedBorderColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(16.dp)
                     )
-                )
+                }
+
 
                 IconButton(
                     onClick = {
@@ -270,7 +291,8 @@ fun ChatScreen(eventId: String, currentUserId: String) {
                 }
             }
         }
-        if (showParticipantsDialog) {
+
+            if (showParticipantsDialog) {
             AlertDialog(
                 onDismissRequest = { showParticipantsDialog = false },
                 title = { Text("Participants") },
