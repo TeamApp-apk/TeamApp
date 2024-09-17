@@ -146,7 +146,7 @@ dependencies {
 
     //fonts
     implementation(libs.androidx.ui.text.google.fonts)
-
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.31.0-alpha")
     //Google localization services
     implementation ("com.google.android.libraries.places:places:3.5.0")
     implementation ("androidx.compose.ui:ui:1.6.8")

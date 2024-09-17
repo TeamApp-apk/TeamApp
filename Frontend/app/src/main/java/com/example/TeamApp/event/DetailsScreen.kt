@@ -1,5 +1,6 @@
 package com.example.TeamApp.event
 import DescriptionTextField
+import UserViewModel
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -33,6 +34,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -76,26 +78,28 @@ import com.tomtom.sdk.map.display.ui.MapFragment
 import com.tomtom.sdk.map.display.ui.MapView
 import java.util.Properties
 import com.example.TeamApp.event.createTomTomMapFragment
+import com.google.firebase.firestore.FirebaseFirestore
 import com.tomtom.sdk.map.display.image.ImageFactory
 import com.tomtom.sdk.map.display.marker.MarkerOptions
 
 
 @Composable
-fun DetailsScreen(navController: NavController, activityId: String) {
+fun DetailsScreen(navController: NavController, activityId: String, userViewModel: UserViewModel) {
+    val user by userViewModel.user.observeAsState()
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val event = viewModel.getEventById(activityId)
     var geoPoint by remember { mutableStateOf<GeoPoint?>(null) }
     val locationQuery = event?.location ?: ""
     val locationID = event?.locationID
-    val cachedMapFragment = viewModel.mapFragment // Pobierz zbuforowany fragment z ViewModel
+    val cachedMapFragment = viewModel.mapFragment
 
 
-    val gradientColors = listOf(
+    val gradientColors = listOf( 
         Color(0xFFE8E8E8),
         Color(0xFF007BFF)
     )
-
-    var isJoined by remember { mutableStateOf(false) }
+    Log.d("DetailsScreen", "Event: ${user?.userID}")
+    var isJoined by remember { mutableStateOf(user?.let { event?.participants?.contains(it.userID) }) }
 
     Box(
         modifier = Modifier
@@ -113,9 +117,8 @@ fun DetailsScreen(navController: NavController, activityId: String) {
             Column(
                 modifier = Modifier
                     .padding(8.dp)
-                    .navigationBarsPadding() // Automatyczny padding na dole, jeśli jest navbar
+                    .navigationBarsPadding()
             ) {
-                // Header
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 5.dp).fillMaxWidth()
@@ -177,7 +180,7 @@ fun DetailsScreen(navController: NavController, activityId: String) {
                         .padding(bottom = 20.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = if (isJoined) R.drawable.joinstatuson else R.drawable.joinstatusoff),
+                        painter = painterResource(id = if (isJoined == true) R.drawable.joinstatuson else R.drawable.joinstatusoff),
                         contentDescription = "Join status",
                         modifier = Modifier
                             .wrapContentWidth()
@@ -185,7 +188,7 @@ fun DetailsScreen(navController: NavController, activityId: String) {
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = if (isJoined) "dołączono" else "nie dołączono",
+                        text = if (isJoined==true) "dołączono" else "nie dołączono",
                         style = TextStyle(
                             fontSize = 14.sp,
                             fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
@@ -195,19 +198,42 @@ fun DetailsScreen(navController: NavController, activityId: String) {
                     )
                 }
 
-                // Action buttons
                 Column(
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
-                        .navigationBarsPadding() // Dodaj to tutaj
+                        .navigationBarsPadding()
                 ) {
                     EventButton(
-                        text = if (isJoined) "OPUŚĆ" else "DOŁĄCZ",
-                        onClick = { isJoined = !isJoined }
+                        text = if (isJoined == true) "OPUŚĆ" else "DOŁĄCZ",
+                        onClick = {
+                            val db = FirebaseFirestore.getInstance()
+                            val eventRef = db.collection("events").document(activityId)
+
+                            if (!isJoined!!) {
+                                if (event != null) {
+                                    user?.let {
+                                        event.participants.add(it.userID)
+                                        eventRef.update("participants", event.participants)
+                                            .addOnSuccessListener { Log.d("Firebase", "User added to participants") }
+                                    }
+                                }
+                            } else {
+                                if (event != null) {
+                                    user?.let {
+                                        event.participants.remove(it.userID)
+                                        eventRef.update("participants", event.participants)
+                                            .addOnSuccessListener { Log.d("Firebase", "User removed from participants") }
+                                    }
+                                }
+                            }
+                            isJoined = !isJoined!!
+                        }
                     )
+
                     EventButton(
                         text = "CZAT",
-                        onClick = { /*TODO*/ }
+                        onClick = {
+                            navController.navigate("chat/$activityId") }
                     )
                 }
             }
@@ -238,7 +264,7 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
         val mapOptions = MapOptions(
             mapKey = getApiKey(context),
         )
-        Log.d("MapFragment", "MapFragment created")
+        Log.d("MapFragment", "Creating MapFragment")
         LaunchedEffect(Unit) {
             createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
                 mapFragment = fragment
@@ -247,44 +273,44 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
         }
     }
 
-    if (isMapFragmentReady) {
-        AndroidView(
-            factory = { mapFragment?.requireView() ?: View(it) },
-            update = {
-                mapFragment?.getMapAsync { tomTomMap ->
-                    if (cords != null) {
-                        tomTomMap.moveCamera(
-                            CameraOptions(
-                                position = GeoPoint(cords.latitude, cords.longitude),
-                                zoom = 15.0
+    if (isMapFragmentReady && mapFragment != null) {
+        val fragmentView = mapFragment?.view
+        if (fragmentView != null) {
+            // Dopiero jeśli fragment ma widok, inicjalizuj AndroidView
+            AndroidView(
+                factory = { fragmentView },
+                update = {
+                    mapFragment?.getMapAsync { tomTomMap ->
+                        if (cords != null) {
+                            tomTomMap.moveCamera(
+                                CameraOptions(
+                                    position = GeoPoint(cords.latitude, cords.longitude),
+                                    zoom = 15.0
+                                )
                             )
-                        )
-                        val bitmap =
-                            BitmapFactory.decodeResource(context.resources, R.drawable.pin_icon)
-                        val scaledBitmap =
-                            Bitmap.createScaledBitmap(bitmap, 100, 100, false) // Adjust size here
-                        val markerOptions = MarkerOptions(
-                            coordinate = GeoPoint(
-                                cords.latitude,
-                                cords.longitude
-                            ),
-                            pinImage = ImageFactory.fromBitmap(scaledBitmap),
-                            pinIconImage = ImageFactory.fromBitmap(scaledBitmap),
-                        )
-                        tomTomMap.addMarker(markerOptions)
+                            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.pin_icon)
+                            val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false) // Adjust size here
+                            val markerOptions = MarkerOptions(
+                                coordinate = GeoPoint(cords.latitude, cords.longitude),
+                                pinImage = ImageFactory.fromBitmap(scaledBitmap),
+                                pinIconImage = ImageFactory.fromBitmap(scaledBitmap),
+                            )
+                            tomTomMap.addMarker(markerOptions)
 
-                        tomTomMap.addMarkerClickListener { }
+                            tomTomMap.addMarkerClickListener { }
+                        }
                     }
-                }
-            },
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .fillMaxWidth()
-                .height(220.dp)
-                .border(2.dp, Color.Black, RoundedCornerShape(16.dp))
-        )
+                },
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .fillMaxWidth()
+                    .height(220.dp)
+                    .border(2.dp, Color.Black, RoundedCornerShape(16.dp))
+            )
+        }
     }
 }
+
 
 
 

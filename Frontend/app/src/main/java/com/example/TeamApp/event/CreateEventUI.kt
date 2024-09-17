@@ -173,6 +173,7 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
     }
     LaunchedEffect(Unit){
         delay(1000)
+        Log.d("CreateEventScreen", "Initializing map")
         viewModel.initializeMapIfNeeded(context)
     }
 
@@ -261,15 +262,15 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
                                     isPlaying = true
                                     Log.d("CreateEventScreen", "Valid input")
                                     Log.d("CreateEventScreen", "Valid input")
-                                    val creatorID = user?.userID ?: "" // Używamy wartości domyślnej, gdy user jest null
-                                    val participantsList = if (creatorID.isNotEmpty()) listOf(creatorID) else emptyList() // Dodajemy creatorID do listy, tylko jeśli nie jest pusty
+                                    val creatorID = user?.userID ?: ""
+                                    val participantsList = if (creatorID.isNotEmpty()) mutableListOf<Any>(creatorID) else mutableListOf()
                                     val newEvent = Event(
                                         participants = participantsList,
-                                        creatorID = creatorID.takeIf { it.isNotEmpty() }, // Jeśli creatorID nie jest pusty, ustawiamy go, inaczej null
+                                        creatorID = creatorID.takeIf { it.isNotEmpty() },
                                         iconResId = Event.sportIcons[sport] ?: "",
                                         date = dateTime,
                                         activityName = sport,
-                                        currentParticipants = participantsList.size, // Liczba uczestników na podstawie wielkości listy
+                                        currentParticipants = participantsList.size,
                                         maxParticipants = participantLimit ?: 0,
                                         location = address,
                                         description = description,
