@@ -57,6 +57,7 @@ import androidx.navigation.NavController
 
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.tasks.Tasks
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,6 +98,7 @@ fun ChatScreen(navController: NavController, eventId: String, userViewModel: Use
 
     // Fetch the event name when eventId is passed
     LaunchedEffect(eventId) {
+        delay(500)
         getEventNameById(eventId) { name ->
             activityName = name
         }
@@ -105,11 +107,12 @@ fun ChatScreen(navController: NavController, eventId: String, userViewModel: Use
         }
     }
 
-    // Get the icon resource ID directly from the map
     val iconResourceId =
-        sportIcons[activityName] ?: R.drawable.chevron_down  // Default icon if not found
+        sportIcons[activityName] ?: R.drawable.chevron_down
 
+    /*TODO: Dodac spinning wheel do animacji ładowania, ten sleep jest potrzebny do zaladowania animacji*/
     LaunchedEffect(eventId) {
+        delay(500)
         val messagesRef = db.collection("events").document(eventId).collection("messages")
         messagesRef.orderBy("timestamp").addSnapshotListener { snapshot, error ->
             if (error != null) {

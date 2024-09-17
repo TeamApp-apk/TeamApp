@@ -117,6 +117,7 @@ fun LoginScreen(navController: NavController){
         }
     }
     LaunchedEffect(Unit) {
+        delay(1000)
         viewModel.mySetSignInLauncher(launcher)
         focusManager.clearFocus()
     }

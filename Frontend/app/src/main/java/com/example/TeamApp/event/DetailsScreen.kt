@@ -233,7 +233,12 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                     EventButton(
                         text = "CZAT",
                         onClick = {
-                            navController.navigate("chat/$activityId") }
+                            if (isJoined == true) {
+                                navController.navigate("chat/$activityId")
+                            } else {
+                                Log.d("DetailsScreen", "User is not a participant")
+                            }
+                        }
                     )
                 }
             }
