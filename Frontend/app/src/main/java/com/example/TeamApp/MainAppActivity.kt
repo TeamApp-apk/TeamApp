@@ -1,6 +1,8 @@
 package com.example.TeamApp
 
 import BottomNavBar
+import ChatScreen
+import MessageScreen
 import UserViewModel
 import android.os.Bundle
 import android.util.Log
@@ -227,7 +229,7 @@ class MainAppActivity : AppCompatActivity() {
                                     }
                                 ) { backStackEntry ->
                                     val activityId = backStackEntry.arguments?.getString("activityId") ?: return@composable
-                                    DetailsScreen(navController, activityId)
+                                    DetailsScreen(navController, activityId, userViewModel)
                                 }
 
                                 composable(
@@ -256,11 +258,32 @@ class MainAppActivity : AppCompatActivity() {
 
                                 composable(
                                     route = "ForgotPassword",
+                                    arguments = listOf(navArgument("activityId") { type = NavType.StringType }),
                                     enterTransition = { fadeIn(animationSpec = tween(300)) },
                                     exitTransition = { fadeOut(animationSpec = tween(300)) },
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
                                 ) { ForgotPasswordScreen(navController) }
+                                composable(
+                                    route = "chat/{activityId}",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) {
+                                    backStackEntry ->
+                                    val activityId = backStackEntry.arguments?.getString("activityId") ?: return@composable
+                                    ChatScreen(navController, activityId, userViewModel)
+                                }
+//                                composable(
+//                                    route = "chat",
+//                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+//                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+//                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+//                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+//                                ) { MessageScreen(navController) }
+
+
                             }
                         }
                     }

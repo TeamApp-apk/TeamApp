@@ -18,9 +18,10 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.navigation.NavController
 
 @Composable
-fun MessageItem(
+fun MessageScreen(
     message: Message,
     currentUserId: String,
     previousMessageTimestamp: Long?

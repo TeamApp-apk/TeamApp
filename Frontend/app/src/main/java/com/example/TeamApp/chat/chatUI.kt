@@ -1,5 +1,4 @@
 import android.util.Log
-import android.util.Size
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -53,20 +50,18 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavController
 
-import androidx.compose.ui.platform.LocalContext
-import com.example.TeamApp.auth.ui.theme.TeamAppTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.tasks.Tasks
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(eventId: String, currentUserId: String) {
+fun ChatScreen(navController: NavController, eventId: String, userViewModel: UserViewModel) {
+    val user by userViewModel.user.observeAsState()
     val db = FirebaseFirestore.getInstance()
     val messages = remember { mutableStateListOf<Message>() }
     var messageText by remember { mutableStateOf("") }
@@ -222,11 +217,13 @@ fun ChatScreen(eventId: String, currentUserId: String) {
                 var previousMessageTimestamp: Long? = null
 
                 items(messages) { message ->
-                    MessageItem(
-                        message = message,
-                        currentUserId = currentUserId,
-                        previousMessageTimestamp = previousMessageTimestamp
-                    )
+                    user?.let {
+                        MessageScreen(
+                            message = message,
+                            currentUserId = it.userID,
+                            previousMessageTimestamp = previousMessageTimestamp
+                        )
+                    }
                     // Update previous message timestamp
                     previousMessageTimestamp = message.timestamp?.toDate()?.time
                 }
@@ -275,7 +272,7 @@ fun ChatScreen(eventId: String, currentUserId: String) {
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
 
                         if (messageText.isNotBlank()) {
-                            sendMessage(eventId, currentUserId, messageText)
+                            user?.let { sendMessage(eventId, it.userID, messageText) }
                             messageText = "" // Clear text field after sending message
                         }
                     },
@@ -386,17 +383,17 @@ fun fetchParticipants(eventId: String, onResult: (List<String>) -> Unit) {
         }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewChatScreen() {
-    // Replace `eventId` and `currentUserId` with test values
-    val testEventId = "YUCN1qQeFfEcJ4LXHVuL"
-    val testUserId = "huj"
-
-
-    // Call the `ChatScreen` function in `Preview`
-    ChatScreen(eventId = testEventId, currentUserId = testUserId)
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewChatScreen() {
+//    // Replace `eventId` and `currentUserId` with test values
+//    val testEventId = "YUCN1qQeFfEcJ4LXHVuL"
+//    val testUserId = "huj"
+//
+//
+//    // Call the `ChatScreen` function in `Preview`
+//    ChatScreen(eventId = testEventId, user.userI = testUserId)
+//}
 @Composable
 fun TransparentStatusBar() {
     val systemUiController = rememberSystemUiController()

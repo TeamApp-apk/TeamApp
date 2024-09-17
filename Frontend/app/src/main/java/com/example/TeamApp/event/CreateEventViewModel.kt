@@ -44,6 +44,7 @@ class CreateEventViewModel : ViewModel() {
     }
     private var isMapInitialized = false
     fun initializeMapIfNeeded(context: Context) {
+        Log.d("CreateEventViewModel", "initializeMapIfNeeded: $isMapInitialized")
         if (!isMapInitialized) {
             isMapInitialized = true
             val fragmentManager = (context as FragmentActivity).supportFragmentManager
@@ -53,7 +54,7 @@ class CreateEventViewModel : ViewModel() {
             )
 
             createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
-                Log.d("CreateEventScreen", "Map fragment created")
+                Log.d("CreateEventViewModel", "Map fragment created")
                 setMapFragment(fragment)
             }
         }
@@ -81,13 +82,23 @@ class CreateEventViewModel : ViewModel() {
             popUpTo("createEvent"){inclusive = true}
         }
     }
-    fun createEvent(event : Event, callback: (String?) -> Unit){
+    fun createEvent(event: Event, callback: (String?) -> Unit) {
         val db = Firebase.firestore
-        db.collection("events").add(event)
-            .addOnSuccessListener { Log.d("CreateEventViewModel", "Event successfully created"); callback(null) }
-            .addOnFailureListener { e -> Log.w("CreateEventViewModel", "Error creating event", e); callback("Błąd, nie dodano Eventu") }
-        activityList.add(0,event)
-        newlyCreatedEvent = event
+        val eventRef = db.collection("events").document() // Create a new document reference with an auto-generated ID
+        val eventWithId = event.copy(id = eventRef.id) // Copy the event with the generated ID
+
+        eventRef.set(eventWithId)
+            .addOnSuccessListener {
+                Log.d("CreateEventViewModel", "Event successfully created with ID: ${eventRef.id}")
+                callback(null)
+            }
+            .addOnFailureListener { e ->
+                Log.w("CreateEventViewModel", "Error creating event", e)
+                callback("Błąd, nie dodano Eventu")
+            }
+
+        activityList.add(0, eventWithId)
+        newlyCreatedEvent = eventWithId
     }
     fun clearNewlyCreatedEvent(){
         newlyCreatedEvent = null

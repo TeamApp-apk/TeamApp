@@ -1,4 +1,5 @@
 package com.example.TeamApp.event
+import android.util.Log
 import androidx.fragment.app.FragmentManager
 import com.example.TeamApp.R
 import com.tomtom.sdk.map.display.MapOptions
@@ -10,6 +11,7 @@ fun createTomTomMapFragment(
     onFragmentReady: (MapFragment) -> Unit
 ) {
     val fragment = fragmentManager.findFragmentById(R.id.map_container) as MapFragment?
+    Log.d("MapFragment", "Fragment: $fragment")
     val newFragment = fragment ?: MapFragment.newInstance(mapOptions)
     fragmentManager.beginTransaction()
         .add(newFragment, "map_fragment")

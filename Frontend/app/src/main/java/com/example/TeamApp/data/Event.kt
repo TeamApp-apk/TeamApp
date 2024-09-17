@@ -3,7 +3,7 @@ import java.util.UUID
 
 
 data class Event(
-    val participants: List<Any> = ArrayList(),
+    var participants: MutableList<Any> = ArrayList(),
     val creatorID:String? =null,
     val iconResId: String = "",
     val date: String = "",
@@ -13,9 +13,9 @@ data class Event(
     val location: String = "",
     val description: String = "",
     val locationID: Map<String, Coordinates>? = null,
-    val id: String = UUID.randomUUID().toString()
+    val id: String = ""
 ) {
-    constructor() : this(emptyList(),null,"", "", "", 0, 0, "", "", null, UUID.randomUUID().toString())
+    constructor() : this(mutableListOf(),null,"", "", "", 0, 0, "", "", null, "")
 
 
     companion object {
