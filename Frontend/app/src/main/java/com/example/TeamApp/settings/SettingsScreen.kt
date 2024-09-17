@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.TeamApp.excludedUI.ConfirmationDialog
@@ -46,7 +47,7 @@ import com.example.TeamApp.excludedUI.DeleteAccountDialog
 
 @Composable
 fun SettingsScreenv2(navController: NavController) {
-    val viewModel: SettingsViewModel = ViewModelProvider.SettingsViewModel
+    val viewModel: SettingsViewModel = viewModel()
     val context = LocalContext.current
     var showConfirmation by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
