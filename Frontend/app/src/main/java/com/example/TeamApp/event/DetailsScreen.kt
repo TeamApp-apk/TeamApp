@@ -295,7 +295,7 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
                                     zoom = 15.0
                                 )
                             )
-                            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.gym_pin)
+                            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.figma_gym_icon)
                             val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false) // Adjust size here
                             val markerOptions = MarkerOptions(
                                 coordinate = GeoPoint(cords.latitude, cords.longitude),
