@@ -225,7 +225,6 @@ fun NoCurrentActivitiesBar(){
 }
 @Composable
 fun FilterButton(navController: NavController, modifier: Modifier = Modifier) {
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val hapticFeedback = LocalHapticFeedback.current
     val configuration = LocalConfiguration.current
     val height = configuration.screenHeightDp.dp
