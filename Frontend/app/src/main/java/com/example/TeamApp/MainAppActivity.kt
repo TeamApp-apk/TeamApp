@@ -23,7 +23,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,10 +37,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.TeamApp.auth.ForgotPasswordScreen
 import com.example.TeamApp.auth.RegisterScreen
 import com.example.TeamApp.data.User
@@ -54,6 +61,7 @@ import com.example.TeamApp.utils.SystemUiUtils
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
@@ -75,6 +83,7 @@ class MainAppActivity : AppCompatActivity() {
             var showMainContent by remember { mutableStateOf(false) }
             var isRefreshing by remember { mutableStateOf(false) }
             val userViewModel: UserViewModel = viewModel()
+
 
 
             LaunchedEffect(navController) {
@@ -291,6 +300,4 @@ class MainAppActivity : AppCompatActivity() {
             }
         }
     }
-
-
 }

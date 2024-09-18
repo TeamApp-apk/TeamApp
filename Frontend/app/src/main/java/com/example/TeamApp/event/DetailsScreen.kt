@@ -215,6 +215,7 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                                         event.participants.add(it.userID)
                                         eventRef.update("participants", event.participants)
                                             .addOnSuccessListener { Log.d("Firebase", "User added to participants") }
+                                        eventRef.update("currentParticipants", event.participants.size)
                                     }
                                 }
                             } else {
@@ -223,6 +224,7 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                                         event.participants.remove(it.userID)
                                         eventRef.update("participants", event.participants)
                                             .addOnSuccessListener { Log.d("Firebase", "User removed from participants") }
+                                        eventRef.update("currentParticipants", event.participants.size)
                                     }
                                 }
                             }

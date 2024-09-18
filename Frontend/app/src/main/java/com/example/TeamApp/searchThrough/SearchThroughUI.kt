@@ -1,4 +1,5 @@
 package com.example.TeamApp.searchThrough
+import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -17,6 +18,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -50,6 +55,9 @@ import com.example.TeamApp.event.CreateEventViewModel
 import com.example.TeamApp.event.ViewModelProvider
 import kotlinx.coroutines.delay
 
+
+
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boolean) -> Unit) {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
@@ -58,6 +66,19 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
     val activityList = remember { viewModel.activityList }
     val newlyCreatedEvent = viewModel.newlyCreatedEvent
     val context = LocalContext.current
+    var isRefreshing by remember { mutableStateOf(false) }
+    val pullRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = {
+        isRefreshing = true
+    })
+    LaunchedEffect(isRefreshing) {
+        if (isRefreshing) {
+            viewModel.isDataFetched = false
+            Log.d("SearchScreen", "Refreshing")
+            viewModel.fetchEvents()
+            delay(300)
+            isRefreshing = false
+        }
+    }
 
     LaunchedEffect(scrollState, newlyCreatedEvent) {
         if (newlyCreatedEvent != null) {
@@ -101,17 +122,16 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(90.dp), // Set equal height for both elements
-                horizontalArrangement = Arrangement.SpaceBetween, // Ensure elements are placed at the start and end
-                verticalAlignment = Alignment.CenterVertically // Align elements vertically in the center
+                    .height(90.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // First column containing SearchBar aligned to the start
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .padding(16.dp),
-                    horizontalAlignment = Alignment.Start, // Align content to the start within the column
-                    verticalArrangement = Arrangement.Center // Center vertically inside the column
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     FilterButton(
                         navController = navController,
@@ -119,11 +139,10 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
                     )
                 }
 
-                // Second column containing CurrentCity aligned to the end
                 Column(
                     modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.End, // Align content to the end within the column
-                    verticalArrangement = Arrangement.Center // Center vertically inside the column
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     CurrentCity(
                         value = "WARSZAWA",
@@ -132,56 +151,60 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
                 }
             }
 
-            LazyColumn(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f) // Ensure LazyColumn fills the remaining space
-
-                , state = scrollState
-            )  {
-                when {
-                    showEmptyMessage -> {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 20.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                NoCurrentActivitiesBar()
+                    .weight(1f)
+            ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .pullRefresh(pullRefreshState),
+                    state = scrollState
+                ) {
+                    when {
+                        showEmptyMessage -> {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 20.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    NoCurrentActivitiesBar()
+                                }
+                            }
+                        }
+                        activityList.isNotEmpty() -> {
+                            items(activityList) { activity ->
+                                val isNewlyCreated = activity == newlyCreatedEvent
+                                ActivityCard(
+                                    iconResId = activity.iconResId,
+                                    date = activity.date,
+                                    activityName = activity.activityName,
+                                    currentParticipants = activity.currentParticipants,
+                                    maxParticipants = activity.maxParticipants,
+                                    location = activity.location,
+                                    isHighlighted = isNewlyCreated,
+                                    onClick = {
+                                        navController.navigate("details/${activity.id}")
+                                    }
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
                             }
                         }
                     }
-                    activityList.isNotEmpty() -> {
-                        items(activityList) { activity ->
-                            val isNewlyCreated = activity == newlyCreatedEvent
-                            ActivityCard(
-                                iconResId = activity.iconResId,
-                                date = activity.date,
-                                activityName = activity.activityName,
-                                currentParticipants = activity.currentParticipants,
-                                maxParticipants = activity.maxParticipants,
-                                location = activity.location,
-                                isHighlighted = isNewlyCreated,
-                                onClick = {
-                                    navController.navigate("details/${activity.id}")
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-                    }
                 }
+
+                PullRefreshIndicator(
+                    refreshing = isRefreshing,
+                    state = pullRefreshState,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                )
             }
         }
     }
 }
-
-//@Composable
-//@Preview(showBackground = false)
-//
-//fun MainScreenPreview(){
-//    SearchScreen(navController = NavController(LocalContext.current))
-//}
 @Composable
 fun CurrentCity(value: String, modifier: Modifier = Modifier) {
     Box(

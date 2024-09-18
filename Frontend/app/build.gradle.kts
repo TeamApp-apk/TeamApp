@@ -66,6 +66,7 @@ dependencies {
 
     // Jetpack Compose dependencies
     implementation(platform(libs.androidx.compose.bom))
+    //implementation(platform(libs.androidx.compose.bom.v20240901))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
@@ -74,6 +75,7 @@ dependencies {
     implementation(libs.androidx.runtime.livedata) // Ensure it matches the Compose version you're using
     implementation (libs.androidx.material.icons.extended)
     implementation(libs.hilt.android)
+    implementation(libs.accompanist.swiperefresh.v0310alpha)
 
     // Navigation
     implementation(libs.androidx.navigation.runtime.ktx)
@@ -89,6 +91,11 @@ dependencies {
     implementation (libs.androidx.lifecycle.viewmodel.ktx) // Sprawdź najnowszą wersję
     implementation(libs.hilt.android.v244)
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+
+
+
+
 
     // Hilt dependencies
     implementation(libs.hilt.android)
