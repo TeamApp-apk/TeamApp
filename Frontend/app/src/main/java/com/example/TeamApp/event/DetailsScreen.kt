@@ -215,6 +215,7 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                                         event.participants.add(it.userID)
                                         eventRef.update("participants", event.participants)
                                             .addOnSuccessListener { Log.d("Firebase", "User added to participants") }
+                                        eventRef.update("currentParticipants", event.participants.size)
                                     }
                                 }
                             } else {
@@ -223,6 +224,7 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                                         event.participants.remove(it.userID)
                                         eventRef.update("participants", event.participants)
                                             .addOnSuccessListener { Log.d("Firebase", "User removed from participants") }
+                                        eventRef.update("currentParticipants", event.participants.size)
                                     }
                                 }
                             }
@@ -233,7 +235,12 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                     EventButton(
                         text = "CZAT",
                         onClick = {
-                            navController.navigate("chat/$activityId") }
+                            if (isJoined == true) {
+                                navController.navigate("chat/$activityId")
+                            } else {
+                                Log.d("DetailsScreen", "User is not a participant")
+                            }
+                        }
                     )
                 }
             }
@@ -288,7 +295,7 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
                                     zoom = 15.0
                                 )
                             )
-                            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.pin_icon)
+                            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.gym_pin)
                             val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false) // Adjust size here
                             val markerOptions = MarkerOptions(
                                 coordinate = GeoPoint(cords.latitude, cords.longitude),

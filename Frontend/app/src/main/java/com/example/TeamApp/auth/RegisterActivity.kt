@@ -76,8 +76,8 @@ class RegisterActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 delay(450) // Simulate loading time
                 isLoading = false
-
-                delay(380) // Ensure the loading screen transitions out fully before showing main content
+                delay(450)
+                //delay(600) // Ensure the loading screen transitions out fully before showing main content
                 showMainContent = true
             }
 

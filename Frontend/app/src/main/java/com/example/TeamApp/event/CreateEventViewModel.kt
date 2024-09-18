@@ -12,6 +12,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.TeamApp.data.Coordinates
 import com.example.TeamApp.data.Event
@@ -26,15 +27,29 @@ import com.tomtom.sdk.search.online.OnlineSearch
 import kotlinx.coroutines.Delay
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 class CreateEventViewModel : ViewModel() {
     private val _sport = MutableLiveData<String>()
     val activityList =   mutableStateListOf<Event>()
     val sport: LiveData<String> get()= _sport
-    private var isDataFetched = false
+    var isDataFetched = false
     var newlyCreatedEvent by mutableStateOf<Event?>(null)
     private val _location = MutableLiveData<String>()
     val location: LiveData<String> get() = _location
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+    fun loadStuff(){
+        viewModelScope.launch {
+            _isLoading.value = true
+            delay(1000)
+            _isLoading.value = false
+
+        }
+    }
 
     private var _mapFragment: MutableState<MapFragment?> = mutableStateOf(null)
     val mapFragment: MapFragment?
@@ -104,6 +119,7 @@ class CreateEventViewModel : ViewModel() {
         newlyCreatedEvent = null
     }
     fun fetchEvents() {
+        Log.d("CreateEventViewModel", "fetchEvents: $isDataFetched")
         if (isDataFetched) return
         Log.d("CreateEventViewModel", "fetchEvents")
         val db = Firebase.firestore
