@@ -154,7 +154,6 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
     var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(progress) {
-        delay(1000)
         if (progress == 1.0f) {
             isPlaying = false
             showTick = true // Pokazuje tick po zakończeniu animacji
@@ -170,7 +169,7 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
         }
     }
     LaunchedEffect(Unit){
-        delay(500)
+        delay(700)
         Log.d("CreateEventScreen", "Initializing map")
         viewModel.initializeMapIfNeeded(context)
     }
@@ -266,6 +265,7 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
                                         participants = participantsList,
                                         creatorID = creatorID.takeIf { it.isNotEmpty() },
                                         iconResId = Event.sportIcons[sport] ?: "",
+                                        pinIconResId = Event.sportPinIcons[sport] ?: "",
                                         date = dateTime,
                                         activityName = sport,
                                         currentParticipants = participantsList.size,

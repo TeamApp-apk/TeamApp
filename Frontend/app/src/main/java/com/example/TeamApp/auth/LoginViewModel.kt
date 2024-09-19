@@ -289,6 +289,4 @@ class LoginViewModel : ViewModel() {
                 callback("Błąd sprawdzania maila w bazie danych")
             }
     }
-
-
 }

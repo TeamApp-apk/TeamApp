@@ -61,9 +61,12 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.commit
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Coordinates
+import com.example.TeamApp.data.Event
 import com.example.TeamApp.excludedUI.EventButton
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -83,6 +86,8 @@ import com.example.TeamApp.event.createTomTomMapFragment
 import com.google.firebase.firestore.FirebaseFirestore
 import com.tomtom.sdk.map.display.image.ImageFactory
 import com.tomtom.sdk.map.display.marker.MarkerOptions
+import kotlinx.coroutines.delay
+
 
 
 @Composable
@@ -94,9 +99,10 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
     val locationQuery = event?.location ?: ""
     val locationID = event?.locationID
     val cachedMapFragment = viewModel.mapFragment
+    val context: Context = LocalContext.current
 
 
-    val gradientColors = listOf( 
+    val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF)
     )
@@ -171,7 +177,7 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                 )
 
                 if (locationID != null) {
-                    TomTomMapView(context = LocalContext.current, locationID = locationID, selectedAddress = locationQuery, cachedMapFragment = cachedMapFragment)
+                    TomTomMapView(context = LocalContext.current, locationID = locationID, selectedAddress = locationQuery, cachedMapFragment = cachedMapFragment, event)
                 }
                 // Join status row
                 Row(
@@ -274,8 +280,12 @@ fun createBitmapWithAntialiasing(context: Context, drawableId: Int, width: Int, 
     return antialiasedBitmap
 }
 
+
+
 @Composable
-fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, selectedAddress: String, cachedMapFragment: MapFragment?) {
+fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, selectedAddress: String, cachedMapFragment: MapFragment?, event: Event) {
+
+
     var mapFragment by remember { mutableStateOf(cachedMapFragment) }
     var isMapFragmentReady by remember { mutableStateOf(cachedMapFragment != null) }
     val fragmentManager = (context as FragmentActivity).supportFragmentManager
@@ -310,8 +320,9 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
                                     zoom = 15.0
                                 )
                             )
-                            /*todo:balonobraz jest testowy, do zmiany na zmapowane ikony*/
-                            val antialiasedBitmap = createBitmapWithAntialiasing(context, R.drawable.balonobraz, 90, 120)
+                            val iconName = event.pinIconResId // np. "balonobraz"
+                            val resourceId = context.resources.getIdentifier(iconName, "drawable", context.packageName)
+                            val antialiasedBitmap = createBitmapWithAntialiasing(context, resourceId, 90, 120)
                             val markerOptions = MarkerOptions(
                                 coordinate = GeoPoint(cords.latitude, cords.longitude),
                                 pinImage = ImageFactory.fromBitmap(antialiasedBitmap),

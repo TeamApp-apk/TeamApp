@@ -179,6 +179,7 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
                             items(activityList) { activity ->
                                 val isNewlyCreated = activity == newlyCreatedEvent
                                 ActivityCard(
+                                    pinIconResId = activity.pinIconResId,
                                     iconResId = activity.iconResId,
                                     date = activity.date,
                                     activityName = activity.activityName,
