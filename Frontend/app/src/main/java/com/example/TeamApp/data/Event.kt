@@ -30,7 +30,7 @@ data class Event(
             "Kolarstwo" to "figma_cycling_icon",
             "Koszykówka" to "figma_basketball_icon",
             "Kręgle" to "figma_bowling_icon",
-            "Kulturystyka" to "figma_calistenics_icon",
+            "Kalistenika" to "figma_calistenics_icon",
             "Łyżwiarstwo" to "figma_iceskate_icon",
             "Piłka nożna" to "figma_soccer_icon",
             "Pingpong" to "figma_pingpong_icon",

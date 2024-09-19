@@ -4,6 +4,8 @@ import UserViewModel
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
@@ -259,6 +261,19 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
 //    val mapFragment = MapFragment.newInstance(mapOptions)
 //
 //}
+fun createBitmapWithAntialiasing(context: Context, drawableId: Int, width: Int, height: Int): Bitmap {
+    val originalBitmap = BitmapFactory.decodeResource(context.resources, drawableId)
+    val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, width, height, true)
+
+    val antialiasedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(antialiasedBitmap)
+
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG) // Antialiasing enabled
+    canvas.drawBitmap(scaledBitmap, 0f, 0f, paint)
+
+    return antialiasedBitmap
+}
+
 @Composable
 fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, selectedAddress: String, cachedMapFragment: MapFragment?) {
     var mapFragment by remember { mutableStateOf(cachedMapFragment) }
@@ -295,12 +310,12 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
                                     zoom = 15.0
                                 )
                             )
-                            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.pin_icon)
-                            val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false) // Adjust size here
+                            /*todo:balonobraz jest testowy, do zmiany na zmapowane ikony*/
+                            val antialiasedBitmap = createBitmapWithAntialiasing(context, R.drawable.balonobraz, 90, 120)
                             val markerOptions = MarkerOptions(
                                 coordinate = GeoPoint(cords.latitude, cords.longitude),
-                                pinImage = ImageFactory.fromBitmap(scaledBitmap),
-                                pinIconImage = ImageFactory.fromBitmap(scaledBitmap),
+                                pinImage = ImageFactory.fromBitmap(antialiasedBitmap),
+                                pinIconImage = ImageFactory.fromBitmap(antialiasedBitmap),
                             )
                             tomTomMap.addMarker(markerOptions)
 
@@ -317,6 +332,7 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
         }
     }
 }
+
 
 
 

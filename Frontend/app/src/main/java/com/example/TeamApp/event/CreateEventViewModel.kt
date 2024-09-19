@@ -175,4 +175,5 @@ class CreateEventViewModel : ViewModel() {
     fun getAvailableSports():List<String>{
         return Event.sportIcons.keys.toList()
     }
+
 }

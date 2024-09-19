@@ -104,10 +104,7 @@ import java.util.UUID
 fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel) {
     val user by userViewModel.user.observeAsState()
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
-    LaunchedEffect (Unit){
-        delay(1000)
-        viewModel.fetchEvents()
-    }
+
     val sport by viewModel.sport.observeAsState("")
     val address by viewModel.location.observeAsState("")
     val limit by viewModel.limit.observeAsState("")
@@ -157,6 +154,7 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
     var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(progress) {
+        delay(1000)
         if (progress == 1.0f) {
             isPlaying = false
             showTick = true // Pokazuje tick po zakończeniu animacji
@@ -172,7 +170,7 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
         }
     }
     LaunchedEffect(Unit){
-        delay(1000)
+        delay(500)
         Log.d("CreateEventScreen", "Initializing map")
         viewModel.initializeMapIfNeeded(context)
     }
