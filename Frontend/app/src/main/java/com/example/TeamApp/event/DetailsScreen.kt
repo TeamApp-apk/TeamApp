@@ -336,7 +336,6 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
 
 
 
-
 //@Composable
 //fun ShowWarsawMap() {
 //    val context = LocalContext.current
