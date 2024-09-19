@@ -88,34 +88,20 @@ class MainAppActivity : AppCompatActivity() {
             var isRefreshing by remember { mutableStateOf(false) }
             val userViewModel: UserViewModel = viewModel()
             val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
-
-
-
-
-//            LaunchedEffect(navController) {
-//                navController.addOnDestinationChangedListener { _, destination, _ ->
-//                    isBottomBarVisible = when (destination.route) {
-//                        "details/{activityId}" -> false
-//                        else -> true
-//                    }
-//                }
-//                //isBottomBarVisible = true
-//            }
-//            LaunchedEffect(Unit) {
-//                val firebaseUser = FirebaseAuth.getInstance().currentUser
-//                firebaseUser?.email?.let { email ->
-//                    userViewModel.fetchUserFromFirestore(email)
-//                }
-//
-//                viewModel.fetchEvents()
-//                delay(700)
-//                viewModel.initializeMapIfNeeded(this@MainAppActivity)
-//                delay(200)
-//                isLoading = false
-//                delay(400)
-//                showMainContent = true
-//            }
+            LaunchedEffect(navController) {
+                navController.addOnDestinationChangedListener { _, destination, _ ->
+                    isBottomBarVisible = when (destination.route) {
+                        "details/{activityId}" -> false
+                        else -> true
+                    }
+                }
+                //isBottomBarVisible = true
+            }
             LaunchedEffect(Unit){
+                val firebaseUser = FirebaseAuth.getInstance().currentUser
+                firebaseUser?.email?.let { email ->
+                    userViewModel.fetchUserFromFirestore(email)
+                }
                 viewModel.fetchEvents()
                 delay(500)
                 isLoading = false
