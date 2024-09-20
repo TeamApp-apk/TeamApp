@@ -58,6 +58,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.TeamApp.R
 import com.example.TeamApp.auth.density
 import com.example.TeamApp.event.CreateEventViewModel
@@ -71,7 +72,7 @@ fun DeleteAccountDialog(painterResource: Painter,
     onSave: () -> Unit
 ) {
     val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
-    val viewModel: SettingsViewModel = com.example.TeamApp.settings.ViewModelProvider.SettingsViewModel
+    val viewModel: SettingsViewModel = viewModel()
 
     // Create a FocusRequester to request focus on the TextField
     val focusRequester = remember { FocusRequester() }

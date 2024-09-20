@@ -6,6 +6,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
@@ -13,6 +14,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.TeamApp.data.User
 import com.example.TeamApp.R
 import com.google.firebase.auth.FirebaseAuth
@@ -23,9 +25,15 @@ import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.ApiException
 import androidx.navigation.NavController
 import com.example.TeamApp.MainAppActivity
+import com.example.TeamApp.data.Avatar
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class LoginViewModel : ViewModel() {
     lateinit var signInLauncher: ActivityResultLauncher<IntentSenderRequest>
@@ -288,5 +296,80 @@ class LoginViewModel : ViewModel() {
                 Log.e("LoginViewModel", "Error checking email in the database.", exception)
                 callback("Błąd sprawdzania maila w bazie danych")
             }
+    }
+
+    private val _avatars = MutableLiveData<List<Avatar>>(emptyList())
+    val avatars: LiveData<List<Avatar>> get() = _avatars
+
+    private val _selectedAvatarIndex = MutableLiveData(0)
+    val selectedAvatarIndex: LiveData<Int> get() = _selectedAvatarIndex
+
+    private var loadedCount = 0 // Liczba już załadowanych avatarów
+
+
+    fun selectAvatarByIndex(index: Int) {
+        _selectedAvatarIndex.value = index
+    }
+
+    init {
+        loadAvatars()
+    }
+
+    fun loadMoreAvatars(){
+        loadAvatars()
+    }
+
+    fun loadAvatars() {
+        val storage = FirebaseStorage.getInstance()
+
+        viewModelScope.launch {
+            val loadedAvatars = mutableListOf<Avatar>() // Lista do tymczasowego przechowywania avatarów
+
+            for (i in 1..TOTAL_AVATARS_COUNT) {
+                val faceRef = storage.reference.child("faces/face$i.png") // Dodaj .png
+                val avatarRef = storage.reference.child("avatars/avatar$i.png") // Dodaj .png
+
+                Log.d("AvatarLoading", "Loading face from: ${faceRef.path}")
+                Log.d("AvatarLoading", "Loading avatar from: ${avatarRef.path}")
+
+                try {
+                    val faceUrl = faceRef.downloadUrl.await()
+                    val avatarUrl = avatarRef.downloadUrl.await()
+
+                    Log.d("Avatar", "Face URL: $faceUrl, Avatar URL: $avatarUrl")
+
+                    val avatar = Avatar(
+                        faceUrl = faceUrl.toString(),
+                        avatarUrl = avatarUrl.toString()
+                    )
+
+                    loadedAvatars.add(avatar) // Dodaj do tymczasowej listy
+                } catch (e: Exception) {
+                    Log.e("AvatarLoading", "Error loading avatar$i: ${e.message}")
+                }
+            }
+
+            // Po zakończeniu ładowania, zaktualizuj LiveData
+            _avatars.value = _avatars.value?.plus(loadedAvatars) // Dodaj nowe avatary do istniejącej listy
+            loadedCount += loadedAvatars.size
+        }
+    }
+
+    fun listFilesInFolder(folder: String) {
+        val storageRef = FirebaseStorage.getInstance().reference.child(folder)
+        storageRef.listAll().addOnSuccessListener { result ->
+            for (item in result.items) {
+                Log.d("FileList", "File: ${item.name}")
+            }
+        }.addOnFailureListener { exception ->
+            Log.e("FileList", "Error listing files: ${exception.message}")
+        }
+    }
+
+
+
+
+    companion object {
+        const val TOTAL_AVATARS_COUNT = 5 // Całkowita liczba avatarów
     }
 }
