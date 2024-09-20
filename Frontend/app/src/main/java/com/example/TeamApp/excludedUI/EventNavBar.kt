@@ -37,7 +37,7 @@ fun BottomNavBar(navController: NavController) {
         composition = searchComposition,
         isPlaying = isPlaying,
         iterations = 1,
-        speed = 2.0f
+        speed = 0f
     )
 
     val plusComposition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.plus))
@@ -45,7 +45,7 @@ fun BottomNavBar(navController: NavController) {
         composition = plusComposition,
         isPlaying = isPlusPlaying,
         iterations = 1,
-        speed = 1.5f
+        speed = 0f
     )
 
     val profileComposition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.profile))
@@ -53,7 +53,7 @@ fun BottomNavBar(navController: NavController) {
         composition = profileComposition,
         isPlaying = isProfilePlaying,
         iterations = 1,
-        speed = 1.5f
+        speed = 0f
     )
 
     val chatComposition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.chat))
@@ -61,13 +61,13 @@ fun BottomNavBar(navController: NavController) {
         composition = chatComposition,
         isPlaying = isChatPlaying,
         iterations = 1,
-        speed = 1.5f
+        speed = 0f
     )
 
     LaunchedEffect(searchProgress, plusProgress, profileProgress) {
-        if (searchProgress == 1f) isPlaying = false
-        if (plusProgress >= 0.5f) isPlusPlaying = false
-        if (profileProgress >= 0.4f) isProfilePlaying = false
+        if (searchProgress >=0f) isPlaying = false
+        if (plusProgress >= 0f) isPlusPlaying = false
+        if (profileProgress >= 0f) isProfilePlaying = false
     }
 
     Row(

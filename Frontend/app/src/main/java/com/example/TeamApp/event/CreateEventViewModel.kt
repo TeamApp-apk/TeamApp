@@ -17,6 +17,7 @@ import androidx.navigation.NavController
 import com.example.TeamApp.data.Coordinates
 import com.example.TeamApp.data.Event
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.tomtom.sdk.location.GeoPoint
 import com.tomtom.sdk.location.poi.StandardCategoryId.Companion.Locale
@@ -175,5 +176,7 @@ class CreateEventViewModel : ViewModel() {
     fun getAvailableSports():List<String>{
         return Event.sportIcons.keys.toList()
     }
+
+
 
 }
