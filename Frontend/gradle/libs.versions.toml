@@ -4,6 +4,7 @@ accompanistNavigationAnimationVersion = "<latest_version>"
 accompanistSwiperefresh = "<latest_version>"
 accompanistSwiperefreshVersion = "0.31.0-alpha"
 agp = "8.5.2"
+coilCompose = "2.2.2"
 composeBomVersion = "2024.09.01"
 constraintlayoutCompose = "1.0.1"
 converterGson = "2.9.0"
@@ -47,6 +48,7 @@ runtime = "1.6.8"
 appcompat = "1.7.0"
 swiperefreshlayoutVersion = "1.1.0"
 uiTextGoogleFonts = "1.6.8"
+firebaseStorageKtx = "21.0.0"
 [libraries]
 accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation" }
 accompanist-navigation-animation-v0300 = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimation" }
@@ -69,6 +71,7 @@ androidx-runtime = { module = "androidx.compose.runtime:runtime", version.ref = 
 androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtime" }
 androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayoutVersion" }
 androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 com-facebook-android-facebook-android-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookFacebookAndroidSdkVersion" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 facebook-android-sdk-vlatestrelease = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdk" }
@@ -106,6 +109,7 @@ lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "
 map-display = { module = "com.tomtom.sdk.maps:map-display", version.ref = "mapDisplay" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
