@@ -10,10 +10,12 @@ import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,12 +29,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -88,8 +96,7 @@ import com.tomtom.sdk.map.display.image.ImageFactory
 import com.tomtom.sdk.map.display.marker.MarkerOptions
 import kotlinx.coroutines.delay
 
-
-
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsScreen(navController: NavController, activityId: String, userViewModel: UserViewModel) {
     val user by userViewModel.user.observeAsState()
@@ -101,159 +108,184 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
     val cachedMapFragment = viewModel.mapFragment
     val context: Context = LocalContext.current
 
-
-    val gradientColors = listOf(
-        Color(0xFFE8E8E8),
-        Color(0xFF007BFF)
-    )
-    Log.d("DetailsScreen", "Event: ${user?.userID}")
     var isJoined by remember { mutableStateOf(user?.let { event?.participants?.contains(it.userID) }) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color(0xFFF2F2F2))
-            .padding(horizontal = 16.dp, vertical = 36.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxSize()
-                .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 16.dp))
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .navigationBarsPadding()
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 5.dp).fillMaxWidth()
-                ) {
-                    IconButton(
-                        onClick = { navController.popBackStack() },
-                        modifier = Modifier.size(26.dp)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.CenterEnd // Align to the end
+
                     ) {
+                        Text(
+                            text = "Szczegóły wydarzenia",
+                            style = TextStyle(
+                                fontSize = 24.sp,
+                                fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                                fontWeight = FontWeight(900),
+                                color = Color(0xFF003366),
+                                textAlign = TextAlign.End,
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(modifier = Modifier.padding(8.dp), onClick = { navController.popBackStack() }) {
                         Icon(
                             painter = painterResource(id = R.drawable.arrowleft),
                             contentDescription = "Back Icon"
                         )
+
                     }
-                    Text(
-                        text = "Szczegóły wydarzenia",
-                        style = TextStyle(
-                            fontSize = 24.sp,
-                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                            fontWeight = FontWeight(900),
-                            color = Color(0xFF003366),
-                            textAlign = TextAlign.End,
-                        )
-                    )
-
-                }
-
-                // Event details
-                if (event != null) {
-                    DescriptionTextField(
-                        label = "Opis wydarzenia",
-                        isEditable = false,
-                        text = event.description
-                    )
-                }
-
-                // Location label
-                Text(
-                    text = "Lokalizacja:",
-                    style = TextStyle(
-                        fontSize = 22.sp,
-                        fontFamily = FontFamily(Font(R.font.robotobold)),
-                        fontWeight = FontWeight(900),
-                        color = Color(0xFF003366),
-                        textAlign = TextAlign.Start,
-                        lineHeight = 25.sp,
-                    ),
-                    modifier = Modifier.padding(bottom = 20.dp)
-                )
-
-                if (locationID != null) {
-                    TomTomMapView(context = LocalContext.current, locationID = locationID, selectedAddress = locationQuery, cachedMapFragment = cachedMapFragment, event)
-                }
-                // Join status row
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.White)
+            )
+        },
+        content = { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color(0xFFF2F2F2))
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 20.dp)
+                        .fillMaxSize()
+                        .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 16.dp))
                 ) {
-                    Image(
-                        painter = painterResource(id = if (isJoined == true) R.drawable.joinstatuson else R.drawable.joinstatusoff),
-                        contentDescription = "Join status",
+                    LazyColumn(
                         modifier = Modifier
-                            .wrapContentWidth()
-                            .height(24.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = if (isJoined==true) "dołączono" else "nie dołączono",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.Black,
-                        )
-                    )
-                }
+                            .navigationBarsPadding()
+                            .padding(horizontal = 16.dp)
+                    ) {
 
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .navigationBarsPadding()
-                ) {
-                    EventButton(
-                        text = if (isJoined == true) "OPUŚĆ" else "DOŁĄCZ",
-                        onClick = {
-                            val db = FirebaseFirestore.getInstance()
-                            val eventRef = db.collection("events").document(activityId)
-
-                            if (!isJoined!!) {
-                                if (event != null) {
-                                    user?.let {
-                                        event.participants.add(it.userID)
-                                        eventRef.update("participants", event.participants)
-                                            .addOnSuccessListener { Log.d("Firebase", "User added to participants") }
-                                        eventRef.update("currentParticipants", event.participants.size)
-                                    }
-                                }
-                            } else {
-                                if (event != null) {
-                                    user?.let {
-                                        event.participants.remove(it.userID)
-                                        eventRef.update("participants", event.participants)
-                                            .addOnSuccessListener { Log.d("Firebase", "User removed from participants") }
-                                        eventRef.update("currentParticipants", event.participants.size)
-                                    }
-                                }
-                            }
-                            isJoined = !isJoined!!
-                        }
-                    )
-
-                    EventButton(
-                        text = "CZAT",
-                        onClick = {
-                            if (isJoined == true) {
-                                navController.navigate("chat/$activityId")
-                            } else {
-                                Log.d("DetailsScreen", "User is not a participant")
+                        item {
+                            if (event != null) {
+                                DescriptionTextField(
+                                    label = "Opis wydarzenia",
+                                    isEditable = false,
+                                    text = event.description
+                                )
                             }
                         }
-                    )
+
+                        item {
+                            Text(
+                                text = "Lokalizacja:",
+                                style = TextStyle(
+                                    fontSize = 22.sp,
+                                    fontFamily = FontFamily(Font(R.font.robotobold)),
+                                    fontWeight = FontWeight(900),
+                                    color = Color(0xFF003366),
+                                    textAlign = TextAlign.Start,
+                                    lineHeight = 25.sp,
+                                ),
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                                    .padding(bottom = 20.dp)
+                            )
+                        }
+
+                        item {
+                            if (locationID != null) {
+                                Box(modifier = Modifier.padding(horizontal = 8.dp))
+                                {
+                                    TomTomMapView(
+                                        context = LocalContext.current,
+                                        locationID = locationID,
+                                        selectedAddress = locationQuery,
+                                        cachedMapFragment = cachedMapFragment,
+                                        event = event
+                                    )
+                                }
+                            }
+                        }
+
+                        item {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 20.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(id = if (isJoined == true) R.drawable.joinstatuson else R.drawable.joinstatusoff),
+                                    contentDescription = "Join status",
+                                    modifier = Modifier
+                                        .wrapContentWidth()
+                                        .height(24.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = if (isJoined == true) "dołączono" else "nie dołączono",
+                                    style = TextStyle(
+                                        fontSize = 14.sp,
+                                        fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color.Black,
+                                    )
+                                )
+                            }
+                        }
+
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .padding(horizontal = 24.dp)
+                                    .navigationBarsPadding()
+                            ) {
+                                EventButton(
+                                    text = if (isJoined == true) "OPUŚĆ" else "DOŁĄCZ",
+                                    onClick = {
+                                        val db = FirebaseFirestore.getInstance()
+                                        val eventRef = db.collection("events").document(activityId)
+
+                                        if (!isJoined!!) {
+                                            if (event != null) {
+                                                user?.let {
+                                                    event.participants.add(it.userID)
+                                                    eventRef.update("participants", event.participants)
+                                                        .addOnSuccessListener { Log.d("Firebase", "User added to participants") }
+                                                    eventRef.update("currentParticipants", event.participants.size)
+                                                }
+                                            }
+                                        } else {
+                                            if (event != null) {
+                                                user?.let {
+                                                    event.participants.remove(it.userID)
+                                                    eventRef.update("participants", event.participants)
+                                                        .addOnSuccessListener { Log.d("Firebase", "User removed from participants") }
+                                                    eventRef.update("currentParticipants", event.participants.size)
+                                                }
+                                            }
+                                        }
+                                        isJoined = !isJoined!!
+                                    }
+                                )
+
+                                EventButton(
+                                    text = "CZAT",
+                                    onClick = {
+                                        if (isJoined == true) {
+                                            navController.navigate("chat/$activityId")
+                                        } else {
+                                            Log.d("DetailsScreen", "User is not a participant")
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
+    )
 }
 
 
