@@ -4,14 +4,13 @@ import UserViewModel
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Rect
 import android.util.Log
-import android.view.View
-import android.widget.FrameLayout
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,11 +25,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,7 +38,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,35 +45,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentContainerView
-import androidx.fragment.app.commit
 import androidx.navigation.NavController
-import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Coordinates
 import com.example.TeamApp.excludedUI.EventButton
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.LatLng
 import com.tomtom.sdk.location.GeoPoint
 import com.tomtom.sdk.map.display.MapOptions
-import com.tomtom.sdk.map.display.TomTomMap
 import com.tomtom.sdk.map.display.camera.CameraOptions
-import com.tomtom.sdk.map.display.camera.CameraPosition
-import com.tomtom.sdk.map.display.common.screen.Padding
-import com.tomtom.sdk.map.display.map.OnlineCachePolicy
-import com.tomtom.sdk.map.display.style.StyleMode
 import com.tomtom.sdk.map.display.ui.MapFragment
-import com.tomtom.sdk.map.display.ui.MapView
-import java.util.Properties
-import com.example.TeamApp.event.createTomTomMapFragment
 import com.google.firebase.firestore.FirebaseFirestore
 import com.tomtom.sdk.map.display.image.ImageFactory
 import com.tomtom.sdk.map.display.marker.MarkerOptions
@@ -295,12 +275,13 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
                                     zoom = 15.0
                                 )
                             )
-                            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.gym_pin)
-                            val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 100, 100, false) // Adjust size here
+                            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.old)
+                            val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 73, 98, false) // Adjust size here
+                            val paddedBitmap = getBitmapWithPaddingAndAntiAlias(scaledBitmap, 10)
                             val markerOptions = MarkerOptions(
                                 coordinate = GeoPoint(cords.latitude, cords.longitude),
-                                pinImage = ImageFactory.fromBitmap(scaledBitmap),
-                                pinIconImage = ImageFactory.fromBitmap(scaledBitmap),
+                                pinImage = ImageFactory.fromBitmap(paddedBitmap),
+                                pinIconImage = ImageFactory.fromBitmap(paddedBitmap),
                             )
                             tomTomMap.addMarker(markerOptions)
 
@@ -329,7 +310,22 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
 //    TomTomMapView(context = context, coordinates = warsawCoordinates)
 //}
 
+fun getBitmapWithPaddingAndAntiAlias(bitmap: Bitmap, paddingSize: Int): Bitmap {
+    val width = bitmap.width + paddingSize * 2
+    val height = bitmap.height + paddingSize * 2
+    val paddedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
+    val canvas = Canvas(paddedBitmap)
+    val paint = Paint().apply {
+        isAntiAlias = true // Enable anti-aliasing for smoother edges
+        isFilterBitmap = true // Enable bitmap filtering for smoother scaling
+    }
+
+    // Draw the bitmap with padding
+    canvas.drawBitmap(bitmap, paddingSize.toFloat(), paddingSize.toFloat(), paint)
+
+    return paddedBitmap
+}
 
 
 
