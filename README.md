@@ -28,10 +28,10 @@ An application that helps people find sports partners.
   + **TomTom Maps SDK** for handling all location features.
   
 ## Future Enhancements
-  + Deploying app on Google Play Store
+  + Deploying app on Google Play Store.
   + Developing a system that ensures participants do not declare attendance at an event and then fail to show up.
   + Introduce challenges where users can compete or collaborate with others, earning badges and rewards.
-  + Adding skill level to app filters
+  + Adding skill level to search/create filters.
   
   
 
