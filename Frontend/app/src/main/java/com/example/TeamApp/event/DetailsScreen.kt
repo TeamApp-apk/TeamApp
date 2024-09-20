@@ -207,28 +207,30 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                         }
 
                         item {
+                            Spacer(modifier = Modifier.height(16.dp))
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 20.dp)
+                                    .padding(bottom = 5.dp)
                             ) {
                                 Image(
                                     painter = painterResource(id = if (isJoined == true) R.drawable.joinstatuson else R.drawable.joinstatusoff),
                                     contentDescription = "Join status",
                                     modifier = Modifier
+                                        .size(40.dp)
                                         .wrapContentWidth()
-                                        .height(24.dp)
+                                        .height(10.dp)
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = if (isJoined == true) "dołączono" else "nie dołączono",
+                                    text = if (isJoined==true) "Dołączono" else "Nie dołączono",
                                     style = TextStyle(
-                                        fontSize = 14.sp,
+                                        fontSize = 24.sp,
                                         fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
                                         fontWeight = FontWeight.ExtraBold,
-                                        color = Color.Black,
+                                        color = Color(0xFF003366),
                                     )
                                 )
                             }
