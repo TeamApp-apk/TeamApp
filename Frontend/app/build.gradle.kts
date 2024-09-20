@@ -137,7 +137,7 @@ dependencies {
     implementation (libs.facebook.android.sdk.vlatestrelease)
     implementation (libs.com.facebook.android.facebook.android.sdk)
     implementation (libs.androidx.navigation.compose.v253)
-
+    implementation(libs.firebase.storage.ktx)
 
 
     // Testing dependencies
@@ -163,5 +163,8 @@ dependencies {
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
     implementation( "androidx.constraintlayout:constraintlayout-compose:1.0.1")
+
+    //Coli
+    implementation(libs.coil.compose)
 
 }

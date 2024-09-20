@@ -14,6 +14,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -47,7 +49,9 @@ import com.example.TeamApp.auth.ForgotPasswordScreen
 import com.example.TeamApp.auth.RegisterScreen
 import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventScreen
+import com.example.TeamApp.event.CreateEventViewModel
 import com.example.TeamApp.event.DetailsScreen
+import com.example.TeamApp.event.ViewModelProvider
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.searchThrough.FiltersScreen
@@ -83,9 +87,7 @@ class MainAppActivity : AppCompatActivity() {
             var showMainContent by remember { mutableStateOf(false) }
             var isRefreshing by remember { mutableStateOf(false) }
             val userViewModel: UserViewModel = viewModel()
-
-
-
+            val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
             LaunchedEffect(navController) {
                 navController.addOnDestinationChangedListener { _, destination, _ ->
                     isBottomBarVisible = when (destination.route) {
@@ -95,16 +97,17 @@ class MainAppActivity : AppCompatActivity() {
                 }
                 //isBottomBarVisible = true
             }
-            LaunchedEffect(Unit) {
+            LaunchedEffect(Unit){
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 firebaseUser?.email?.let { email ->
                     userViewModel.fetchUserFromFirestore(email)
                 }
-                delay(450) // Czas ładowania
+                viewModel.fetchEvents()
+                delay(500)
                 isLoading = false
-
-                delay(380) // Czas przejścia między ekranami
+                delay(400)
                 showMainContent = true
+
             }
 
             Box(
@@ -112,42 +115,23 @@ class MainAppActivity : AppCompatActivity() {
                     .fillMaxSize()
                     .background(Brush.linearGradient(colors = gradientColors))
             ) {
+//                AnimatedVisibility(
+//                    visible = isLoading
+//                ) {
+//                    LoadingScreen()
+//                }
                 AnimatedVisibility(
                     visible = isLoading,
-                    enter = slideInVertically(
-                        initialOffsetY = { it },
-                        animationSpec = tween(
-                            durationMillis = 1000,
-                            easing = FastOutSlowInEasing
-                        )
-                    ) + fadeIn(animationSpec = tween(durationMillis = 1000)),
-                    exit = slideOutVertically(
-                        targetOffsetY = { it },
-                        animationSpec = tween(
-                            durationMillis = 1000,
-                            easing = FastOutSlowInEasing
-                        )
-                    ) + fadeOut(animationSpec = tween(durationMillis = 1000))
+                    enter = fadeIn(animationSpec = tween(400)) + scaleIn(initialScale = 1.0f, animationSpec = tween(400)),
+                    exit = fadeOut(animationSpec = tween(400)) + scaleOut(targetScale = 0.5f, animationSpec = tween(400))
                 ) {
                     LoadingScreen()
                 }
 
                 AnimatedVisibility(
                     visible = showMainContent,
-                    enter = slideInVertically(
-                        initialOffsetY = { 4000 },
-                        animationSpec = tween(
-                            durationMillis = 900,
-                            easing = FastOutSlowInEasing
-                        )
-                    ) + fadeIn(animationSpec = tween(durationMillis = 1200)),
-                    exit = slideOutVertically(
-                        targetOffsetY = { -1000 },
-                        animationSpec = tween(
-                            durationMillis = 1500,
-                            easing = FastOutSlowInEasing
-                        )
-                    ) + fadeOut(animationSpec = tween(durationMillis = 1200))
+                    enter = fadeIn(animationSpec = tween(900)),
+                    exit = fadeOut(animationSpec = tween(900))
                 ) {
                     Scaffold(
                         modifier = Modifier.navigationBarsPadding(),
@@ -284,15 +268,6 @@ class MainAppActivity : AppCompatActivity() {
                                     val activityId = backStackEntry.arguments?.getString("activityId") ?: return@composable
                                     ChatScreen(navController, activityId, userViewModel)
                                 }
-//                                composable(
-//                                    route = "chat",
-//                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
-//                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
-//                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
-//                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
-//                                ) { MessageScreen(navController) }
-
-
                             }
                         }
                     }

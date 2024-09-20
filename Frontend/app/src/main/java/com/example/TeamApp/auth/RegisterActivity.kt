@@ -216,3 +216,4 @@ class RegisterActivity : ComponentActivity() {
         finish()
     }
 }
+

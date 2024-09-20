@@ -104,10 +104,7 @@ import java.util.UUID
 fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel) {
     val user by userViewModel.user.observeAsState()
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
-    LaunchedEffect (Unit){
-        delay(1000)
-        viewModel.fetchEvents()
-    }
+
     val sport by viewModel.sport.observeAsState("")
     val address by viewModel.location.observeAsState("")
     val limit by viewModel.limit.observeAsState("")
@@ -172,7 +169,7 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
         }
     }
     LaunchedEffect(Unit){
-        delay(1000)
+        delay(700)
         Log.d("CreateEventScreen", "Initializing map")
         viewModel.initializeMapIfNeeded(context)
     }
@@ -268,6 +265,7 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
                                         participants = participantsList,
                                         creatorID = creatorID.takeIf { it.isNotEmpty() },
                                         iconResId = Event.sportIcons[sport] ?: "",
+                                        pinIconResId = Event.sportPinIcons[sport] ?: "",
                                         date = dateTime,
                                         activityName = sport,
                                         currentParticipants = participantsList.size,

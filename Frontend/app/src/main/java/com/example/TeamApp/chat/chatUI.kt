@@ -83,7 +83,7 @@ fun ChatScreen(navController: NavController, eventId: String, userViewModel: Use
         "Kolarstwo" to R.drawable.figma_cycling_icon,
         "Koszykówka" to R.drawable.figma_basketball_icon,
         "Kręgle" to R.drawable.figma_bowling_icon,
-        "Kulturystyka" to R.drawable.figma_calistenics_icon,
+        "Kalistenika" to R.drawable.figma_calistenics_icon,
         "Łyżwiarstwo" to R.drawable.figma_iceskate_icon,
         "Piłka nożna" to R.drawable.figma_soccer_icon,
         "Pingpong" to R.drawable.figma_pingpong_icon,

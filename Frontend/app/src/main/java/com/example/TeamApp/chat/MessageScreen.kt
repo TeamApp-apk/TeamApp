@@ -19,6 +19,7 @@ import java.util.Locale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun MessageScreen(
@@ -26,7 +27,14 @@ fun MessageScreen(
     currentUserId: String,
     previousMessageTimestamp: Long?
 ) {
+    var username by remember { mutableStateOf<String?>(null) }
     val isCurrentUser = message.userId == currentUserId
+    val viewModel = UserViewModel()
+    LaunchedEffect(message.userId) {
+        viewModel.getUsernameById(message.userId) { fetchedUsername ->
+            username = fetchedUsername
+        }
+    }
 
     // Formatter for displaying only hour and minutes
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale("pl", "PL"))
@@ -97,7 +105,7 @@ fun MessageScreen(
             ) {
                 // Display user name
                 Text(
-                    text = message.userId,
+                    text = username ?: "",
                     style = MaterialTheme.typography.caption,
                     fontFamily = FontFamily(Font(R.font.proximanovaregular)),
                     color = if (isCurrentUser) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
@@ -127,6 +135,7 @@ fun MessageScreen(
         }
     }
 }
+
 
 
 

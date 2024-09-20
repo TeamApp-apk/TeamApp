@@ -6,6 +6,7 @@ data class Event(
     var participants: MutableList<Any> = ArrayList(),
     val creatorID:String? =null,
     val iconResId: String = "",
+    val pinIconResId: String = "",
     val date: String = "",
     val activityName: String = "",
     val currentParticipants: Int = 0,
@@ -15,7 +16,7 @@ data class Event(
     val locationID: Map<String, Coordinates>? = null,
     val id: String = ""
 ) {
-    constructor() : this(mutableListOf(),null,"", "", "", 0, 0, "", "", null, "")
+    constructor() : this(mutableListOf(),null,"","", "", "", 0, 0, "", "", null, "")
 
 
     companion object {
@@ -30,7 +31,7 @@ data class Event(
             "Kolarstwo" to "figma_cycling_icon",
             "Koszykówka" to "figma_basketball_icon",
             "Kręgle" to "figma_bowling_icon",
-            "Kulturystyka" to "figma_calistenics_icon",
+            "Kalistenika" to "figma_calistenics_icon",
             "Łyżwiarstwo" to "figma_iceskate_icon",
             "Piłka nożna" to "figma_soccer_icon",
             "Pingpong" to "figma_pingpong_icon",
@@ -42,7 +43,33 @@ data class Event(
             "Tenis" to "figma_tennis_icon",
             "Wędkarstwo" to "figma_fising_icon"
         )
+        val sportPinIcons: Map<String,String> = mapOf(
+            "Badminton" to "figma_badminton_pin",
+            "Biliard" to "figma_pool_pin",
+            "Bieganie" to "figma_running_pin",
+            "Boks" to "figma_boxing_pin",
+            "Jazda na deskorolce" to "figma_skate_pin",
+            "Jazda na rolkach" to "figma_rollerskates_pin",
+            "Kajakarstwo" to "figma_kayak_pin",
+            "Kolarstwo" to "figma_cycling_pin",
+            "Koszykówka" to "figma_basketball_pin",
+            "Kręgle" to "figma_bowling_pin",
+            "Kalistenika" to "figma_calistenics_pin",
+            "Łyżwiarstwo" to "figma_iceskate_pin",
+            "Piłka nożna" to "figma_soccer_pin",
+            "Pingpong" to "figma_pingpong_pin",
+            "Pływanie" to "figma_swimming_pin",
+            "Rzutki" to "figma_dart_pin",
+            "Siatkówka" to "figma_volleyball_pin",
+            "Siłownia" to "figma_gym_pin",
+            "Szermierka" to "figma_fencing_pin",
+            "Tenis" to "figma_tennis_pin",
+            "Wędkarstwo" to "figma_fishing_pin"
+
+        )
+
     }
+
 
 
 
