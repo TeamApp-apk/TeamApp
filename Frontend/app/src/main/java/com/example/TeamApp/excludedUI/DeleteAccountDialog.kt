@@ -60,7 +60,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.TeamApp.R
-import com.example.TeamApp.auth.density
 import com.example.TeamApp.event.CreateEventViewModel
 import com.example.TeamApp.event.ViewModelProvider
 import com.example.TeamApp.settings.SettingsViewModel
@@ -120,7 +119,7 @@ fun DeleteAccountDialog(painterResource: Painter,
                     TextField(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(height * 0.00625f * 8 * density)
+                            .height(height * 0.00625f * 8)
                             .focusRequester(focusRequester),
                         label = { Text(
                             text = "hasło",
