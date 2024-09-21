@@ -1,40 +1,41 @@
 package com.example.TeamApp.excludedUI
 
-import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.example.TeamApp.auth.LoginViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel as viewModel
 
 @Composable
-fun AvatarSelection(viewModel: LoginViewModel) {
+fun AvatarSelection() {
+    val viewModel : LoginViewModel = viewModel()
     // Observe avatars and selected avatar
     val avatars by viewModel.avatars.observeAsState(emptyList())
     val selectedAvatarIndex by viewModel.selectedAvatarIndex.observeAsState(0)
-
+    val listState = rememberLazyListState()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
@@ -48,6 +49,7 @@ fun AvatarSelection(viewModel: LoginViewModel) {
 
         // Avatar carousel showing only 3 avatars with the center one enlarged
         LazyRow(
+            state = listState,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp),
@@ -69,9 +71,32 @@ fun AvatarSelection(viewModel: LoginViewModel) {
             }
         }
 
-        // Button to load more avatars
-        Button(onClick = { viewModel.loadMoreAvatars() }) {
-            Text("Load more avatars")
+        val shouldLoadMore = remember {
+            derivedStateOf {
+                val visibleItems = listState.layoutInfo.visibleItemsInfo
+                if (visibleItems.isNotEmpty()) {
+                    val firstVisibleIndex = visibleItems.firstOrNull()?.index ?: 0
+                    firstVisibleIndex == 0
+                } else {
+                    false
+                }
+            }
+        }
+
+        // Trigger loading more avatars when user scrolls close to the end
+        LaunchedEffect(shouldLoadMore.value) {
+            if (shouldLoadMore.value) {
+                viewModel.loadAvatars(25)
+            }
+        }
+
+        Button(onClick = {
+            val selectedAvatar = avatars.getOrNull(selectedAvatarIndex)
+            if (selectedAvatar != null) {
+                viewModel.saveSelectedAvatar(selectedAvatar.avatarUrl) // Zapisz avatar do Firestore
+            }
+        }) {
+            Text("Save Avatar")
         }
     }
 }
