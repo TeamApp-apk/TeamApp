@@ -52,7 +52,7 @@ val fontFamily = FontFamily(
 )
 
 val textInUpperBoxForgotPassword = TextStyle(
-    fontSize = 25.sp * com.example.TeamApp.auth.density,
+    fontSize = 32.sp,
     fontFamily = fontFamily,
     fontWeight = FontWeight(500),
     color = Color(0xFF003366),
@@ -94,8 +94,8 @@ val forgotPasswordLogin = TextStyle(
 )
 
 val buttonLogIn = TextStyle(
-    fontSize = 16.sp,
-    fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+    fontSize = 22.sp,
+    fontFamily = FontFamily(Font(R.font.proximanovabold)),
     fontWeight = FontWeight.Normal,
     color = Color(0xffe0e0e0),
     textAlign = TextAlign.Center,

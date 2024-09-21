@@ -81,8 +81,6 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
         }
     }
 
-
-
     LaunchedEffect(Unit) {
         delay(1000)
         if (activityList.isEmpty()) {
@@ -188,7 +186,7 @@ fun NoCurrentActivitiesBar(){
         .height(40.dp)
         .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 16.dp))){
         Text(
-            text = "Brak aktywnośći",
+            text = "Brak aktywności",
             style = TextStyle(
                 fontSize = 15.sp,
                 fontFamily = FontFamily(Font(R.font.robotoitalic)),

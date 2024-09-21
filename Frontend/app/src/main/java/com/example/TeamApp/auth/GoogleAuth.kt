@@ -37,7 +37,7 @@ import com.example.TeamApp.R
 import com.example.ui.theme.googleAuthStyle
 
 @Composable
-fun GoogleLoginButton() {
+fun GoogleLoginButton( modifier: Modifier) {
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
     val context = LocalContext.current
@@ -49,17 +49,7 @@ fun GoogleLoginButton() {
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
-        modifier = Modifier
-            .shadow(
-                elevation = 30.dp,
-                spotColor = Color(0x40D3D4E2),
-                ambientColor = Color(0x40D3D4E2)
-            )
-
-            .padding(1.dp)
-            .width(width * 0.83f)
-            .height(height * 0.00625f * 14)
-            .background(color = Color.White, shape = RoundedCornerShape(size = 12.dp))
+        modifier = modifier,
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
