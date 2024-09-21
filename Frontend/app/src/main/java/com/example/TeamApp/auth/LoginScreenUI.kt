@@ -328,11 +328,6 @@ fun LoginScreen(navController: NavController){
     }
 }
 
-//@Composable
-//@Preview
-//fun LoginScreenPreview(){
-//    LoginScreen()
-//}
 @Composable
 fun ToggleSwitch(){
 

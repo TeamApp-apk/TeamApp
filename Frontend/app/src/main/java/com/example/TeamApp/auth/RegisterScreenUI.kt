@@ -98,12 +98,9 @@ import com.example.ui.theme.textInUpperBoxForgotPassword
 
 /*
 do oifowania powtorzenie hasla sa dwie oddzielne funkcje
-
 Ten remember password pamieta dwa te same pola chacik pisze ze cos we viewmodel
+*/
 
- */
-
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RegisterScreen(navController: NavController){
     val context = LocalContext.current
@@ -133,7 +130,6 @@ fun RegisterScreen(navController: NavController){
         delay(1000)
         viewModel.mySetSignInLauncher(launcher)
         focusManager.clearFocus()
-
     }
     SideEffect {
         val window = (context as? Activity)?.window ?: return@SideEffect
@@ -154,12 +150,13 @@ fun RegisterScreen(navController: NavController){
             .background(brush = Brush.linearGradient(colors = gradientColors)) ){}
 
         ConstraintLayout (modifier = Modifier.fillMaxSize()) {
+            val (welcomeText, signUp, emailBox, nameBox, passBox, repeatBox,
+                divider, googleButton, logInText) = createRefs()
+
             val startGuideline = createGuidelineFromStart(0.11f)
             val endGuideline = createGuidelineFromStart(0.9f)
             val topWelcomeText = createGuidelineFromTop(0.07f)
             val bottomWelcomeText = createGuidelineFromTop(0.14f)
-            val (welcomeText, signUp, emailBox, nameBox, passBox, repeatBox,
-                divider, googleButton, logInText) = createRefs()
             Text(
                 textAlign = TextAlign.Center,
                 style = textInUpperBoxForgotPassword,
@@ -175,6 +172,7 @@ fun RegisterScreen(navController: NavController){
                     }
             )
 
+            /*
             val nameStart = createGuidelineFromStart(0.1f)
             val nameEnd = createGuidelineFromStart(0.9f)
             val nameTop = createGuidelineFromTop(0.17f)
@@ -193,6 +191,7 @@ fun RegisterScreen(navController: NavController){
                     }
                     .focusRequester(nameFocusRequester)
             )
+            */
 
             val emailStart = createGuidelineFromStart(0.1f)
             val emailEnd = createGuidelineFromStart(0.9f)
@@ -551,12 +550,12 @@ fun ButtonSignUP(navController: NavController,
                  onShowSnackbar: (Boolean) -> Unit,
                  onSnackbarSuccess: (Boolean) -> Unit,
                  modifier: Modifier) {
-    val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel()
     val isLoading by viewModel.isLoading.observeAsState(false)
 
     Button(
-        onClick = {viewModel.onRegisterClick(navController) { result ->
+        onClick = {
+            viewModel.onRegisterClick(navController) { result ->
             if (result == null) {
                 onSnackbarMessageChanged("Rejestracja przebiegła pomyślnie")
                 onSnackbarSuccess(true)
@@ -565,8 +564,8 @@ fun ButtonSignUP(navController: NavController,
                 onSnackbarSuccess(false)
             }
             onShowSnackbar(true)
-        }
-                  }, // Zmieniono navController na context
+            }
+        }, // Zmieniono navController na context
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
@@ -676,8 +675,3 @@ fun LoadingSpinner(isLoading: Boolean) {
         }
     }
 }
-
-
-
-
-
