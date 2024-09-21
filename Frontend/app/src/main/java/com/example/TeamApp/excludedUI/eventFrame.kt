@@ -47,6 +47,7 @@ fun getIconResourceId(context: Context, iconName: String): Int {
 
 @Composable
 fun ActivityCard(
+    pinIconResId: String,
     iconResId: String,
     date: String,
     activityName: String,

@@ -66,6 +66,7 @@ dependencies {
 
     // Jetpack Compose dependencies
     implementation(platform(libs.androidx.compose.bom))
+    //implementation(platform(libs.androidx.compose.bom.v20240901))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
@@ -74,6 +75,7 @@ dependencies {
     implementation(libs.androidx.runtime.livedata) // Ensure it matches the Compose version you're using
     implementation (libs.androidx.material.icons.extended)
     implementation(libs.hilt.android)
+    implementation(libs.accompanist.swiperefresh.v0310alpha)
 
     // Navigation
     implementation(libs.androidx.navigation.runtime.ktx)
@@ -89,6 +91,11 @@ dependencies {
     implementation (libs.androidx.lifecycle.viewmodel.ktx) // Sprawdź najnowszą wersję
     implementation(libs.hilt.android.v244)
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+
+
+
+
 
     // Hilt dependencies
     implementation(libs.hilt.android)
@@ -130,7 +137,7 @@ dependencies {
     implementation (libs.facebook.android.sdk.vlatestrelease)
     implementation (libs.com.facebook.android.facebook.android.sdk)
     implementation (libs.androidx.navigation.compose.v253)
-
+    implementation(libs.firebase.storage.ktx)
 
 
     // Testing dependencies
@@ -146,7 +153,7 @@ dependencies {
 
     //fonts
     implementation(libs.androidx.ui.text.google.fonts)
-
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.31.0-alpha")
     //Google localization services
     implementation ("com.google.android.libraries.places:places:3.5.0")
     implementation ("androidx.compose.ui:ui:1.6.8")
@@ -156,5 +163,8 @@ dependencies {
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
     implementation( "androidx.constraintlayout:constraintlayout-compose:1.0.1")
+
+    //Coli
+    implementation(libs.coil.compose)
 
 }

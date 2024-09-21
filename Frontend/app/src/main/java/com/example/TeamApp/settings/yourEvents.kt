@@ -24,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -67,7 +68,7 @@ import com.example.TeamApp.excludedUI.CustomSnackbar
 
 
 @Composable
-fun YourEventsScreen() {
+fun YourEventsScreen(navController: NavController) {
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF)
@@ -76,47 +77,38 @@ fun YourEventsScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(brush = Brush.linearGradient(colors = gradientColors))
+            .padding(start = 6.dp, end = 6.dp, top = 28.dp, bottom = 72.dp)
+
     ) {
         Column(
             modifier = Modifier
                 .align(Alignment.Center) // Center the Column within the Box
-                .width(360.dp)
-                .height(764.dp)
-                .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 16.dp))
+                .fillMaxSize()
+                .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 16.dp))
                 .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
-                verticalAlignment = Alignment.Top, modifier = Modifier
-                    .width(359.dp)
-                    .height(45.dp)
-                    .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 10.dp)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 5.dp).fillMaxWidth()
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.arrow_icon),
-                    contentDescription = "arrow",
-                    modifier = Modifier
-                        .clickable {
-
-                        }
-                        .size(24.dp)
-                        .padding(1.dp)
-
-                )
-                Spacer(modifier = Modifier.width(12.dp))
+                IconButton(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier.size(26.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrowleft),
+                        contentDescription = "Back Icon"
+                    )
+                }
                 Text(
-                    modifier = Modifier.width(303.dp)
-                        .height(25.dp),
                     text = "Twoje wydarzenia",
                     style = TextStyle(
-                        fontSize = 20.sp,
-                        lineHeight = 25.sp,
+                        fontSize = 24.sp,
                         fontFamily = FontFamily(Font(R.font.proximanovabold)),
                         fontWeight = FontWeight(900),
                         color = Color(0xFF003366),
-                        textAlign = TextAlign.Right,
+                        textAlign = TextAlign.End,
                     )
                 )
 
@@ -124,10 +116,6 @@ fun YourEventsScreen() {
         }
     }
 }
-//@Composable
-//@Preview(showBackground = false)
-//    fun yourEventsScreenPreview(){
-//        YourEventsScreen()
-//    }
+
 
 

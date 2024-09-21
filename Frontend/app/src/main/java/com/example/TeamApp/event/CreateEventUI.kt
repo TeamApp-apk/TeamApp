@@ -104,10 +104,7 @@ import java.util.UUID
 fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel) {
     val user by userViewModel.user.observeAsState()
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
-    LaunchedEffect (Unit){
-        delay(1000)
-        viewModel.fetchEvents()
-    }
+
     val sport by viewModel.sport.observeAsState("")
     val address by viewModel.location.observeAsState("")
     val limit by viewModel.limit.observeAsState("")
@@ -172,7 +169,8 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
         }
     }
     LaunchedEffect(Unit){
-        delay(1000)
+        delay(700)
+        Log.d("CreateEventScreen", "Initializing map")
         viewModel.initializeMapIfNeeded(context)
     }
 
@@ -261,15 +259,16 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
                                     isPlaying = true
                                     Log.d("CreateEventScreen", "Valid input")
                                     Log.d("CreateEventScreen", "Valid input")
-                                    val creatorID = user?.userID ?: "" // Używamy wartości domyślnej, gdy user jest null
-                                    val participantsList = if (creatorID.isNotEmpty()) listOf(creatorID) else emptyList() // Dodajemy creatorID do listy, tylko jeśli nie jest pusty
+                                    val creatorID = user?.userID ?: ""
+                                    val participantsList = if (creatorID.isNotEmpty()) mutableListOf<Any>(creatorID) else mutableListOf()
                                     val newEvent = Event(
                                         participants = participantsList,
-                                        creatorID = creatorID.takeIf { it.isNotEmpty() }, // Jeśli creatorID nie jest pusty, ustawiamy go, inaczej null
+                                        creatorID = creatorID.takeIf { it.isNotEmpty() },
                                         iconResId = Event.sportIcons[sport] ?: "",
+                                        pinIconResId = Event.sportPinIcons[sport] ?: "",
                                         date = dateTime,
                                         activityName = sport,
-                                        currentParticipants = participantsList.size, // Liczba uczestników na podstawie wielkości listy
+                                        currentParticipants = participantsList.size,
                                         maxParticipants = participantLimit ?: 0,
                                         location = address,
                                         description = description,
@@ -646,12 +645,17 @@ fun SearchStreetField() {
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable {
-                                                Log.d("SearchStreetField", "Suggestion clicked: ${suggestion.address}")
+                                                Log.d(
+                                                    "SearchStreetField",
+                                                    "Suggestion clicked: ${suggestion.address}"
+                                                )
                                                 query = suggestion.address
                                                 viewModel.onAddressChange(query)
                                                 suggestions = emptyList()
                                                 expanded = false
-                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                hapticFeedback.performHapticFeedback(
+                                                    HapticFeedbackType.LongPress
+                                                )
                                                 focusManager.clearFocus()
                                                 suggestion.coordinates?.let { coords ->
                                                     viewModel.setLocationID(mapOf(query to coords))

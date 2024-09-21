@@ -83,6 +83,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.compose.secondaryLight
 import com.example.TeamApp.R
+import kotlinx.coroutines.delay
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -129,6 +130,7 @@ fun RegisterScreen(navController: NavController){
         }
     }
     LaunchedEffect(Unit) {
+        delay(1000)
         viewModel.mySetSignInLauncher(launcher)
         focusManager.clearFocus()
 

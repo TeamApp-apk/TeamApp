@@ -1,16 +1,21 @@
 package com.example.TeamApp.event
 import DescriptionTextField
+import UserViewModel
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,15 +29,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,9 +69,12 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
 import androidx.fragment.app.commit
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Coordinates
+import com.example.TeamApp.data.Event
 import com.example.TeamApp.excludedUI.EventButton
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -76,148 +91,203 @@ import com.tomtom.sdk.map.display.ui.MapFragment
 import com.tomtom.sdk.map.display.ui.MapView
 import java.util.Properties
 import com.example.TeamApp.event.createTomTomMapFragment
+import com.google.firebase.firestore.FirebaseFirestore
 import com.tomtom.sdk.map.display.image.ImageFactory
 import com.tomtom.sdk.map.display.marker.MarkerOptions
+import kotlinx.coroutines.delay
 
-
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun DetailsScreen(navController: NavController, activityId: String) {
+fun DetailsScreen(navController: NavController, activityId: String, userViewModel: UserViewModel) {
+    val user by userViewModel.user.observeAsState()
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val event = viewModel.getEventById(activityId)
     var geoPoint by remember { mutableStateOf<GeoPoint?>(null) }
     val locationQuery = event?.location ?: ""
     val locationID = event?.locationID
-    val cachedMapFragment = viewModel.mapFragment // Pobierz zbuforowany fragment z ViewModel
+    val cachedMapFragment = viewModel.mapFragment
+    val context: Context = LocalContext.current
 
+    var isJoined by remember { mutableStateOf(user?.let { event?.participants?.contains(it.userID) }) }
 
-    val gradientColors = listOf(
-        Color(0xFFE8E8E8),
-        Color(0xFF007BFF)
-    )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.CenterEnd // Align to the end
 
-    var isJoined by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = Color(0xFFF2F2F2))
-            .padding(horizontal = 16.dp, vertical = 36.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxSize()
-                .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 16.dp))
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .navigationBarsPadding() // Automatyczny padding na dole, jeśli jest navbar
-            ) {
-                // Header
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 24.dp)
-                ) {
-                    IconButton(
-                        onClick = { navController.popBackStack() },
-                        modifier = Modifier.size(26.dp)
                     ) {
+                        Text(
+                            text = "Szczegóły wydarzenia",
+                            style = TextStyle(
+                                fontSize = 24.sp,
+                                fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                                fontWeight = FontWeight(900),
+                                color = Color(0xFF003366),
+                                textAlign = TextAlign.End,
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(modifier = Modifier.padding(8.dp), onClick = { navController.popBackStack() }) {
                         Icon(
                             painter = painterResource(id = R.drawable.arrowleft),
                             contentDescription = "Back Icon"
                         )
+
                     }
-
-                    Text(
-                        text = "Szczegóły wydarzenia",
-                        style = TextStyle(
-                            fontSize = 22.sp,
-                            fontFamily = FontFamily(Font(R.font.robotobold)),
-                            fontWeight = FontWeight(900),
-                            color = Color(0xFF003366),
-                            textAlign = TextAlign.Start,
-                            lineHeight = 25.sp,
-                        ),
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                }
-
-                // Event details
-                if (event != null) {
-                    DescriptionTextField(
-                        label = "Opis wydarzenia",
-                        isEditable = false,
-                        text = event.description
-                    )
-                }
-
-                // Location label
-                Text(
-                    text = "Lokalizacja:",
-                    style = TextStyle(
-                        fontSize = 22.sp,
-                        fontFamily = FontFamily(Font(R.font.robotobold)),
-                        fontWeight = FontWeight(900),
-                        color = Color(0xFF003366),
-                        textAlign = TextAlign.Start,
-                        lineHeight = 25.sp,
-                    ),
-                    modifier = Modifier.padding(bottom = 20.dp)
-                )
-
-                if (locationID != null) {
-                    TomTomMapView(context = LocalContext.current, locationID = locationID, selectedAddress = locationQuery, cachedMapFragment = cachedMapFragment)
-                }
-                // Join status row
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center,
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.White)
+            )
+        },
+        content = { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color(0xFFF2F2F2))
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 20.dp)
+                        .fillMaxSize()
+                        .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 16.dp))
                 ) {
-                    Image(
-                        painter = painterResource(id = if (isJoined) R.drawable.joinstatuson else R.drawable.joinstatusoff),
-                        contentDescription = "Join status",
+                    LazyColumn(
                         modifier = Modifier
-                            .wrapContentWidth()
-                            .height(24.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = if (isJoined) "dołączono" else "nie dołączono",
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color.Black,
-                        )
-                    )
-                }
+                            .navigationBarsPadding()
+                            .padding(horizontal = 16.dp)
+                    ) {
 
-                // Action buttons
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .navigationBarsPadding() // Dodaj to tutaj
-                ) {
-                    EventButton(
-                        text = if (isJoined) "OPUŚĆ" else "DOŁĄCZ",
-                        onClick = { isJoined = !isJoined }
-                    )
-                    EventButton(
-                        text = "CZAT",
-                        onClick = { /*TODO*/ }
-                    )
+                        item {
+                            if (event != null) {
+                                DescriptionTextField(
+                                    label = "Opis wydarzenia",
+                                    isEditable = false,
+                                    text = event.description
+                                )
+                            }
+                        }
+
+                        item {
+                            Text(
+                                text = "Lokalizacja:",
+                                style = TextStyle(
+                                    fontSize = 22.sp,
+                                    fontFamily = FontFamily(Font(R.font.robotobold)),
+                                    fontWeight = FontWeight(900),
+                                    color = Color(0xFF003366),
+                                    textAlign = TextAlign.Start,
+                                    lineHeight = 25.sp,
+                                ),
+                                modifier = Modifier.padding(horizontal = 8.dp)
+                                    .padding(bottom = 20.dp)
+                            )
+                        }
+
+                        item {
+                            if (locationID != null) {
+                                Box(modifier = Modifier.padding(horizontal = 8.dp))
+                                {
+                                    TomTomMapView(
+                                        context = LocalContext.current,
+                                        locationID = locationID,
+                                        selectedAddress = locationQuery,
+                                        cachedMapFragment = cachedMapFragment,
+                                        event = event
+                                    )
+                                }
+                            }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 5.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(id = if (isJoined == true) R.drawable.joinstatuson else R.drawable.joinstatusoff),
+                                    contentDescription = "Join status",
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .wrapContentWidth()
+                                        .height(10.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = if (isJoined==true) "Dołączono" else "Nie dołączono",
+                                    style = TextStyle(
+                                        fontSize = 24.sp,
+                                        fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = Color(0xFF003366),
+                                    )
+                                )
+                            }
+                        }
+
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .padding(horizontal = 24.dp)
+                                    .navigationBarsPadding()
+                            ) {
+                                EventButton(
+                                    text = if (isJoined == true) "OPUŚĆ" else "DOŁĄCZ",
+                                    onClick = {
+                                        val db = FirebaseFirestore.getInstance()
+                                        val eventRef = db.collection("events").document(activityId)
+
+                                        if (!isJoined!!) {
+                                            if (event != null) {
+                                                user?.let {
+                                                    event.participants.add(it.userID)
+                                                    eventRef.update("participants", event.participants)
+                                                        .addOnSuccessListener { Log.d("Firebase", "User added to participants") }
+                                                    eventRef.update("currentParticipants", event.participants.size)
+                                                }
+                                            }
+                                        } else {
+                                            if (event != null) {
+                                                user?.let {
+                                                    event.participants.remove(it.userID)
+                                                    eventRef.update("participants", event.participants)
+                                                        .addOnSuccessListener { Log.d("Firebase", "User removed from participants") }
+                                                    eventRef.update("currentParticipants", event.participants.size)
+                                                }
+                                            }
+                                        }
+                                        isJoined = !isJoined!!
+                                    }
+                                )
+
+                                EventButton(
+                                    text = "CZAT",
+                                    onClick = {
+                                        if (isJoined == true) {
+                                            navController.navigate("chat/$activityId")
+                                        } else {
+                                            Log.d("DetailsScreen", "User is not a participant")
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
+    )
 }
 
 
@@ -231,8 +301,25 @@ fun DetailsScreen(navController: NavController, activityId: String) {
 //    val mapFragment = MapFragment.newInstance(mapOptions)
 //
 //}
+fun createBitmapWithAntialiasing(context: Context, drawableId: Int, width: Int, height: Int): Bitmap {
+    val originalBitmap = BitmapFactory.decodeResource(context.resources, drawableId)
+    val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, width, height, true)
+
+    val antialiasedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(antialiasedBitmap)
+
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG) // Antialiasing enabled
+    canvas.drawBitmap(scaledBitmap, 0f, 0f, paint)
+
+    return antialiasedBitmap
+}
+
+
+
 @Composable
-fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, selectedAddress: String, cachedMapFragment: MapFragment?) {
+fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, selectedAddress: String, cachedMapFragment: MapFragment?, event: Event) {
+
+
     var mapFragment by remember { mutableStateOf(cachedMapFragment) }
     var isMapFragmentReady by remember { mutableStateOf(cachedMapFragment != null) }
     val fragmentManager = (context as FragmentActivity).supportFragmentManager
@@ -243,7 +330,7 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
         val mapOptions = MapOptions(
             mapKey = getApiKey(context),
         )
-        Log.d("MapFragment", "MapFragment created")
+        Log.d("MapFragment", "Creating MapFragment")
         LaunchedEffect(Unit) {
             createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
                 mapFragment = fragment
@@ -252,44 +339,45 @@ fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, select
         }
     }
 
-    if (isMapFragmentReady) {
-        AndroidView(
-            factory = { mapFragment?.requireView() ?: View(it) },
-            update = {
-                mapFragment?.getMapAsync { tomTomMap ->
-                    if (cords != null) {
-                        tomTomMap.moveCamera(
-                            CameraOptions(
-                                position = GeoPoint(cords.latitude, cords.longitude),
-                                zoom = 15.0
+    if (isMapFragmentReady && mapFragment != null) {
+        val fragmentView = mapFragment?.view
+        if (fragmentView != null) {
+            // Dopiero jeśli fragment ma widok, inicjalizuj AndroidView
+            AndroidView(
+                factory = { fragmentView },
+                update = {
+                    mapFragment?.getMapAsync { tomTomMap ->
+                        if (cords != null) {
+                            tomTomMap.moveCamera(
+                                CameraOptions(
+                                    position = GeoPoint(cords.latitude, cords.longitude),
+                                    zoom = 15.0
+                                )
                             )
-                        )
-                        val bitmap =
-                            BitmapFactory.decodeResource(context.resources, R.drawable.pin_icon)
-                        val scaledBitmap =
-                            Bitmap.createScaledBitmap(bitmap, 100, 100, false) // Adjust size here
-                        val markerOptions = MarkerOptions(
-                            coordinate = GeoPoint(
-                                cords.latitude,
-                                cords.longitude
-                            ),
-                            pinImage = ImageFactory.fromBitmap(scaledBitmap),
-                            pinIconImage = ImageFactory.fromBitmap(scaledBitmap),
-                        )
-                        tomTomMap.addMarker(markerOptions)
+                            val iconName = event.pinIconResId // np. "balonobraz"
+                            val resourceId = context.resources.getIdentifier(iconName, "drawable", context.packageName)
+                            val antialiasedBitmap = createBitmapWithAntialiasing(context, resourceId, 90, 120)
+                            val markerOptions = MarkerOptions(
+                                coordinate = GeoPoint(cords.latitude, cords.longitude),
+                                pinImage = ImageFactory.fromBitmap(antialiasedBitmap),
+                                pinIconImage = ImageFactory.fromBitmap(antialiasedBitmap),
+                            )
+                            tomTomMap.addMarker(markerOptions)
 
-                        tomTomMap.addMarkerClickListener { }
+                            tomTomMap.addMarkerClickListener { }
+                        }
                     }
-                }
-            },
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .fillMaxWidth()
-                .height(220.dp)
-                .border(2.dp, Color.Black, RoundedCornerShape(16.dp))
-        )
+                },
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .fillMaxWidth()
+                    .height(220.dp)
+                    .border(2.dp, Color.Black, RoundedCornerShape(16.dp))
+            )
+        }
     }
 }
+
 
 
 

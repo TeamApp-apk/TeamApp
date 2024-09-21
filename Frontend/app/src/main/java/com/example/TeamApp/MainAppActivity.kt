@@ -1,10 +1,11 @@
 package com.example.TeamApp
 
 import BottomNavBar
+import ChatScreen
+import MessageScreen
 import UserViewModel
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -13,6 +14,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -22,7 +25,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,32 +39,35 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.example.TeamApp.auth.ForgotPasswordScreen
 import com.example.TeamApp.auth.RegisterScreen
 import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventScreen
+import com.example.TeamApp.event.CreateEventViewModel
 import com.example.TeamApp.event.DetailsScreen
+import com.example.TeamApp.event.ViewModelProvider
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.searchThrough.SearchScreen
+import com.example.TeamApp.searchThrough.FiltersScreen
+import com.example.TeamApp.settings.SendMessageScreen
 import com.example.TeamApp.settings.SettingsScreen
+import com.example.TeamApp.settings.SettingsScreenv2
+import com.example.TeamApp.settings.TermsOfUse
+import com.example.TeamApp.settings.YourEventsScreen
 import com.example.TeamApp.ui.LoadingScreen
 import com.example.TeamApp.utils.SystemUiUtils
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
-
-val user = User(
-    name = "Jan",
-    email = "jan@example.com",
-    birthDay = "01/01/1990",
-    gender = "Male",
-    avatar = "testavatar"
-)
 
 class MainAppActivity : AppCompatActivity() {
     @OptIn(ExperimentalAnimationApi::class)
@@ -76,8 +87,7 @@ class MainAppActivity : AppCompatActivity() {
             var showMainContent by remember { mutableStateOf(false) }
             var isRefreshing by remember { mutableStateOf(false) }
             val userViewModel: UserViewModel = viewModel()
-
-
+            val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
             LaunchedEffect(navController) {
                 navController.addOnDestinationChangedListener { _, destination, _ ->
                     isBottomBarVisible = when (destination.route) {
@@ -87,16 +97,17 @@ class MainAppActivity : AppCompatActivity() {
                 }
                 //isBottomBarVisible = true
             }
-            LaunchedEffect(Unit) {
+            LaunchedEffect(Unit){
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 firebaseUser?.email?.let { email ->
                     userViewModel.fetchUserFromFirestore(email)
                 }
-                delay(450) // Czas ładowania
+                viewModel.fetchEvents()
+                delay(500)
                 isLoading = false
-
-                delay(380) // Czas przejścia między ekranami
+                delay(400)
                 showMainContent = true
+
             }
 
             Box(
@@ -104,42 +115,23 @@ class MainAppActivity : AppCompatActivity() {
                     .fillMaxSize()
                     .background(Brush.linearGradient(colors = gradientColors))
             ) {
+//                AnimatedVisibility(
+//                    visible = isLoading
+//                ) {
+//                    LoadingScreen()
+//                }
                 AnimatedVisibility(
                     visible = isLoading,
-                    enter = slideInVertically(
-                        initialOffsetY = { it },
-                        animationSpec = tween(
-                            durationMillis = 1000,
-                            easing = FastOutSlowInEasing
-                        )
-                    ) + fadeIn(animationSpec = tween(durationMillis = 1000)),
-                    exit = slideOutVertically(
-                        targetOffsetY = { it },
-                        animationSpec = tween(
-                            durationMillis = 1000,
-                            easing = FastOutSlowInEasing
-                        )
-                    ) + fadeOut(animationSpec = tween(durationMillis = 1000))
+                    enter = fadeIn(animationSpec = tween(400)) + scaleIn(initialScale = 1.0f, animationSpec = tween(400)),
+                    exit = fadeOut(animationSpec = tween(400)) + scaleOut(targetScale = 0.5f, animationSpec = tween(400))
                 ) {
                     LoadingScreen()
                 }
 
                 AnimatedVisibility(
                     visible = showMainContent,
-                    enter = slideInVertically(
-                        initialOffsetY = { 4000 },
-                        animationSpec = tween(
-                            durationMillis = 900,
-                            easing = FastOutSlowInEasing
-                        )
-                    ) + fadeIn(animationSpec = tween(durationMillis = 1200)),
-                    exit = slideOutVertically(
-                        targetOffsetY = { -1000 },
-                        animationSpec = tween(
-                            durationMillis = 1500,
-                            easing = FastOutSlowInEasing
-                        )
-                    ) + fadeOut(animationSpec = tween(durationMillis = 1200))
+                    enter = fadeIn(animationSpec = tween(900)),
+                    exit = fadeOut(animationSpec = tween(900))
                 ) {
                     Scaffold(
                         modifier = Modifier.navigationBarsPadding(),
@@ -183,7 +175,7 @@ class MainAppActivity : AppCompatActivity() {
                                     exitTransition = { fadeOut(animationSpec = tween(300)) },
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
-                                ) { ProfileScreen(navController,user ) }
+                                ) { ProfileScreen(navController) }
 
                                 composable(
                                     route = "settings",
@@ -191,7 +183,15 @@ class MainAppActivity : AppCompatActivity() {
                                     exitTransition = { fadeOut(animationSpec = tween(300)) },
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
-                                ) { SettingsScreen(navController) }
+                                ) { SettingsScreenv2(navController) }
+
+                                composable(
+                                    route = "filterScreen",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { FiltersScreen(navController) }
 
                                 composable(
                                     route = "details/{activityId}",
@@ -222,10 +222,52 @@ class MainAppActivity : AppCompatActivity() {
                                     }
                                 ) { backStackEntry ->
                                     val activityId = backStackEntry.arguments?.getString("activityId") ?: return@composable
-                                    DetailsScreen(navController, activityId)
+                                    DetailsScreen(navController, activityId, userViewModel)
                                 }
 
-                                // Dodaj inne ekrany tutaj
+                                composable(
+                                    route = "yourEvents",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { YourEventsScreen(navController) }
+
+                                composable(
+                                    route = "termsOfUse",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { TermsOfUse() }
+
+                                composable(
+                                    route = "sendUsMessage",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { SendMessageScreen() }
+
+                                composable(
+                                    route = "ForgotPassword",
+                                    arguments = listOf(navArgument("activityId") { type = NavType.StringType }),
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { ForgotPasswordScreen(navController) }
+                                composable(
+                                    route = "chat/{activityId}",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) {
+                                    backStackEntry ->
+                                    val activityId = backStackEntry.arguments?.getString("activityId") ?: return@composable
+                                    ChatScreen(navController, activityId, userViewModel)
+                                }
                             }
                         }
                     }
@@ -233,6 +275,4 @@ class MainAppActivity : AppCompatActivity() {
             }
         }
     }
-
-
 }

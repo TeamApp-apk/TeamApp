@@ -12,7 +12,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.profile.ProfileScreen
-import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.settings.SettingsScreen
 import com.example.TeamApp.utils.SystemUiUtils
 
@@ -42,7 +41,7 @@ class ForgotPasswordActivity : ComponentActivity() {
                 //composable("createEvent") { CreateEventScreen(navController, ) }
                 composable("register") { RegisterScreen(navController) }
                 //dodalem to user zeby moc zobaczyc czy bedzie mi dzialalo korzystanie z tej metody getResourceId
-                composable("profile"){ ProfileScreen(navController, user) }
+                composable("profile"){ ProfileScreen(navController) }
                 composable("settings"){ SettingsScreen(navController) }
                 //composable("search"){ SearchScreen(navController) }
             }
