@@ -8,8 +8,8 @@ class User {
     var email: String? = null
     var birthDay: String? = null
     var gender: String? = null;
-    var avatar: String? = null;
-    var userID: String = UUID.randomUUID().toString()
+    var avatarUrl: String? = null;
+    val userID: String = UUID.randomUUID().toString()
     var attendedEvents: MutableList<Any> = ArrayList()
     //age do dodania
     constructor()
@@ -24,7 +24,7 @@ class User {
         this.email = email
         this.birthDay = birthDay
         this.gender = gender
-        this.avatar = avatar
+        this.avatarUrl = avatar
     }
 
     override fun toString(): String {

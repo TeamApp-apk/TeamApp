@@ -1,8 +1,6 @@
 package com.example.TeamApp.profile
 
 import android.content.Context
-import android.provider.ContactsContract.Profile
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,19 +19,13 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.TeamApp.R
-import com.example.TeamApp.data.User
 import com.example.TeamApp.excludedUI.UserProfileButton
 import com.example.TeamApp.excludedUI.Variables
-import com.example.compose.TeamAppTheme
-import com.example.TeamApp.profile.ProfileViewModel
-
 
 
 fun getIconResourceId(context: Context, iconName: String): Int {
@@ -45,14 +37,14 @@ fun getIconResourceId(context: Context, iconName: String): Int {
 @Composable
 fun ProfileScreen(navController: NavController) {
     val context = LocalContext.current
-    val profileViewModel: ProfileViewModel = viewModel()
-    val user by profileViewModel.user.observeAsState()
+    val loginViewModel: LoginViewModel = viewModel()
+    val user by loginViewModel.user.observeAsState()
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF),
     )
     user?.let { userData ->
-        val iconId = getIconResourceId(context, userData.avatar!!)
+        val iconId = getIconResourceId(context, userData.avatarUrl!!)
         Box(modifier = Modifier
             .fillMaxSize()
             .background(brush = Brush.linearGradient(colors = gradientColors))

@@ -76,6 +76,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
@@ -87,9 +89,6 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun LoginScreen(navController: NavController){
-    val configuration = LocalConfiguration.current
-    val height = configuration.screenHeightDp.dp
-    val width = configuration.screenWidthDp.dp
     val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel()
     val loginSuccess by viewModel.loginSuccess.observeAsState()
@@ -126,71 +125,193 @@ fun LoginScreen(navController: NavController){
         ,Color(0xFF007BFF)
     )
     Surface(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier
 
+        Box(modifier = Modifier
             .fillMaxSize()
             .background(brush = Brush.linearGradient(colors = gradientColors))
-            .padding(horizontal = 28.dp)){
-            Column {
-                Spacer(modifier = Modifier.height(53.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(0.dp, Alignment.End),
-                    verticalAlignment = Alignment.CenterVertically,
+        ){}
+
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val (arrow, upperText, emailBox, passwordBox, forgotPass, loginButton,
+                googleButton, spacer, registerText) = createRefs()
+            val arrowTop = createGuidelineFromTop(0.05f)
+            val arrowStart = createGuidelineFromStart(0.1f)
+            Image(
+                painter = painterResource(id = R.drawable.arrow_icon),
+                contentDescription = "arrow",
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        viewModel.getToRegisterScreen(navController)
+                    }
+                    .size(22.dp)
+                    .constrainAs(arrow) {
+                        top.linkTo(arrowTop)
+                        start.linkTo(arrowStart)
+                    }
+            )
+            val upperTextTop = createGuidelineFromTop(0.1f)
+            val upperTextStart = createGuidelineFromStart(0.1f)
+            val upperTextEnd = createGuidelineFromEnd(0.9f)
+            val upperTextBottom = createGuidelineFromTop(0.13f)
+            UpperTextField(
+                value = "Witaj ponownie!",
+                modifier = Modifier
+                    .constrainAs(upperText) {
+                        top.linkTo(upperTextTop)
+                        start.linkTo(upperTextStart)
+                        end.linkTo(upperTextEnd)
+                        bottom.linkTo(upperTextBottom)
+                        width = Dimension.fillToConstraints
+                        height = Dimension.wrapContent
+                        centerHorizontallyTo(parent)
+                    }
+            )
+
+            val emailStart = createGuidelineFromStart(0.1f)
+            val emailEnd = createGuidelineFromStart(0.9f)
+            val emailTop = createGuidelineFromTop(0.2f)
+            val emailBottom = createGuidelineFromTop(0.265f)
+            EmailBoxForLogin(labelValue = "E-mail",
+                painterResource (id = R.drawable.mail_icon),
+                nextFocusRequester = passwordFocusRequester,
+                focusRequester = emailFocusRequester,
+                modifier = Modifier
+                    .constrainAs(emailBox) {
+                        top.linkTo(emailTop)
+                        bottom.linkTo(emailBottom)
+                        start.linkTo(emailStart)
+                        end.linkTo(emailEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+                    .focusRequester(emailFocusRequester)
+            )
+
+            val passwordStart = createGuidelineFromStart(0.1f)
+            val passwordEnd = createGuidelineFromStart(0.9f)
+            val passwordTop = createGuidelineFromTop(0.3f)
+            val passwordBottom = createGuidelineFromTop(0.365f)
+            PasswordTextFieldForLogin(labelValue ="Hasło",
+                painterResource (id = R.drawable.lock_icon),
+                nextFocusRequester = null,
+                focusRequester = passwordFocusRequester,
+                modifier = Modifier
+                    .constrainAs(passwordBox) {
+                        top.linkTo(passwordTop)
+                        bottom.linkTo(passwordBottom)
+                        start.linkTo(passwordStart)
+                        end.linkTo(passwordEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+                    .focusRequester(passwordFocusRequester)
+            )
+
+            val forgotPassStart = createGuidelineFromStart(0.15f)
+            val forgotPassEnd = createGuidelineFromStart(0.9f)
+            val forgotPassTop = createGuidelineFromTop(0.38f)
+            val forgotPassBottom = createGuidelineFromTop(0.4f)
+            ForgotPasswordTextField(navController,
+                modifier = Modifier
+                    .constrainAs(forgotPass) {
+                        top.linkTo(forgotPassTop)
+                        bottom.linkTo(forgotPassBottom)
+                        start.linkTo(forgotPassStart)
+                        end.linkTo(forgotPassEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+                    .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.arrow_icon),
-                        contentDescription = "arrow",
-                        modifier = Modifier
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                viewModel.getToRegisterScreen(navController)
-                            }
-                            .size(22.dp)
+                    viewModel.getToChangePasswordScreen(navController)
+                }
+            )
+
+            val loginButtonStart = createGuidelineFromStart(0.1f)
+            val loginButtonEnd = createGuidelineFromStart(0.9f)
+            val loginButtonTop = createGuidelineFromTop(0.5f)
+            val loginButtonBottom = createGuidelineFromTop(0.59f)
+            ButtonSignIN(navController,
+                onSnackbarMessageChanged = { message -> snackbarMessage = message ?: "" },
+                onShowSnackbar = { showSnackbar = it },
+                onSnackbarSuccess = { success -> snackbarSuccess = success},
+                modifier = Modifier
+                    .constrainAs(loginButton) {
+                        top.linkTo(loginButtonTop)
+                        bottom.linkTo(loginButtonBottom)
+                        start.linkTo(loginButtonStart)
+                        end.linkTo(loginButtonEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+                    .shadow(
+                        elevation = 35.dp,
+                        spotColor = Color(0x406F7EC9),
+                        ambientColor = Color(0x406F7EC9)
                     )
+                    .background(color = Color(0xFF007BFF),
+                        shape = RoundedCornerShape(10.dp))
+                    .padding(0.dp)
+            )
+
+            val dividerTop = createGuidelineFromTop(0.64f)
+            val dividerStart = createGuidelineFromStart(0.1f)
+            val dividerEnd = createGuidelineFromStart(0.9f)
+            DividerTextComponent(modifier = Modifier
+                .constrainAs(spacer) {
+                    top.linkTo(dividerTop)
+                    start.linkTo(dividerStart)
+                    end.linkTo(dividerEnd)
+                    width = Dimension.fillToConstraints
                 }
-                Spacer(modifier = Modifier.height(height * 0.00625f * 6 * density))
-                UpperTextField(
-                    value = "Witaj ponownie!",
+            )
+
+            val googleStart = createGuidelineFromStart(0.1f)
+            val googleEnd = createGuidelineFromStart(0.9f)
+            val googleTop = createGuidelineFromTop(0.7f)
+            val googleBottom = createGuidelineFromTop(0.8f)
+            GoogleLoginButton(modifier = Modifier
+                .shadow(
+                    elevation = 30.dp,
+                    spotColor = Color(0x40D3D4E2),
+                    ambientColor = Color(0x40D3D4E2)
                 )
-                Spacer(modifier = Modifier.height(height * 0.00625f * 8 * density))
-                EmailBoxForLogin(labelValue ="E-Mail" , painterResource (id = R.drawable.mail_icon), nextFocusRequester = passwordFocusRequester, focusRequester = emailFocusRequester )
-                Spacer(modifier = Modifier.height(height * 0.00625f * 6 / density))
-                PasswordTextFieldForLogin(labelValue ="Hasło" , painterResource (id = R.drawable.lock_icon), nextFocusRequester = null, focusRequester = passwordFocusRequester )
-                Spacer(modifier = Modifier.height(height * 0.00625f * 6 / density))
-                Row(horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()) {
-                    Spacer(modifier = Modifier.width(8.dp * density))
-                    ForgotPasswordTextField(navController)
+                .padding(1.dp)
+                .background(color = Color.White, shape = RoundedCornerShape(size = 12.dp))
+                .constrainAs(googleButton) {
+                    top.linkTo(googleTop)
+                    bottom.linkTo(googleBottom)
+                    start.linkTo(googleStart)
+                    end.linkTo(googleEnd)
+                    width = Dimension.fillToConstraints
+                    height = Dimension.fillToConstraints
                 }
-                Spacer(modifier = Modifier.height(height * 0.00625f * 8 * density))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentSize(Alignment.Center) // Center horizontally
-                ) {
-                    ButtonSignIN(navController,
-                        onSnackbarMessageChanged = { message -> snackbarMessage = message ?: "" },
-                        onShowSnackbar = { showSnackbar = it },
-                        onSnackbarSuccess = { success -> snackbarSuccess = success})
-                }
-                Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
-                DividerTextComponent()
-                Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentSize(Alignment.Center) // Center horizontally
-                ) {
-                    GoogleLoginButton()
+            )
 
+            val registerTextStart = createGuidelineFromStart(0.1f)
+            val registerTextEnd = createGuidelineFromStart(0.9f)
+            val registerTextTop = createGuidelineFromTop(0.85f)
+            ClickableRegisterComponent(modifier = Modifier
+                .constrainAs(registerText) {
+                    top.linkTo(registerTextTop)
+                    start.linkTo(registerTextStart)
+                    end.linkTo(registerTextEnd)
+                    height = Dimension.fillToConstraints
+                    centerHorizontallyTo(parent)
                 }
-                Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
-                ClickableRegisterComponent(modifier = Modifier.align(Alignment.CenterHorizontally), navController)
-
-            }
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    viewModel.getToRegisterScreen(navController)
+                },
+                navController = navController
+            )
 
         }
 
@@ -206,6 +327,7 @@ fun LoginScreen(navController: NavController){
         )
     }
 }
+
 //@Composable
 //@Preview
 //fun LoginScreenPreview(){
@@ -227,18 +349,19 @@ fun ToggleSwitch(){
     )
 }
 
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmailBoxForLogin(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
+fun EmailBoxForLogin(labelValue: String,
+                     painterResource: Painter,
+                     nextFocusRequester: FocusRequester?,
+                     focusRequester: FocusRequester,
+                     modifier: Modifier) {
     val viewModel: LoginViewModel = viewModel()
     val email by viewModel.email.observeAsState("")
     val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier.fillMaxWidth()
-            .focusRequester(focusRequester),
+        modifier = modifier,
         label = { Text(text = labelValue) },
         value = email,
         onValueChange = { newText ->
@@ -273,15 +396,18 @@ fun EmailBoxForLogin(labelValue: String, painterResource: Painter, nextFocusRequ
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordTextFieldForLogin(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
+fun PasswordTextFieldForLogin(labelValue: String,
+                              painterResource: Painter,
+                              nextFocusRequester: FocusRequester?,
+                              focusRequester: FocusRequester,
+                              modifier: Modifier) {
     val viewModel: LoginViewModel = viewModel()
     val password by viewModel.password.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier.fillMaxWidth()
-            .focusRequester(focusRequester),
+        modifier = modifier,
         label = { Text(text = labelValue) },
         value = password,
         onValueChange = {
@@ -333,16 +459,11 @@ fun PasswordTextFieldForLogin(labelValue: String, painterResource: Painter, next
     )
 }
 @Composable
-fun ForgotPasswordTextField(navController: NavController) {
+fun ForgotPasswordTextField(navController: NavController, modifier: Modifier) {
     val viewModel: LoginViewModel = viewModel()
     Text(
-        modifier = Modifier
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {
-                viewModel.getToChangePasswordScreen(navController)
-            },
+        modifier = modifier,
+        textAlign = TextAlign.Left,
         text = "Zapomniałeś hasła?",
         style = forgotPasswordLogin
     )
@@ -353,7 +474,8 @@ fun ForgotPasswordTextField(navController: NavController) {
 fun ButtonSignIN(navController: NavController,
                  onSnackbarMessageChanged: (String?) -> Unit,
                  onShowSnackbar: (Boolean) -> Unit,
-                 onSnackbarSuccess: (Boolean) -> Unit) {
+                 onSnackbarSuccess: (Boolean) -> Unit,
+                 modifier: Modifier) {
     val viewModel: LoginViewModel = viewModel()
     val isLoading by viewModel.isLoading.observeAsState(false)
 
@@ -372,16 +494,7 @@ fun ButtonSignIN(navController: NavController,
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
-        modifier = Modifier
-            .width(300.dp)
-            .height(58.dp)
-            .shadow(
-                elevation = 35.dp,
-                spotColor = Color(0x406F7EC9),
-                ambientColor = Color(0x406F7EC9)
-            )
-            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(10.dp))
-            .padding(0.dp)
+        modifier = modifier
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),

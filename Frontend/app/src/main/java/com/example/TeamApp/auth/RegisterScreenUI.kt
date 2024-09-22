@@ -2,25 +2,15 @@ package com.example.TeamApp.auth
 
 import android.app.Activity
 import android.content.res.Resources
-import android.util.DisplayMetrics
 import android.app.Activity.RESULT_OK
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CornerSize
@@ -61,9 +50,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
@@ -85,24 +75,25 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
 import com.example.compose.secondaryLight
 import com.example.TeamApp.R
 import kotlinx.coroutines.delay
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.constraintlayout.compose.ConstrainedLayoutReference
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintLayoutBaseScope
+import androidx.constraintlayout.compose.Dimension
 import com.example.TeamApp.excludedUI.CustomSnackbar
 import com.example.ui.theme.buttonLogIn
+import com.example.ui.theme.textInUpperBoxForgotPassword
 
 
 /*
@@ -112,11 +103,7 @@ Ten remember password pamieta dwa te same pola chacik pisze ze cos we viewmodel
 
  */
 
-//height * 0.00625f * n/4, where n is hard coded dpi value
-
-val metrics = Resources.getSystem().displayMetrics
-val density = metrics.density / 2
-
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RegisterScreen(navController: NavController){
     val context = LocalContext.current
@@ -153,57 +140,184 @@ fun RegisterScreen(navController: NavController){
         window.statusBarColor = Color.Transparent.toArgb()
         WindowInsetsControllerCompat(window, view).isAppearanceLightStatusBars = true
     }
-    val configuration = LocalConfiguration.current
-    val height = configuration.screenHeightDp.dp
-    val width = configuration.screenWidthDp.dp
+
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
     )
-    Surface(modifier = Modifier.fillMaxSize()) {
+
+
+    Surface( modifier = Modifier.fillMaxSize() ) {
+        //we are drawing on top of the box since guidelines do not work with that for some reason?
         Box(modifier = Modifier
-
             .fillMaxSize()
-            .background(brush = Brush.linearGradient(colors = gradientColors))
-            .padding(horizontal = width * 0.078f) ){
-            Column {
-                Spacer(modifier = Modifier.height(height * 0.00625f * 5))
-                Spacer(modifier = Modifier.height(height * 0.00625f * 8))
-                UpperTextField(value = "Dołącz do nas!", )
-                Spacer(modifier = Modifier.height(height * 0.00625f * 6 ))
-                NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.user_icon), nextFocusRequester = emailFocusRequester, focusRequester = nameFocusRequester)
-                Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
-                NameAndEmailBox(labelValue = "E-mail", painterResource (id = R.drawable.mail_icon), nextFocusRequester = passwordFocusRequester, focusRequester = emailFocusRequester)
-                Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
-                PasswordTextField(labelValue ="Hasło" , painterResource (id=R.drawable.lock_icon),  nextFocusRequester = repeatpasswordFocusRequester, focusRequester = passwordFocusRequester)
-                Spacer(modifier = Modifier.height(height * 0.00625f * 10 / density))
-                PasswordTextFieldRepeatPassword(labelValue ="Powtórz hasło", painterResource (id=R.drawable.lock_icon), nextFocusRequester = null, focusRequester = repeatpasswordFocusRequester)
-                Spacer(modifier = Modifier.height(height * 0.00625f * 8 / density))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentSize(Alignment.Center) // Center horizontally
-                ) {
-                    ButtonSignUP(navController,
-                        onSnackbarMessageChanged = { message -> snackbarMessage = message ?: "" },
-                        onShowSnackbar = { showSnackbar = it },
-                        onSnackbarSuccess = { success -> snackbarSuccess = success}
-                    )
-                }
-                Spacer(modifier = Modifier.height(height * 0.00625f * 9 / density))
-                DividerTextComponent()
-                Spacer(modifier = Modifier.height(height * 0.00625f * 4))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentSize(Alignment.Center) // Center horizontally
-                ) {
-                    GoogleLoginButton()
+            .background(brush = Brush.linearGradient(colors = gradientColors)) ){}
 
+        ConstraintLayout (modifier = Modifier.fillMaxSize()) {
+            val startGuideline = createGuidelineFromStart(0.11f)
+            val endGuideline = createGuidelineFromStart(0.9f)
+            val topWelcomeText = createGuidelineFromTop(0.07f)
+            val bottomWelcomeText = createGuidelineFromTop(0.14f)
+            val (welcomeText, signUp, emailBox, nameBox, passBox, repeatBox,
+                divider, googleButton, logInText) = createRefs()
+            Text(
+                textAlign = TextAlign.Center,
+                style = textInUpperBoxForgotPassword,
+                text = "Dołącz do nas!",
+                modifier = Modifier
+                    .constrainAs(welcomeText) {
+                        top.linkTo(topWelcomeText)
+                        bottom.linkTo(bottomWelcomeText)
+                        start.linkTo(startGuideline)
+                        end.linkTo(endGuideline)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+            )
+
+            val nameStart = createGuidelineFromStart(0.1f)
+            val nameEnd = createGuidelineFromStart(0.9f)
+            val nameTop = createGuidelineFromTop(0.17f)
+            val nameBottom = createGuidelineFromTop(0.235f)
+            NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.user_icon),
+                nextFocusRequester = emailFocusRequester,
+                focusRequester = nameFocusRequester,
+                modifier = Modifier
+                    .constrainAs(nameBox) {
+                        top.linkTo(nameTop)
+                        bottom.linkTo(nameBottom)
+                        start.linkTo(nameStart)
+                        end.linkTo(nameEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+                    .focusRequester(nameFocusRequester)
+            )
+
+            val emailStart = createGuidelineFromStart(0.1f)
+            val emailEnd = createGuidelineFromStart(0.9f)
+            val emailTop = createGuidelineFromTop(0.27f)
+            val emailBottom = createGuidelineFromTop(0.335f)
+            NameAndEmailBox(labelValue = "E-mail", painterResource (id = R.drawable.mail_icon),
+                nextFocusRequester = passwordFocusRequester,
+                focusRequester = emailFocusRequester,
+                modifier = Modifier
+                    .constrainAs(emailBox) {
+                        top.linkTo(emailTop)
+                        bottom.linkTo(emailBottom)
+                        start.linkTo(emailStart)
+                        end.linkTo(emailEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+                    .focusRequester(emailFocusRequester)
+            )
+
+            val passStart = createGuidelineFromStart(0.1f)
+            val passEnd = createGuidelineFromStart(0.9f)
+            val passTop = createGuidelineFromTop(0.37f)
+            val passBottom = createGuidelineFromTop(0.435f)
+            PasswordTextField(labelValue ="Hasło" , painterResource (id=R.drawable.lock_icon),
+                nextFocusRequester = repeatpasswordFocusRequester,
+                focusRequester = passwordFocusRequester,
+                modifier = Modifier
+                    .constrainAs(passBox) {
+                        top.linkTo(passTop)
+                        bottom.linkTo(passBottom)
+                        start.linkTo(passStart)
+                        end.linkTo(passEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+                    .focusRequester(passwordFocusRequester)
+            )
+
+            val repeatStart = createGuidelineFromStart(0.1f)
+            val repeatEnd = createGuidelineFromStart(0.9f)
+            val repeatTop = createGuidelineFromTop(0.47f)
+            val repeatBottom = createGuidelineFromTop(0.535f)
+            PasswordTextFieldRepeatPassword(labelValue ="Powtórz hasło" , painterResource (id=R.drawable.lock_icon),
+                nextFocusRequester = null,
+                focusRequester = repeatpasswordFocusRequester,
+                modifier = Modifier
+                    .constrainAs(repeatBox) {
+                        top.linkTo(repeatTop)
+                        bottom.linkTo(repeatBottom)
+                        start.linkTo(repeatStart)
+                        end.linkTo(repeatEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+                    .focusRequester(repeatpasswordFocusRequester)
+            )
+
+            val signUpStart = createGuidelineFromStart(0.1f)
+            val signUpEnd = createGuidelineFromStart(0.9f)
+            val signUpTop = createGuidelineFromTop(0.57f)
+            val signUpBottom = createGuidelineFromTop(0.66f)
+            ButtonSignUP(navController,
+                onSnackbarMessageChanged = { message -> snackbarMessage = message ?: "" },
+                onShowSnackbar = { showSnackbar = it },
+                onSnackbarSuccess = { success -> snackbarSuccess = success},
+                modifier = Modifier
+                    .shadow(
+                        elevation = 35.dp,
+                        spotColor = Color(0x406F7EC9),
+                        ambientColor = Color(0x406F7EC9)
+                    )
+                    .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(23.dp))
+                    .constrainAs(signUp) {
+                        top.linkTo(signUpTop)
+                        bottom.linkTo(signUpBottom)
+                        start.linkTo(signUpStart)
+                        end.linkTo(signUpEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+            )
+
+            val dividerTop = createGuidelineFromTop(0.7f)
+            val dividerStart = createGuidelineFromStart(0.1f)
+            val dividerEnd = createGuidelineFromStart(0.9f)
+            DividerTextComponent(modifier = Modifier
+                .constrainAs(divider) {
+                    top.linkTo(dividerTop)
+                    start.linkTo(dividerStart)
+                    end.linkTo(dividerEnd)
+                    width = Dimension.fillToConstraints
                 }
-                Spacer(modifier = Modifier.height(height * 0.00625f * 5 * density))
-                ClickableLoginTextComponent(modifier = Modifier.align(Alignment.CenterHorizontally), navController)
-            }
+            )
+
+            val googleStart = createGuidelineFromStart(0.1f)
+            val googleEnd = createGuidelineFromStart(0.9f)
+            val googleTop = createGuidelineFromTop(0.75f)
+            val googleBottom = createGuidelineFromTop(0.85f)
+            GoogleLoginButton(modifier = Modifier
+                .shadow(
+                    elevation = 30.dp,
+                    spotColor = Color(0x40D3D4E2),
+                    ambientColor = Color(0x40D3D4E2)
+                )
+                .padding(1.dp)
+                .background(color = Color.White, shape = RoundedCornerShape(size = 12.dp))
+                .constrainAs(googleButton) {
+                    top.linkTo(googleTop)
+                    bottom.linkTo(googleBottom)
+                    start.linkTo(googleStart)
+                    end.linkTo(googleEnd)
+                    width = Dimension.fillToConstraints
+                    height = Dimension.fillToConstraints
+                }
+            )
+
+            val logInTextTop = createGuidelineFromTop(0.9f)
+            ClickableLoginTextComponent ( modifier = Modifier
+                .constrainAs(logInText) {
+                    top.linkTo(logInTextTop)
+                    centerHorizontallyTo(parent)
+                },
+                navController = navController
+            )
         }
     }
     if (showSnackbar) {
@@ -218,21 +332,6 @@ fun RegisterScreen(navController: NavController){
     }
 }
 
-@Composable
-fun ConstraintLayout () {
-    ConstraintLayout {
-        // Create guideline from the start of the parent at 10% the width of the Composable
-        val startGuideline = createGuidelineFromStart(0.1f)
-        DividerTextComponent()
-        // Create guideline from the end of the parent at 10% the width of the Composable
-        val endGuideline = createGuidelineFromEnd(0.1f)
-        //  Create guideline from 16 dp from the top of the parent
-        val topGuideline = createGuidelineFromTop(16.dp)
-        //  Create guideline from 16 dp from the bottom of the parent
-        val bottomGuideline = createGuidelineFromBottom(16.dp)
-    }
-}
-
 //@Composable
 //@Preview
 //fun FinalRegisterScreenPreview(){
@@ -240,36 +339,37 @@ fun ConstraintLayout () {
 //}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NameAndEmailBox(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
+fun NameAndEmailBox(labelValue: String, painterResource: Painter,
+                    nextFocusRequester: FocusRequester?,
+                    focusRequester: FocusRequester,
+                    modifier: Modifier
+) {
+
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
     val email by viewModel.email.observeAsState("")
-    val configuration = LocalConfiguration.current
-    val height = configuration.screenHeightDp.dp
-    val width = configuration.screenWidthDp.dp
     val focusManager = LocalFocusManager.current
 
-
     TextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(height * 0.00625f * 8 * density)
-            .focusRequester(focusRequester),
-        label = { Text(
-            text = labelValue,
-            ) },
+        modifier = modifier,
+        label = {
+            Text(
+                text = labelValue,
+            )
+        },
         value = if (labelValue == "E-mail") email else textValue.value,
-        onValueChange = {
-                newText ->
+        onValueChange = { newText ->
 
             if (labelValue == "E-mail") {
-                val allowedCharsRegex = Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+                val allowedCharsRegex =
+                    Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
                 if (allowedCharsRegex.matches(newText)) {
                     viewModel.onEmailChange(newText)
 
                 }
             } else {
-                val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+                val allowedCharsRegex =
+                    Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
                 if (allowedCharsRegex.matches(newText)) {
                     textValue.value = newText
                 }
@@ -294,33 +394,31 @@ fun NameAndEmailBox(labelValue: String, painterResource: Painter, nextFocusReque
 
         ),
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription = "", modifier = Modifier
-                .padding(1.dp)
-                .width(22.dp)
-                .height(22.dp))
+            Icon(
+                painter = painterResource, contentDescription = "", modifier = Modifier
+                    .padding(1.dp)
+                    .width(22.dp)
+                    .height(22.dp)
+            )
         },
-        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f))
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(23.dp))
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordTextField(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
+fun PasswordTextField(labelValue: String, painterResource: Painter,
+                      nextFocusRequester: FocusRequester?,
+                      focusRequester: FocusRequester,
+                      modifier: Modifier) {
     val viewModel: LoginViewModel = viewModel()
     val password by viewModel.password.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
-    val configuration = LocalConfiguration.current
-    val height = configuration.screenHeightDp.dp
-    val width = configuration.screenWidthDp.dp
     val textValue = remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(height * 0.00625f * 8 * density)
-            .focusRequester(focusRequester),
+        modifier = modifier,
         label = { Text(
             text = labelValue,
             style = TextStyle(
@@ -358,7 +456,7 @@ fun PasswordTextField(labelValue: String, painterResource: Painter, nextFocusReq
                 .width(22.dp)
                 .height(22.dp))
         },
-        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f)),
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(23.dp)),
         trailingIcon = {
             val iconImage = if (passwordVisible.value) {
                 Icons.Filled.Visibility
@@ -382,20 +480,17 @@ fun PasswordTextField(labelValue: String, painterResource: Painter, nextFocusReq
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter, nextFocusRequester: FocusRequester?, focusRequester: FocusRequester) {
+fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter,
+                                    nextFocusRequester: FocusRequester?,
+                                    focusRequester: FocusRequester,
+                                    modifier: Modifier) {
     val viewModel: LoginViewModel = viewModel()
     val confirmPassword by viewModel.confirmPassword.observeAsState("")
     val passwordVisible = remember { mutableStateOf(false) }
-    val configuration = LocalConfiguration.current
-    val height = configuration.screenHeightDp.dp
-    val width = configuration.screenWidthDp.dp
     val focusManager = LocalFocusManager.current
 
     TextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(height * 0.00625f * 8 * density)
-            .focusRequester(focusRequester),
+        modifier = modifier,
         label = { Text(
             text = labelValue,
         ) },
@@ -428,7 +523,7 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
                 .width(22.dp)
                 .height(22.dp))
         },
-        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(height * 0.023f)),
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(23.dp)),
         trailingIcon = {
             val iconImage = if (passwordVisible.value) {
                 Icons.Filled.Visibility
@@ -454,16 +549,12 @@ fun PasswordTextFieldRepeatPassword(labelValue: String, painterResource: Painter
 fun ButtonSignUP(navController: NavController,
                  onSnackbarMessageChanged: (String?) -> Unit,
                  onShowSnackbar: (Boolean) -> Unit,
-                 onSnackbarSuccess: (Boolean) -> Unit) {
+                 onSnackbarSuccess: (Boolean) -> Unit,
+                 modifier: Modifier) {
     val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel()
     val isLoading by viewModel.isLoading.observeAsState(false)
-    val configuration = LocalConfiguration.current
-    val density = LocalDensity.current.density // Użycie gęstości dla rozmiarów
-    val height = configuration.screenHeightDp.dp
-    val width = configuration.screenWidthDp.dp
 
-    
     Button(
         onClick = {viewModel.onRegisterClick(navController) { result ->
             if (result == null) {
@@ -479,15 +570,7 @@ fun ButtonSignUP(navController: NavController,
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
-        modifier = Modifier
-            .width(width * 0.83f * density)
-            .height(height * 0.09f)
-            .shadow(
-                elevation = 35.dp,
-                spotColor = Color(0x406F7EC9),
-                ambientColor = Color(0x406F7EC9)
-            )
-            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(height * 0.023f))
+        modifier = modifier,
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -525,34 +608,32 @@ fun ButtonSignUP(navController: NavController,
 
 
 @Composable
-fun DividerTextComponent() {
-    val configuration = LocalConfiguration.current
-    val height = configuration.screenHeightDp.dp
-    val width = configuration.screenWidthDp.dp
+fun DividerTextComponent(modifier: Modifier) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = modifier,
+    verticalAlignment = Alignment.CenterVertically
     ) {
         Divider(
             modifier = Modifier
-                .weight(1f),
-            color = secondaryLight,
-            thickness = 1.dp
+                .weight(1f)
+                .padding(horizontal = 4.dp),
+        color = secondaryLight,
+        thickness = 1.dp
         )
-        Text(text = "lub", fontSize = 14.sp, fontFamily = FontFamily(Font(R.font.proximanovaregular)))
+        Text(text = "lub", fontSize = 14.sp)
         Divider(
             modifier = Modifier
-                .weight(1f),
-            color = secondaryLight,
-            thickness = 1.dp
+                .weight(1f)
+                .padding(horizontal = 4.dp),
+        color = secondaryLight,
+        thickness = 1.dp
         )
     }
 }
+
 @Composable
 fun ClickableLoginTextComponent(modifier: Modifier = Modifier, navController: NavController) {
     val viewModel: LoginViewModel = viewModel()
-    val context = LocalContext.current
     val initialText = "Masz już konto?  "
     val loginText = "Zaloguj się!"
     var isClicked by remember { mutableStateOf(false) }
@@ -573,7 +654,7 @@ fun ClickableLoginTextComponent(modifier: Modifier = Modifier, navController: Na
 
     ClickableText(
         text = annotatedString,
-        modifier=modifier,
+        modifier = modifier,
         onClick = {
             isClicked = true
             viewModel.getToLoginScreen(navController)

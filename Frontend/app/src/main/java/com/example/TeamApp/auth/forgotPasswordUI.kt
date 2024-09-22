@@ -35,8 +35,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -53,6 +56,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstrainedLayoutReference
+import androidx.constraintlayout.compose.ConstraintLayoutBaseScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
@@ -61,6 +66,9 @@ import com.example.compose.secondaryLight
 import com.example.ui.theme.fontFamily
 import com.example.TeamApp.excludedUI.CustomSnackbar
 import com.example.ui.theme.*
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+
 
 @Composable
 fun ForgotPasswordScreen(navController: NavController){
@@ -77,26 +85,94 @@ fun ForgotPasswordScreen(navController: NavController){
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
     )
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Transparent)
 
-    ) {
+    Surface(modifier = Modifier.fillMaxSize()) {
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(brush = Brush.linearGradient(colors = gradientColors))
-        ) {
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(50.dp),
-                // Center horizontally
-            ) {
-                UpperTextField(value = "Reset Password")
-                Spacer(modifier = Modifier.height(14.dp))
-                LowerTextField(value =  "Please enter your email address to request a password reset")
-                Spacer(modifier = Modifier.height(20.dp))
+        ) {}
+
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val (upperText, lowerText, email, sendBox) = createRefs()
+            val upperTextTop = createGuidelineFromTop(0.1f)
+            val upperTextStart = createGuidelineFromStart(0.1f)
+            val upperTextEnd = createGuidelineFromEnd(0.9f)
+            val upperTextBottom = createGuidelineFromTop(0.13f)
+            UpperTextField(
+                value = "Zresetuj hasło",
+                modifier = Modifier
+                    .constrainAs(upperText) {
+                        top.linkTo(upperTextTop)
+                        start.linkTo(upperTextStart)
+                        end.linkTo(upperTextEnd)
+                        bottom.linkTo(upperTextBottom)
+                        width = Dimension.fillToConstraints
+                        height = Dimension.wrapContent
+                        centerHorizontallyTo(parent)
+                    }
+            )
+
+            val lowerTextTop = createGuidelineFromTop(0.2f)
+            val lowerTextStart = createGuidelineFromStart(0.1f)
+            val lowerTextEnd = createGuidelineFromStart(0.9f)
+            val lowerTextBottom = createGuidelineFromTop(0.2f)
+            LowerTextField(
+                value = "Wpisz tu swój e-mail\n" +
+                        " do którego chcesz otrzymać link do resetu hasła",
+                modifier = Modifier
+                    .constrainAs(lowerText) {
+                        top.linkTo(lowerTextTop)
+                        start.linkTo(lowerTextStart)
+                        end.linkTo(lowerTextEnd)
+                        bottom.linkTo(lowerTextBottom)
+                        width = Dimension.fillToConstraints
+                        centerHorizontallyTo(parent)
+                    }
+            )
+
+            val emailStart = createGuidelineFromStart(0.1f)
+            val emailEnd = createGuidelineFromStart(0.9f)
+            val emailTop = createGuidelineFromTop(0.25f)
+            val emailBottom = createGuidelineFromTop(0.315f)
+
+            EmailButtonField(labelValue ="Your Email" ,
+                painterResource (id=R.drawable.mail_icon ),
+                modifier = Modifier
+                    .constrainAs(email) {
+                        top.linkTo(emailTop)
+                        bottom.linkTo(emailBottom)
+                        start.linkTo(emailStart)
+                        end.linkTo(emailEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+            )
+
+            val sendBoxStart = createGuidelineFromStart(0.1f)
+            val sendBoxEnd = createGuidelineFromStart(0.9f)
+            val sendBoxTop = createGuidelineFromTop(0.35f)
+            val sendBoxBottom = createGuidelineFromTop(0.44f)
+            ButtonWithSend(
+                onSnackbarMessageChanged = { message -> snackbarMessage = message ?: "" },
+                onShowSnackbar = { showSnackbar = it },
+                onSnackbarSuccess = { success -> snackbarSuccess = success},
+                modifier = Modifier
+                    .constrainAs(sendBox) {
+                        top.linkTo(sendBoxTop)
+                        bottom.linkTo(sendBoxBottom)
+                        start.linkTo(sendBoxStart)
+                        end.linkTo(sendBoxEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+            )
+        }
+    }
+
+    /*
+
                 EmailButtonField(labelValue ="Your Email" , painterResource (id=R.drawable.mail_icon ))
                 Spacer(modifier = Modifier.height(54.dp))
                 Box(
@@ -112,7 +188,7 @@ fun ForgotPasswordScreen(navController: NavController){
                 }
             }
         }
-    }
+    }*/
     if (showSnackbar) {
         CustomSnackbar(
             success = snackbarSuccess,
@@ -123,26 +199,24 @@ fun ForgotPasswordScreen(navController: NavController){
             }
         )
     }
-
 }
+
 @Composable
-fun UpperTextField(value: String){
-    val configuration = LocalConfiguration.current
-    val height = configuration.screenHeightDp.dp
-    val width = configuration.screenWidthDp.dp
+fun UpperTextField(value: String, modifier: Modifier){
     Text(
-        text = value,
-        modifier = Modifier.width(width * 0.83f).height(28.dp * density),
         textAlign = TextAlign.Center,
-        style = textInUpperBoxForgotPassword
+        style = textInUpperBoxForgotPassword,
+        text = value,
+        modifier = modifier
     )
-
 }
+
 @Composable
-fun LowerTextField(value: String){
-    Text(text = value, modifier = Modifier
-        .width(244.dp)
-        .height(50.dp),
+fun LowerTextField(value: String, modifier: Modifier){
+    Text(
+        textAlign = TextAlign.Center,
+        text = value,
+        modifier = modifier,
         style = textInLowerBoxForgotPassword
     )
 
@@ -157,13 +231,15 @@ fun LowerTextField(value: String){
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmailButtonField(labelValue: String, painterResource: Painter) {
+fun EmailButtonField(labelValue: String,
+                     painterResource: Painter,
+                     modifier: Modifier) {
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
     val email by viewModel.email.observeAsState("")
 
     OutlinedTextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         label = { Text(text = labelValue) },
         value = if (labelValue == "Your Email") email else textValue.value,
         onValueChange = { newText ->
@@ -198,7 +274,8 @@ fun EmailButtonField(labelValue: String, painterResource: Painter) {
 @Composable
 fun ButtonWithSend(onSnackbarMessageChanged: (String?) -> Unit,
                    onShowSnackbar: (Boolean) -> Unit,
-                   onSnackbarSuccess: (Boolean) -> Unit) {
+                   onSnackbarSuccess: (Boolean) -> Unit,
+                   modifier: Modifier) {
     val textValue = remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
     Button(onClick = { viewModel.onForgotPasswordClick(){ result ->
@@ -215,9 +292,7 @@ fun ButtonWithSend(onSnackbarMessageChanged: (String?) -> Unit,
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
-        modifier = Modifier
-            .width(271.dp)
-            .height(58.dp)
+        modifier = modifier
             .shadow(
                 elevation = 35.dp,
                 spotColor = Color(0x406F7EC9),

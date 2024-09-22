@@ -6,11 +6,6 @@ import android.os.Looper
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -29,9 +24,9 @@ import com.example.TeamApp.data.Avatar
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -316,78 +311,109 @@ class LoginViewModel : ViewModel() {
             }
     }
 
+    private val _user = MutableLiveData<User>()
+    val user: LiveData<User> get() = _user
+
     private val _avatars = MutableLiveData<List<Avatar>>(emptyList())
     val avatars: LiveData<List<Avatar>> get() = _avatars
 
     private val _selectedAvatarIndex = MutableLiveData(0)
     val selectedAvatarIndex: LiveData<Int> get() = _selectedAvatarIndex
 
-    private var loadedCount = 0 // Liczba już załadowanych avatarów
-
+    private var _loadedCount = 0
+    private val TOTAL_AVATARS_COUNT = 25
 
     fun selectAvatarByIndex(index: Int) {
         _selectedAvatarIndex.value = index
     }
 
     init {
-        loadAvatars()
+
+        _user.value = User(
+            name = "Jan",
+            email = "jan@example.com",
+            birthDay = "01/01/1990",
+            gender = "Male",
+            avatar = "null"
+        )
+        loadAvatars(10)
     }
 
-    fun loadMoreAvatars(){
-        loadAvatars()
-    }
-
-    fun loadAvatars() {
+    fun loadAvatars(limit: Int) {
         val storage = FirebaseStorage.getInstance()
+        //val limit = minOf(_loadedCount + 10, TOTAL_AVATARS_COUNT)
+        if(limit <= TOTAL_AVATARS_COUNT){
+            viewModelScope.launch {
+                val loadedAvatars = mutableListOf<Avatar>() // Temporary list to store loaded avatars
 
-        viewModelScope.launch {
-            val loadedAvatars = mutableListOf<Avatar>() // Lista do tymczasowego przechowywania avatarów
+                for (i in (_loadedCount + 1)..limit) {
 
-            for (i in 1..TOTAL_AVATARS_COUNT) {
-                val faceRef = storage.reference.child("faces/face$i.png") // Dodaj .png
-                val avatarRef = storage.reference.child("avatars/avatar$i.png") // Dodaj .png
+                    val faceRef: StorageReference
+                    val avatarRef: StorageReference
 
-                Log.d("AvatarLoading", "Loading face from: ${faceRef.path}")
-                Log.d("AvatarLoading", "Loading avatar from: ${avatarRef.path}")
+                    if (_user.value!!.gender == "Male") {
+                        faceRef = storage.reference.child("facesMen/face$i.png")
+                        avatarRef = storage.reference.child("avatarsMen/avatar$i.png")
+                    } else {
+                        faceRef = storage.reference.child("facesWomen/face$i.png")
+                        avatarRef = storage.reference.child("avatarsWomen/avatar$i.png")
+                    }
 
-                try {
-                    val faceUrl = faceRef.downloadUrl.await()
-                    val avatarUrl = avatarRef.downloadUrl.await()
+                    Log.d("AvatarLoading", "Loading face from: ${faceRef.path}")
+                    Log.d("AvatarLoading", "Loading avatar from: ${avatarRef.path}")
 
-                    Log.d("Avatar", "Face URL: $faceUrl, Avatar URL: $avatarUrl")
+                    try {
+                        val faceUrl = faceRef.downloadUrl.await()
+                        val avatarUrl = avatarRef.downloadUrl.await()
 
-                    val avatar = Avatar(
-                        faceUrl = faceUrl.toString(),
-                        avatarUrl = avatarUrl.toString()
-                    )
+                        Log.d("Avatar", "Face URL: $faceUrl, Avatar URL: $avatarUrl")
 
-                    loadedAvatars.add(avatar) // Dodaj do tymczasowej listy
-                } catch (e: Exception) {
-                    Log.e("AvatarLoading", "Error loading avatar$i: ${e.message}")
+                        val avatar = Avatar(
+                            faceUrl = faceUrl.toString(),
+                            avatarUrl = avatarUrl.toString()
+                        )
+
+                        loadedAvatars.add(avatar) // Add to temporary list
+                    } catch (e: Exception) {
+                        Log.e("AvatarLoading", "Error loading avatar$i: ${e.message}")
+                    }
                 }
-            }
 
-            // Po zakończeniu ładowania, zaktualizuj LiveData
-            _avatars.value = _avatars.value?.plus(loadedAvatars) // Dodaj nowe avatary do istniejącej listy
-            loadedCount += loadedAvatars.size
-        }
-    }
-
-    fun listFilesInFolder(folder: String) {
-        val storageRef = FirebaseStorage.getInstance().reference.child(folder)
-        storageRef.listAll().addOnSuccessListener { result ->
-            for (item in result.items) {
-                Log.d("FileList", "File: ${item.name}")
+                // After loading, update LiveData
+                _avatars.value = _avatars.value?.plus(loadedAvatars) ?: loadedAvatars
+                _loadedCount += loadedAvatars.size // Increment loadedCount by the number of avatars loaded
             }
-        }.addOnFailureListener { exception ->
-            Log.e("FileList", "Error listing files: ${exception.message}")
         }
     }
 
 
 
-
-    companion object {
-        const val TOTAL_AVATARS_COUNT = 5 // Całkowita liczba avatarów
+    fun saveSelectedAvatar(avatarUrl: String) {
+//        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+//        val db = FirebaseFirestore.getInstance()
+//        val userRef = db.collection("users").document(userId)
+//
+//        // Sprawdź, czy dokument istnieje
+//        userRef.get()
+//            .addOnSuccessListener { document ->
+//                if (document.exists()) {
+//                    // Dokument istnieje, zaktualizuj avatar
+//                    userRef.update("avatar", avatarUrl)
+//                        .addOnSuccessListener {
+//                            Log.d("Firestore", "Avatar updated for user $userId")
+//                        }
+//                        .addOnFailureListener { e ->
+//                            Log.e("Firestore", "Error updating avatar: ${e.message}")
+//                        }
+//                } else {
+//                    // Dokument nie istnieje, zgłoś błąd
+//                    Log.e("Firestore", "User document not found for user ID: $userId")
+//                }
+//            }
+//            .addOnFailureListener { e ->
+//                Log.e("Firestore", "Error fetching user document: ${e.message}")
+//            }
+        _user.value!!.avatarUrl = avatarUrl
+        Log.d("USER","avatarURL: ${_user.value!!.avatarUrl}")
     }
 }
