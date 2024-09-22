@@ -85,6 +85,7 @@ import com.example.TeamApp.data.Suggestion
 import com.example.TeamApp.data.User
 import com.example.TeamApp.excludedUI.EventButton
 import com.example.TeamApp.excludedUI.PickerExample
+import com.google.firebase.auth.FirebaseAuth
 import com.tomtom.sdk.map.display.MapOptions
 import com.tomtom.sdk.search.SearchCallback
 import com.tomtom.sdk.search.SearchOptions
@@ -115,7 +116,6 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
     val location by viewModel.location.observeAsState("")
     val dateTime by viewModel.dateTime.observeAsState("")
     val context = LocalContext.current
-
     var isLoading by remember { mutableStateOf(false) }
     var loadingComplete by remember { mutableStateOf(false) }
     var showTick by remember { mutableStateOf(false) } // Dodany stan do zarządzania animacją ticka
@@ -154,6 +154,12 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
     var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(progress) {
+        if(user==null){
+            val firebaseUser = FirebaseAuth.getInstance().currentUser
+            firebaseUser?.email?.let { email ->
+                userViewModel.fetchUserFromFirestore(email)
+            }
+        }
         if (progress == 1.0f) {
             isPlaying = false
             showTick = true // Pokazuje tick po zakończeniu animacji
@@ -274,8 +280,8 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
                                         description = description,
                                         locationID = locationID
                                     )
-
-                                    viewModel.createEvent(newEvent) { result ->
+                                    Log.d("CreateEventScreen", "User: $user")
+                                    viewModel.createEvent(newEvent, creatorID.toString()) { result ->
                                         if (result == null) {
                                             snackbarMessage = "Utworzono Event"
                                             snackbarSuccess = true

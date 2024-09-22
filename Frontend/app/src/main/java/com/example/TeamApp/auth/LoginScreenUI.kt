@@ -421,23 +421,28 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier, navController: Nav
     val viewModel: LoginViewModel = viewModel()
     val initialText = "Nie masz jeszcze konta?  "
     val loginText = "Zarejestruj się!"
+    var isClicked by remember { mutableStateOf(false) }
+
     val annotatedString = buildAnnotatedString {
         pushStringAnnotation(tag = "initialText", annotation = initialText)
-        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
-        FontFamily(Font(R.font.proximanovaregular)), fontWeight = FontWeight.Normal)) {
+        withStyle(style = SpanStyle(color = if (isClicked) Color.LightGray else Color(0xffe0e0e0), fontFamily =
+        FontFamily(Font(R.font.proximanovaregular)), fontWeight = FontWeight(100), fontSize = 16.sp
+        )) {
             append(initialText)
         }
         pushStringAnnotation(tag = "logintext", annotation = loginText)
-            withStyle(style = SpanStyle(color = Color(0xffe0e0e0),fontFamily =
-            FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight.ExtraBold)) {
-                append(loginText)
-            }
-            pop()
+        withStyle(style = SpanStyle(color = if (isClicked) Color.LightGray else Color(0xffe0e0e0), fontFamily =
+        FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight(900),fontSize = 16.sp )) {
+            append(loginText)
+        }
+        pop()
     }
+
     ClickableText(
         text = annotatedString,
         modifier = modifier,
         onClick = {
+            isClicked = true
             viewModel.getToRegisterScreen(navController)
         }
     )

@@ -77,4 +77,18 @@ data class Event(
     fun isParticipant(participant: User): Boolean {
         return participants.contains(participant)
     }
+    override fun toString(): String {
+        return "Event(id='$id', " +
+                "creatorID=$creatorID, " +
+                "iconResId='$iconResId', " +
+                "pinIconResId='$pinIconResId', " +
+                "date='$date', " +
+                "activityName='$activityName', " +
+                "currentParticipants=$currentParticipants, " +
+                "maxParticipants=$maxParticipants, " +
+                "location='$location', " +
+                "description='$description', " +
+                "locationID=$locationID, " +
+                "participants=$participants)"
+    }
 }

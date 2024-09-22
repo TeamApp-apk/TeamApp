@@ -198,10 +198,8 @@ class LoginViewModel : ViewModel() {
         // Temporarily hardcoded username
         val username = "xyz"
         val db = Firebase.firestore
-        val user = User(name = username, email = email)
         var arePasswordsDifferent: Boolean = false
         var errorMessage: String? = null
-
 
         if (email.isNotEmpty() && password.isNotEmpty()) {
             setLoading(true)  // Start loading spinner here
@@ -210,21 +208,40 @@ class LoginViewModel : ViewModel() {
                 arePasswordsDifferent = true
                 setLoading(false)
                 return callback("Hasła są niezgodne")
-            }
-            else
-            {
+            } else {
                 Log.d("RegisterAttempt", "Attempting to register with email: $email")
                 auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         android.os.Handler(Looper.getMainLooper()).postDelayed({
                             if (task.isSuccessful && !arePasswordsDifferent) {
                                 Log.d("Register", "Registration successful")
-                                db.collection("users").add(user)
+
+                                // Retrieve the Firebase UID and create User object
+                                val firebaseUser = auth.currentUser
+                                val firebaseUserId = firebaseUser?.uid ?: return@postDelayed
+
+                                // Now create the user object with the Firebase UID
+                                val user = User(name = username, email = email).apply {
+                                    this.userID = firebaseUserId  // Set Firebase's user ID
+                                }
+
+                                // Save user data in Firestore with the Firebase userID
+                                db.collection("users").document(firebaseUserId)
+                                    .set(user)
+                                    .addOnSuccessListener {
+                                        Log.d("Firestore", "User successfully written!")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("Firestore", "Error writing user", e)
+                                    }
+
                                 _registerSuccess.value = true
                                 callback(null)
+
+                                // Navigate to MainAppActivity
                                 val context = navController.context
                                 val intent = Intent(context, MainAppActivity::class.java)
-                                // Dodaj flagi, aby zamknąć bieżącą aktywność po przejściu do nowej
+                                // Add flags to clear the current activity
                                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 context.startActivity(intent)
                             } else {
@@ -233,7 +250,7 @@ class LoginViewModel : ViewModel() {
                                     is FirebaseAuthWeakPasswordException -> "Hasło jest za słabe"
                                     is FirebaseAuthInvalidCredentialsException -> "Zły format e-maila"
                                     is FirebaseAuthUserCollisionException -> "Konto z podanym mailem już istnieje"
-                                    else -> exception?.message ?: "Rejstracja nie powiodła się"
+                                    else -> exception?.message ?: "Rejestracja nie powiodła się"
                                 }
                                 _registerSuccess.value = false
                                 callback(errorMessage)
@@ -249,6 +266,7 @@ class LoginViewModel : ViewModel() {
             callback("Uzupełnij wszystkie pola")
         }
     }
+
 
     fun resetSuccess() {
         _loginSuccess.postValue(null)

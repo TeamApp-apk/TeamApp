@@ -16,7 +16,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.TeamApp.data.Coordinates
 import com.example.TeamApp.data.Event
+import com.example.TeamApp.data.User
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.tomtom.sdk.location.GeoPoint
@@ -58,7 +60,7 @@ class CreateEventViewModel : ViewModel() {
     fun setMapFragment(fragment: MapFragment) {
         _mapFragment.value = fragment
     }
-    private var isMapInitialized = false
+    var isMapInitialized = false
     fun initializeMapIfNeeded(context: Context) {
         Log.d("CreateEventViewModel", "initializeMapIfNeeded: $isMapInitialized")
         if (!isMapInitialized) {
@@ -98,11 +100,13 @@ class CreateEventViewModel : ViewModel() {
             popUpTo("createEvent"){inclusive = true}
         }
     }
-    fun createEvent(event: Event, callback: (String?) -> Unit) {
+    fun createEvent(event: Event, userID:String, callback: (String?) -> Unit) {
         val db = Firebase.firestore
+        Log.d("CreateEventViewModel", "createEvent: $event")
+        Log.d("CreateEventViewModel", "userID: $userID")
+        val userRef = db.collection("users").document(userID)
         val eventRef = db.collection("events").document() // Create a new document reference with an auto-generated ID
         val eventWithId = event.copy(id = eventRef.id) // Copy the event with the generated ID
-
         eventRef.set(eventWithId)
             .addOnSuccessListener {
                 Log.d("CreateEventViewModel", "Event successfully created with ID: ${eventRef.id}")
@@ -112,6 +116,14 @@ class CreateEventViewModel : ViewModel() {
                 Log.w("CreateEventViewModel", "Error creating event", e)
                 callback("Błąd, nie dodano Eventu")
             }
+        userRef.update("attendedEvents", FieldValue.arrayUnion(eventRef.id))
+            .addOnSuccessListener {
+                Log.d("CreateEventViewModel", "Event ID successfully added to user's attendedEvents")
+            }
+            .addOnFailureListener { e ->
+                Log.w("CreateEventViewModel", "Error updating attendedEvents", e)
+            }
+
 
         activityList.add(0, eventWithId)
         newlyCreatedEvent = eventWithId

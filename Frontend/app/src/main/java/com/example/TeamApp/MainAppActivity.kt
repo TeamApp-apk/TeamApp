@@ -98,10 +98,12 @@ class MainAppActivity : AppCompatActivity() {
                 //isBottomBarVisible = true
             }
             LaunchedEffect(Unit){
+                Log.d("LaunchedEffect", "LaunchedEffect called")
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 firebaseUser?.email?.let { email ->
                     userViewModel.fetchUserFromFirestore(email)
                 }
+                Log.d("LaunchedEffect", "${userViewModel.user}")
                 viewModel.fetchEvents()
                 delay(500)
                 isLoading = false
