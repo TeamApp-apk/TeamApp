@@ -371,10 +371,8 @@ fun DescriptionDialog(
     var text by remember { mutableStateOf(initialText) }
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
 
-    // Create a FocusRequester to request focus on the TextField
     val focusRequester = remember { FocusRequester() }
 
-    // Get the keyboard controller
     val keyboardController = LocalSoftwareKeyboardController.current
     val hapticFeedback = LocalHapticFeedback.current
     Dialog(onDismissRequest = onDismiss) {

@@ -299,7 +299,7 @@ fun RegisterScreen(navController: NavController){
                     ambientColor = Color(0x40D3D4E2)
                 )
                 .padding(1.dp)
-                .background(color = Color.White, shape = RoundedCornerShape(size = 12.dp))
+                .background(color = Color.White, shape = RoundedCornerShape(size = 20.dp))
                 .constrainAs(googleButton) {
                     top.linkTo(googleTop)
                     bottom.linkTo(googleBottom)
@@ -556,7 +556,7 @@ fun ButtonSignUP(navController: NavController,
     val isLoading by viewModel.isLoading.observeAsState(false)
 
     Button(
-        onClick = {viewModel.onRegisterClick(navController) { result ->
+        onClick = { viewModel.onRegisterClick(navController) { result ->
             if (result == null) {
                 onSnackbarMessageChanged("Rejestracja przebiegła pomyślnie")
                 onSnackbarSuccess(true)
@@ -565,12 +565,18 @@ fun ButtonSignUP(navController: NavController,
                 onSnackbarSuccess(false)
             }
             onShowSnackbar(true)
-        }
-                  }, // Zmieniono navController na context
+        }},
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(10.dp),
-        modifier = modifier,
+        shape = RoundedCornerShape(30.dp),
+        modifier = modifier
+            .shadow(
+                elevation = 35.dp,
+                spotColor = Color(0x406F7EC9),
+                ambientColor = Color(0x406F7EC9),
+                shape = RoundedCornerShape(20.dp)
+            )
+            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(20.dp))
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -586,9 +592,8 @@ fun ButtonSignUP(navController: NavController,
             } else {
                 Box(
                     modifier = Modifier
-                        .weight(1f) // Take up remaining space on the left
+                        .weight(1f)
                         .wrapContentWidth(align = Alignment.CenterHorizontally)
-
                 ) {
                     Text(
                         text = "Zarejestruj się!",
@@ -605,7 +610,6 @@ fun ButtonSignUP(navController: NavController,
         }
     }
 }
-
 
 @Composable
 fun DividerTextComponent(modifier: Modifier) {

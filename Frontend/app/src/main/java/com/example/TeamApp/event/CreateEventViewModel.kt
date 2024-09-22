@@ -105,8 +105,8 @@ class CreateEventViewModel : ViewModel() {
         Log.d("CreateEventViewModel", "createEvent: $event")
         Log.d("CreateEventViewModel", "userID: $userID")
         val userRef = db.collection("users").document(userID)
-        val eventRef = db.collection("events").document() // Create a new document reference with an auto-generated ID
-        val eventWithId = event.copy(id = eventRef.id) // Copy the event with the generated ID
+        val eventRef = db.collection("events").document()
+        val eventWithId = event.copy(id = eventRef.id)
         eventRef.set(eventWithId)
             .addOnSuccessListener {
                 Log.d("CreateEventViewModel", "Event successfully created with ID: ${eventRef.id}")
