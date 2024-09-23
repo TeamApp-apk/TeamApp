@@ -163,7 +163,7 @@ fun RegisterScreen(navController: NavController){
             Text(
                 textAlign = TextAlign.Center,
                 style = textInUpperBoxForgotPassword,
-                text = "Dołącz do nas!",
+                text = "Stwórz konto",
                 modifier = Modifier
                     .constrainAs(welcomeText) {
                         top.linkTo(topWelcomeText)
@@ -596,7 +596,7 @@ fun ButtonSignUP(navController: NavController,
                         .wrapContentWidth(align = Alignment.CenterHorizontally)
                 ) {
                     Text(
-                        text = "Zarejestruj się!",
+                        text = "Zarejestruj się",
                         style = buttonLogIn
                     )
                 }

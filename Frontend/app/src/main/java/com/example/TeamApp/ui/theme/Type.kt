@@ -52,8 +52,8 @@ val fontFamily = FontFamily(
 )
 
 val textInUpperBoxForgotPassword = TextStyle(
-    fontSize = 32.sp,
-    fontFamily = fontFamily,
+    fontSize = 35.sp,
+    fontFamily = FontFamily(Font(R.font.proximanovabold)),
     fontWeight = FontWeight(500),
     color = Color(0xFF003366),
 )

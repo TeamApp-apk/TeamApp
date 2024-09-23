@@ -153,6 +153,8 @@ class RegisterActivity : ComponentActivity() {
                         composable("register") { RegisterScreen(navController) }
                         composable("login") { LoginScreen(navController) }
                         composable("forgotPassword") { ForgotPasswordScreen(navController) }
+                        composable("sexName") { SexAndNameChoice(navController) }
+                        composable("avatarSelection") { AvatarSelectionScreen(navController) }
 
                     }
                 }
@@ -169,22 +171,20 @@ class RegisterActivity : ComponentActivity() {
                 FirebaseAuth.getInstance().signInWithCredential(firebaseCredential)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
-                            Log.d("LoginActivity", "signInWithCredential:success")
+                            Log.d("RegisterActivity", "signInWithCredential:success")
                             val user = FirebaseAuth.getInstance().currentUser
-                            val intent = Intent(this, MainAppActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            finish()
                             val db = com.google.firebase.ktx.Firebase.firestore
                             user?.let { firebaseUser ->
                                 val email = firebaseUser.email
-                                val id = firebaseUser.uid // Firebase user ID
+                                val id = firebaseUser.uid
                                 if (email != null) {
-                                    db.collection("users")
-                                        .whereEqualTo("email", email)
-                                        .get()
-                                        .addOnSuccessListener { documents ->
-                                            if (documents.isEmpty) {
+                                    db.collection("users").document(id).get()
+                                        .addOnSuccessListener { document ->
+                                            if (document.exists()) {
+                                                Log.d("RegisterActivity", "User already exists in the database.")
+                                                goToMainAppActivity()
+                                            } else {
+                                                navController.navigate("sexName")
                                                 val newUser = User(name = "xyz", email = email).apply {
                                                     this.userID = id // Set the Firebase user ID
                                                     this.attendedEvents = mutableListOf()
@@ -192,46 +192,33 @@ class RegisterActivity : ComponentActivity() {
                                                 db.collection("users").document(id)
                                                     .set(newUser)
                                                     .addOnSuccessListener {
-                                                        Log.d("LoginActivity", "User successfully added to Firestore.")
-
-                                                        // Optionally retrieve the user document to check the ID
-                                                        db.collection("users").document(id).get()
-                                                            .addOnSuccessListener { userDocument ->
-                                                                if (userDocument.exists()) {
-                                                                    val retrievedUser = userDocument.toObject(User::class.java)
-                                                                    Log.d("LoginActivity", "Retrieved User ID: ${retrievedUser?.userID}")
-                                                                }
-                                                            }
+                                                        Log.d("RegisterActivity", "User successfully added to Firestore.")
                                                     }
                                                     .addOnFailureListener { exception ->
-                                                        Log.e("LoginActivity", "Error adding user to Firestore.", exception)
+                                                        Log.e("RegisterActivity", "Error adding user to Firestore.", exception)
                                                     }
-                                            } else {
-                                                Log.d("LoginActivity", "Email already exists in the database.")
                                             }
                                         }
                                         .addOnFailureListener { exception ->
-                                            Log.e("LoginActivity", "Error checking email in the database.", exception)
+                                            Log.e("RegisterActivity", "Error checking user in the database.", exception)
                                         }
                                 } else {
-                                    Log.w("LoginActivity", "User email is null")
+                                    Log.w("RegisterActivity", "User email is null")
                                 }
                             }
-                        }
-                        else {
-                            Log.w("LoginActivity", "signInWithCredential:failure", task.exception)
+                        } else {
+                            Log.w("RegisterActivity", "signInWithCredential:failure", task.exception)
                         }
                     }
             } else {
-                Log.d("LoginActivity", "No ID token!")
+                Log.d("RegisterActivity", "No ID token!")
             }
         } catch (e: ApiException) {
-            Log.e("LoginActivity", "Google Sign-In failed", e)
+            Log.e("RegisterActivity", "Google Sign-In failed", e)
         }
     }
 
-
-    private fun goToMainAppActivity(){
+    private fun goToMainAppActivity() {
         val intent = Intent(this, MainAppActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)

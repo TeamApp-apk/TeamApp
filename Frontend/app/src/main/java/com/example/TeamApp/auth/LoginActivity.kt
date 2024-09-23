@@ -116,53 +116,40 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
                         if (task.isSuccessful) {
                             Log.d("LoginActivity", "signInWithCredential:success")
                             val user = FirebaseAuth.getInstance().currentUser
-                            val intent = Intent(this, MainAppActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            finish()
                             val db = com.google.firebase.ktx.Firebase.firestore
                             user?.let { firebaseUser ->
                                 val email = firebaseUser.email
                                 val id = firebaseUser.uid // Firebase user ID
                                 if (email != null) {
-                                    db.collection("users")
-                                        .whereEqualTo("email", email)
-                                        .get()
-                                        .addOnSuccessListener { documents ->
-                                            if (documents.isEmpty) {
+                                    db.collection("users").document(id).get()
+                                        .addOnSuccessListener { document ->
+                                            if (document.exists()) {
+                                                Log.d("LoginActivity", "User already exists in the database.")
+                                                goToMainAppActivity()
+                                            } else {
+                                                navController.navigate("sexName")
                                                 val newUser = User(name = "xyz", email = email).apply {
-                                                    this.userID = id // Set the Firebase user ID
+                                                    this.userID = id
+                                                    this.attendedEvents = mutableListOf()
                                                 }
                                                 db.collection("users").document(id)
                                                     .set(newUser)
                                                     .addOnSuccessListener {
                                                         Log.d("LoginActivity", "User successfully added to Firestore.")
-
-                                                        // Optionally retrieve the user document to check the ID
-                                                        db.collection("users").document(id).get()
-                                                            .addOnSuccessListener { userDocument ->
-                                                                if (userDocument.exists()) {
-                                                                    val retrievedUser = userDocument.toObject(User::class.java)
-                                                                    Log.d("LoginActivity", "Retrieved User ID: ${retrievedUser?.userID}")
-                                                                }
-                                                            }
                                                     }
                                                     .addOnFailureListener { exception ->
                                                         Log.e("LoginActivity", "Error adding user to Firestore.", exception)
                                                     }
-                                            } else {
-                                                Log.d("LoginActivity", "Email already exists in the database.")
                                             }
                                         }
                                         .addOnFailureListener { exception ->
-                                            Log.e("LoginActivity", "Error checking email in the database.", exception)
+                                            Log.e("LoginActivity", "Error checking user in the database.", exception)
                                         }
                                 } else {
                                     Log.w("LoginActivity", "User email is null")
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             Log.w("LoginActivity", "signInWithCredential:failure", task.exception)
                         }
                     }
@@ -174,14 +161,11 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         }
     }
 
-    private fun updateUI(user: FirebaseUser?, navController: NavController) {
-        if (user != null) {
-            // Przejdź do CreateEventActivity za pomocą Intent
-            val intent = Intent(this, MainAppActivity::class.java)
-            startActivity(intent)
-        } else {
-            Log.e("LoginActivity", "Sign-in failed")
-        }
+    private fun goToMainAppActivity() {
+        val intent = Intent(this, MainAppActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     override fun launchSignIn(intent: IntentSenderRequest) {

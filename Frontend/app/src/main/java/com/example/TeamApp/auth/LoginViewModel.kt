@@ -233,12 +233,15 @@ class LoginViewModel : ViewModel() {
                                 _registerSuccess.value = true
                                 callback(null)
 
-                                // Navigate to MainAppActivity
-                                val context = navController.context
-                                val intent = Intent(context, MainAppActivity::class.java)
-                                // Add flags to clear the current activity
-                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                context.startActivity(intent)
+//                                // Navigate to MainAppActivity
+//                                val context = navController.context
+//                                val intent = Intent(context, MainAppActivity::class.java)
+//                                // Add flags to clear the current activity
+//                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+//                                context.startActivity(intent)
+                                navController.navigate("sexName"){
+                                    popUpTo("register") { inclusive = true }
+                                }
                             } else {
                                 Log.e("Register", "Registration failed: ${task.exception?.message}")
                                 errorMessage = when (val exception = task.exception) {
