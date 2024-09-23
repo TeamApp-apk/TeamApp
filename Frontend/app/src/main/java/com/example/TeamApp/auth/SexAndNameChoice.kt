@@ -1,5 +1,6 @@
 package com.example.TeamApp.auth
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,9 +58,8 @@ import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.ui.theme.buttonLogIn
 
-@Preview
 @Composable
-fun SexAndNameChoice () {
+fun SexAndNameChoice (navController: NavController) {
     val nameFocusRequester = remember { FocusRequester() }
     val context = LocalContext.current
     val view = LocalView.current
@@ -226,6 +226,7 @@ fun SexAndNameChoice () {
                     height = Dimension.fillToConstraints
                     width = Dimension.fillToConstraints
                 }
+                ,navController
             )
         }
     }
@@ -300,12 +301,19 @@ fun NameBox(labelValue: String, painterResource: Painter,
 }
 
 @Composable
-fun ButtonNext(modifier: Modifier) {
+fun ButtonNext(modifier: Modifier, navController: NavController) {
     val viewModel: LoginViewModel = viewModel()
     val isLoading by viewModel.isLoading.observeAsState(false)
 
     Button(
-        onClick = {        }, // TODO
+        onClick = {
+            Log.d("SexAndNameChoice", "ButtonNext: onClick")
+            navController.navigate("avatarSelection") {
+                popUpTo("sexName") {
+                    inclusive = false
+                }
+            }
+        }, // TODO
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
@@ -327,6 +335,7 @@ fun ButtonNext(modifier: Modifier) {
                     modifier = Modifier
                         .weight(1f) // Take up remaining space on the left
                         .wrapContentWidth(align = Alignment.CenterHorizontally)
+
 
                 ) {
                     Text(

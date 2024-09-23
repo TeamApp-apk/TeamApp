@@ -9,7 +9,8 @@ class User {
     var birthDay: String? = null
     var gender: String? = null;
     var avatarUrl: String? = null;
-    val userID: String = UUID.randomUUID().toString()
+    var userID: String = UUID.randomUUID().toString()
+    var attendedEvents: MutableList<Any> = ArrayList()
     //age do dodania
     constructor()
 

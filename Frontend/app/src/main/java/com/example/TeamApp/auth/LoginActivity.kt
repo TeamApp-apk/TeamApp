@@ -114,26 +114,34 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
                         if (task.isSuccessful) {
                             Log.d("LoginActivity", "signInWithCredential:success")
                             val user = FirebaseAuth.getInstance().currentUser
-                            val intent = Intent(this, MainAppActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            finish()
                             val db = com.google.firebase.ktx.Firebase.firestore
                             user?.let { firebaseUser ->
                                 val email = firebaseUser.email
+                                val id = firebaseUser.uid // Firebase user ID
                                 if (email != null) {
-                                    db.collection("users")
-                                        .whereEqualTo("email", email)
-                                        .get()
-                                        .addOnSuccessListener { documents ->
-                                            if (documents.isEmpty) {
-                                                db.collection("users").add(User(name = "xyz", email = email))
+                                    db.collection("users").document(id).get()
+                                        .addOnSuccessListener { document ->
+                                            if (document.exists()) {
+                                                Log.d("LoginActivity", "User already exists in the database.")
+                                                goToMainAppActivity()
                                             } else {
-                                                Log.d("LoginActivity", "Email already exists in the database.")
+                                                navController.navigate("sexName")
+                                                val newUser = User(name = "xyz", email = email).apply {
+                                                    this.userID = id
+                                                    this.attendedEvents = mutableListOf()
+                                                }
+                                                db.collection("users").document(id)
+                                                    .set(newUser)
+                                                    .addOnSuccessListener {
+                                                        Log.d("LoginActivity", "User successfully added to Firestore.")
+                                                    }
+                                                    .addOnFailureListener { exception ->
+                                                        Log.e("LoginActivity", "Error adding user to Firestore.", exception)
+                                                    }
                                             }
                                         }
                                         .addOnFailureListener { exception ->
-                                            Log.e("LoginActivity", "Error checking email in the database.", exception)
+                                            Log.e("LoginActivity", "Error checking user in the database.", exception)
                                         }
                                 } else {
                                     Log.w("LoginActivity", "User email is null")
@@ -151,14 +159,11 @@ class LoginActivity : ComponentActivity(), SignInLauncher {
         }
     }
 
-    private fun updateUI(user: FirebaseUser?, navController: NavController) {
-        if (user != null) {
-            // Przejdź do CreateEventActivity za pomocą Intent
-            val intent = Intent(this, MainAppActivity::class.java)
-            startActivity(intent)
-        } else {
-            Log.e("LoginActivity", "Sign-in failed")
-        }
+    private fun goToMainAppActivity() {
+        val intent = Intent(this, MainAppActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     override fun launchSignIn(intent: IntentSenderRequest) {

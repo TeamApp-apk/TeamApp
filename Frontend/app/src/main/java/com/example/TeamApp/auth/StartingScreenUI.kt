@@ -1,5 +1,6 @@
 package com.example.TeamApp.auth
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -88,6 +89,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun StartingScreenUI(){
     val gradientColorsBackGround = listOf(

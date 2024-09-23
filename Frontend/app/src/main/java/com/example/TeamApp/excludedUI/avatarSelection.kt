@@ -1,5 +1,6 @@
 package com.example.TeamApp.excludedUI
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,12 +26,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.auth.LoginViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel as viewModel
 
 @Composable
-fun AvatarSelection() {
+fun AvatarSelection(navController: NavController) {
     val viewModel : LoginViewModel = viewModel()
     // Observe avatars and selected avatar
     val avatars by viewModel.avatars.observeAsState(emptyList())
@@ -66,6 +69,7 @@ fun AvatarSelection() {
                     onClick = {
                         // Handle avatar click to shift the selection to the center
                         viewModel.selectAvatarByIndex(index)
+
                     }
                 )
             }
@@ -93,7 +97,11 @@ fun AvatarSelection() {
         Button(onClick = {
             val selectedAvatar = avatars.getOrNull(selectedAvatarIndex)
             if (selectedAvatar != null) {
-                viewModel.saveSelectedAvatar(selectedAvatar.avatarUrl) // Zapisz avatar do Firestore
+                viewModel.saveSelectedAvatar(selectedAvatar.avatarUrl)
+                    val context = navController.context
+                    val intent = Intent(context, MainAppActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    context.startActivity(intent)
             }
         }) {
             Text("Save Avatar")

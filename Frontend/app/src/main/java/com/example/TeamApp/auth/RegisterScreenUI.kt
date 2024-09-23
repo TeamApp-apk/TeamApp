@@ -160,7 +160,7 @@ fun RegisterScreen(navController: NavController){
             Text(
                 textAlign = TextAlign.Center,
                 style = textInUpperBoxForgotPassword,
-                text = "Dołącz do nas!",
+                text = "Stwórz konto",
                 modifier = Modifier
                     .constrainAs(welcomeText) {
                         top.linkTo(topWelcomeText)
@@ -298,7 +298,7 @@ fun RegisterScreen(navController: NavController){
                     ambientColor = Color(0x40D3D4E2)
                 )
                 .padding(1.dp)
-                .background(color = Color.White, shape = RoundedCornerShape(size = 12.dp))
+                .background(color = Color.White, shape = RoundedCornerShape(size = 20.dp))
                 .constrainAs(googleButton) {
                     top.linkTo(googleTop)
                     bottom.linkTo(googleBottom)
@@ -568,8 +568,15 @@ fun ButtonSignUP(navController: NavController,
         }, // Zmieniono navController na context
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(10.dp),
-        modifier = modifier,
+        shape = RoundedCornerShape(30.dp),
+        modifier = modifier
+            .shadow(
+                elevation = 35.dp,
+                spotColor = Color(0x406F7EC9),
+                ambientColor = Color(0x406F7EC9),
+                shape = RoundedCornerShape(20.dp)
+            )
+            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(20.dp))
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -585,12 +592,11 @@ fun ButtonSignUP(navController: NavController,
             } else {
                 Box(
                     modifier = Modifier
-                        .weight(1f) // Take up remaining space on the left
+                        .weight(1f)
                         .wrapContentWidth(align = Alignment.CenterHorizontally)
-
                 ) {
                     Text(
-                        text = "Zarejestruj się!",
+                        text = "Zarejestruj się",
                         style = buttonLogIn
                     )
                 }
@@ -604,7 +610,6 @@ fun ButtonSignUP(navController: NavController,
         }
     }
 }
-
 
 @Composable
 fun DividerTextComponent(modifier: Modifier) {
@@ -635,16 +640,17 @@ fun ClickableLoginTextComponent(modifier: Modifier = Modifier, navController: Na
     val viewModel: LoginViewModel = viewModel()
     val initialText = "Masz już konto?  "
     val loginText = "Zaloguj się!"
+    var isClicked by remember { mutableStateOf(false) }
     val annotatedString = buildAnnotatedString {
         pushStringAnnotation(tag = "initialText", annotation = initialText)
-        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
-        FontFamily(Font(R.font.proximanovaregular)), fontWeight = FontWeight(100)
+        withStyle(style = SpanStyle(color = if (isClicked) Color.LightGray else Color(0xffe0e0e0), fontFamily =
+        FontFamily(Font(R.font.proximanovaregular)), fontWeight = FontWeight(100), fontSize = 16.sp
         )) {
             append(initialText)
         }
         pushStringAnnotation(tag = "logintext", annotation = loginText)
-        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
-        FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight(900) )) {
+        withStyle(style = SpanStyle(color = if (isClicked) Color.LightGray else Color(0xffe0e0e0), fontFamily =
+        FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight(900),fontSize = 16.sp )) {
             append(loginText)
         }
         pop()
@@ -654,6 +660,7 @@ fun ClickableLoginTextComponent(modifier: Modifier = Modifier, navController: Na
         text = annotatedString,
         modifier = modifier,
         onClick = {
+            isClicked = true
             viewModel.getToLoginScreen(navController)
             //viewModel.onLoginClick(context)
         }

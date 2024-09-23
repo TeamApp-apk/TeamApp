@@ -255,7 +255,7 @@ fun LoginScreen(navController: NavController){
                         ambientColor = Color(0x406F7EC9)
                     )
                     .background(color = Color(0xFF007BFF),
-                        shape = RoundedCornerShape(10.dp))
+                        shape = RoundedCornerShape(20.dp))
                     .padding(0.dp)
             )
 
@@ -282,7 +282,7 @@ fun LoginScreen(navController: NavController){
                     ambientColor = Color(0x40D3D4E2)
                 )
                 .padding(1.dp)
-                .background(color = Color.White, shape = RoundedCornerShape(size = 12.dp))
+                .background(color = Color.White, shape = RoundedCornerShape(size = 20.dp))
                 .constrainAs(googleButton) {
                     top.linkTo(googleTop)
                     bottom.linkTo(googleBottom)
@@ -385,7 +385,7 @@ fun EmailBoxForLogin(labelValue: String,
                 .width(22.dp)
                 .height(22.dp))
         },
-        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(15.dp))
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(23.dp))
     )
 }
 
@@ -432,7 +432,7 @@ fun PasswordTextFieldForLogin(labelValue: String,
                 .width(22.dp)
                 .height(22.dp))
         },
-        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(15.dp)),
+        shape = MaterialTheme.shapes.medium.copy(all = CornerSize(23.dp)),
         trailingIcon = {
             val iconImage = if (passwordVisible.value) {
                 Icons.Filled.Visibility
@@ -488,8 +488,15 @@ fun ButtonSignIN(navController: NavController,
                   },
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(30.dp),
         modifier = modifier
+            .shadow(
+                elevation = 35.dp,
+                spotColor = Color(0x406F7EC9),
+                ambientColor = Color(0x406F7EC9),
+                shape = RoundedCornerShape(30.dp)
+            )
+            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(30.dp))
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -529,23 +536,28 @@ fun ClickableRegisterComponent(modifier: Modifier = Modifier, navController: Nav
     val viewModel: LoginViewModel = viewModel()
     val initialText = "Nie masz jeszcze konta?  "
     val loginText = "Zarejestruj się!"
+    var isClicked by remember { mutableStateOf(false) }
+
     val annotatedString = buildAnnotatedString {
         pushStringAnnotation(tag = "initialText", annotation = initialText)
-        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
-        FontFamily(Font(R.font.proximanovaregular)), fontWeight = FontWeight.Normal)) {
+        withStyle(style = SpanStyle(color = if (isClicked) Color.LightGray else Color(0xffe0e0e0), fontFamily =
+        FontFamily(Font(R.font.proximanovaregular)), fontWeight = FontWeight(100), fontSize = 16.sp
+        )) {
             append(initialText)
         }
         pushStringAnnotation(tag = "logintext", annotation = loginText)
-            withStyle(style = SpanStyle(color = Color(0xffe0e0e0),fontFamily =
-            FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight.ExtraBold)) {
-                append(loginText)
-            }
-            pop()
+        withStyle(style = SpanStyle(color = if (isClicked) Color.LightGray else Color(0xffe0e0e0), fontFamily =
+        FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight(900),fontSize = 16.sp )) {
+            append(loginText)
+        }
+        pop()
     }
+
     ClickableText(
         text = annotatedString,
         modifier = modifier,
         onClick = {
+            isClicked = true
             viewModel.getToRegisterScreen(navController)
         }
     )

@@ -24,7 +24,7 @@ import com.example.ui.theme.textInUpperBoxForgotPassword
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun AvatarSelectionScreen() {
+fun AvatarSelectionScreen(navController: NavController) {
     val viewModel: LoginViewModel = viewModel()
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
@@ -42,12 +42,6 @@ fun AvatarSelectionScreen() {
             modifier = Modifier.padding(16.dp)
 
         )
-        AvatarSelection()
+        AvatarSelection(navController)
     }
-}
-
-@Preview
-@Composable
-fun AvatarSelectionScreenPreview() {
-    AvatarSelectionScreen()
 }

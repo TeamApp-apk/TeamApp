@@ -42,11 +42,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
+import com.example.TeamApp.event.CreateEventViewModel
+import com.example.TeamApp.event.ViewModelProvider
 import com.example.TeamApp.excludedUI.ConfirmationDialog
 import com.example.TeamApp.excludedUI.DeleteAccountDialog
 
 @Composable
 fun SettingsScreenv2(navController: NavController) {
+    val createEventViewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val viewModel: SettingsViewModel = viewModel()
     val context = LocalContext.current
     var showConfirmation by remember { mutableStateOf(false) }
@@ -233,7 +236,9 @@ fun SettingsScreenv2(navController: NavController) {
             Text(modifier = Modifier
                 .width(340.dp)
                 .height(25.dp)
-                .clickable {viewModel.logout(context)},
+                .clickable {viewModel.logout(context)
+                    createEventViewModel.isMapInitialized = false
+                           },
 
                 text = "Wyloguj się",
                 style = TextStyle(
