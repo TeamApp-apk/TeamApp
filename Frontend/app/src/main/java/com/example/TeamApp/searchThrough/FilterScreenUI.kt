@@ -1,4 +1,5 @@
 package com.example.TeamApp.searchThrough
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,43 +70,54 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
 
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FiltersScreen(navController: NavController) {
     val viewModel: SearchThroughViewModel = viewModel()
     var showEmptyMessage by remember { mutableStateOf(false) }
     //val context = LocalContext.current
 
-    val gradientColors = listOf(
-        Color(0xFFE8E8E8),
-        Color(0xFF007BFF),
-    )
-    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-        val (acceptButton, reset, arrow, sport, genderButtons, ageSlider, distanceSlider ) = createRefs()
+    ConstraintLayout(modifier = Modifier.fillMaxSize()
+        .background(color = Color(0xFFF2F2F2))) {
+        val (acceptButton, reset, sport, genderButtons, ageSlider, distanceSlider ) = createRefs()
+
+        TopAppBar(
+            title = {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.CenterEnd // Align to the end
+
+                ) {
+                    Text(
+                        text = "Filtruj wydarzenia",
+                        style = TextStyle(
+                            fontSize = 24.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight(900),
+                            color = Color(0xFF003366),
+                            textAlign = TextAlign.End,
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            navigationIcon = {
+                IconButton(modifier = Modifier.padding(8.dp), onClick = { navController.popBackStack() }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrowleft),
+                        contentDescription = "Back Icon"
+                    )
+
+                }
+            },
+            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.White)
+        )
 
 
         //mozna tworzyc guideline nie od poczatku ekranu tylko od innych obiektow
         //np top.linkTo(reset.bottom, margin = 16.dp)
-        val arrowStart = createGuidelineFromStart(0.05f)
-        val arrowEnd = createGuidelineFromStart(0.12f)
-        val arrowTop = createGuidelineFromTop(0.05f)
-        val arrowBottom = createGuidelineFromTop(0.12f)
-
-        Image(
-            painter = painterResource(id = R.drawable.arrowleft),
-            contentDescription = "back",
-            modifier = Modifier
-                .clickable { navController.popBackStack() }
-                .size(26.dp)
-                .border(1.dp, Color.Black)
-                .constrainAs(arrow) {
-                    top.linkTo(arrowTop)
-                    bottom.linkTo(arrowBottom)
-                    start.linkTo(arrowStart)
-                    end.linkTo(arrowEnd)
-                    height = Dimension.fillToConstraints
-                    width = Dimension.fillToConstraints
-                }
-        )
         val sportStart = createGuidelineFromStart(0.1f)
         val sportEnd = createGuidelineFromStart(0.9f)
         val sportTop = createGuidelineFromTop(0.20f)
@@ -155,8 +167,8 @@ fun FiltersScreen(navController: NavController) {
 
         val passStart = createGuidelineFromStart(0.1f)
         val passEnd = createGuidelineFromStart(0.9f)
-        val passTop = createGuidelineFromTop(0.80f)
-        val passBottom = createGuidelineFromTop(0.88f)
+        val passTop = createGuidelineFromTop(0.86f)
+        val passBottom = createGuidelineFromTop(0.94f)
 
         val genderButtonsTop = createGuidelineFromTop(0.32f)
         val genderButtonsBottom = createGuidelineFromTop(0.42f)
@@ -195,8 +207,8 @@ fun FiltersScreen(navController: NavController) {
 
         val resetStart = createGuidelineFromStart(0.35f)
         val resetEnd = createGuidelineFromStart(0.65f)
-        val resetTop = createGuidelineFromTop(0.89f)
-        val resetBottom = createGuidelineFromTop(0.94f)
+        val resetTop = createGuidelineFromTop(0.94f)
+        val resetBottom = createGuidelineFromTop(0.99f)
 
         ClickableResetTextComponent(
             modifier = Modifier
@@ -249,10 +261,10 @@ fun AcceptButton(
 fun ClickableResetTextComponent(modifier: Modifier = Modifier, navController: NavController) {
     val viewModel: LoginViewModel = viewModel()
     val context = LocalContext.current
-    val loginText = "Resetuj"
+    val loginText = "Resetuj filtry"
     val annotatedString = buildAnnotatedString {
         pushStringAnnotation(tag = "Resetuj", annotation = loginText)
-        withStyle(style = SpanStyle(color = Color(0xffe0e0e0), fontFamily =
+        withStyle(style = SpanStyle(color = Color(0xffd46161), fontFamily =
         FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight(900) )
         ) {
             append(loginText)
@@ -262,7 +274,6 @@ fun ClickableResetTextComponent(modifier: Modifier = Modifier, navController: Na
 
     Box(
         modifier = modifier
-            .border(1.dp, Color.Black) // Black outline with 1dp width
             .fillMaxWidth() // Make the box fill the available width
             .padding(8.dp), // Optional padding for aesthetics
         contentAlignment = Alignment.Center // Center the content (text) within the box
@@ -443,8 +454,8 @@ fun DistanceSlider(
             valueRange = range.first.toFloat()..range.last.toFloat(),
             modifier = Modifier.fillMaxWidth(),
             colors = SliderDefaults.colors(
-                thumbColor = Color.Blue,
-                activeTrackColor = Color.Blue
+                thumbColor = Color(0xff4fc3f7),
+                activeTrackColor = Color(0xff4fc3f7)
             )
         )
     }
@@ -477,8 +488,8 @@ fun RangeSliderExample(modifier: Modifier = Modifier) {
             },
             modifier = Modifier.fillMaxWidth(),
             colors = SliderDefaults.colors(
-                thumbColor = Color.Blue,
-                activeTrackColor = Color.Blue
+                thumbColor = Color(0xff4fc3f7),
+                activeTrackColor = Color(0xff4fc3f7)
             )
         )
     }
