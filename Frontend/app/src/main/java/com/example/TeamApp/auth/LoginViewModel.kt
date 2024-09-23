@@ -321,7 +321,7 @@ class LoginViewModel : ViewModel() {
             name = "Jan",
             email = "jan@example.com",
             birthDay = "01/01/1990",
-            gender = "Male",
+            gender = "Female",
             avatar = "null"
         )
         loadAvatars(10)
