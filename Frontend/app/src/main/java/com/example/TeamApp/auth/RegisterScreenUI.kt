@@ -8,6 +8,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -155,7 +158,7 @@ fun RegisterScreen(navController: NavController){
 
             val startGuideline = createGuidelineFromStart(0.11f)
             val endGuideline = createGuidelineFromStart(0.9f)
-            val topWelcomeText = createGuidelineFromTop(0.07f)
+            val topWelcomeText = createGuidelineFromTop(0.085f)
             val bottomWelcomeText = createGuidelineFromTop(0.14f)
             Text(
                 textAlign = TextAlign.Center,
@@ -259,12 +262,6 @@ fun RegisterScreen(navController: NavController){
                 onShowSnackbar = { showSnackbar = it },
                 onSnackbarSuccess = { success -> snackbarSuccess = success},
                 modifier = Modifier
-                    .shadow(
-                        elevation = 35.dp,
-                        spotColor = Color(0x406F7EC9),
-                        ambientColor = Color(0x406F7EC9)
-                    )
-                    .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(23.dp))
                     .constrainAs(signUp) {
                         top.linkTo(signUpTop)
                         bottom.linkTo(signUpBottom)
@@ -552,6 +549,10 @@ fun ButtonSignUP(navController: NavController,
                  modifier: Modifier) {
     val viewModel: LoginViewModel = viewModel()
     val isLoading by viewModel.isLoading.observeAsState(false)
+    val gradientColors = listOf(
+        Color(0xB5D46161),
+        Color(0xFF007BFF)
+    )
 
     Button(
         onClick = {
@@ -568,15 +569,16 @@ fun ButtonSignUP(navController: NavController,
         }, // Zmieniono navController na context
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(30.dp),
+        shape = RoundedCornerShape(20.dp),
         modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
             .shadow(
-                elevation = 35.dp,
+                elevation = 20.dp,
                 spotColor = Color(0x406F7EC9),
                 ambientColor = Color(0x406F7EC9),
                 shape = RoundedCornerShape(20.dp)
             )
-            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(20.dp))
+            .background(brush = Brush.horizontalGradient(gradientColors), shape = RoundedCornerShape(20.dp))
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),

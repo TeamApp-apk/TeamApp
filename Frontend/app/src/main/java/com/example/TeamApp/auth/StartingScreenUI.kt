@@ -88,10 +88,11 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.example.TeamApp.utils.SystemUiUtils
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun StartingScreenUI(){
+fun StartingScreenUI(navController: NavController){
     val gradientColorsBackGround = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF),
@@ -103,7 +104,7 @@ fun StartingScreenUI(){
         val (image,loginButton,registerButton,WelcomeText,RowWithOtherOptions) = createRefs()
         val imageStart = createGuidelineFromStart(0.1f)
         val imageEnd = createGuidelineFromStart(0.9f)
-        val imageTop = createGuidelineFromTop(0.19f)
+        val imageTop = createGuidelineFromTop(0.1f)
         val imageBottom = createGuidelineFromBottom(0.56f)
         Image(
             painter = painterResource(id = R.drawable.logo),
@@ -123,17 +124,17 @@ fun StartingScreenUI(){
             modifier = Modifier
                 .width(253.dp)
                 .padding(vertical = 4.dp)
-                .height(96.dp)
+                .height(70.dp)
                 .constrainAs(WelcomeText) {
-                    top.linkTo(image.bottom, margin = 40.dp)
+                    top.linkTo(image.bottom, margin = 10.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
 
                 },
-            text = "Załóż darmowe konto",
+            text = "Witaj w TeamApp!",
             style = TextStyle(
-                fontSize = 24.sp,
-                fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+                fontSize = 27.sp,
+                fontFamily = FontFamily(Font(R.font.proximanovabold)),
                 fontWeight = FontWeight(900),
                 color = Color.White,
 
@@ -143,18 +144,19 @@ fun StartingScreenUI(){
 
         )
         CreateAccountStartUI(Modifier.constrainAs(loginButton){
-            top.linkTo(WelcomeText.bottom)
+            top.linkTo(WelcomeText.bottom, margin = 20.dp)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
-        })
+        }
+        ,navController)
         LogInStartUI(modifier = Modifier.constrainAs(registerButton) {
             top.linkTo(loginButton.bottom, margin = 30.dp)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
-        })
+        },navController)
 
         RowWithDifferentOptions(modifier = Modifier.constrainAs(RowWithOtherOptions) {
-            top.linkTo(registerButton.bottom, margin = 104.dp)
+            top.linkTo(registerButton.bottom, margin = 90.dp)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
         })
@@ -167,7 +169,7 @@ fun StartingScreenUI(){
 }
 }
 @Composable
-fun CreateAccountStartUI(modifier: Modifier) {
+fun CreateAccountStartUI(modifier: Modifier, navController: NavController) {
     // Define gradient colors
     val gradientColors = listOf(
         Color(0xB5D46161), // Light Red
@@ -175,20 +177,20 @@ fun CreateAccountStartUI(modifier: Modifier) {
     )
 
     Button(
-        onClick = { /* Your action here */ },
+        onClick = { navController.navigate("register") },
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         modifier = modifier
-
-            .width(200.46777.dp)
-            .height(48.74976.dp)// Adjust button size
+            .clip(RoundedCornerShape(27.dp))
+            .width(250.dp)
+            .height(70.dp)// Adjust button size
             .background(
                 brush = Brush.horizontalGradient(gradientColors),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(27.dp)
 
             ),
 
         contentPadding = PaddingValues(0.dp),
-        shape = RoundedCornerShape(16.dp)// Remove default padding
+        shape = RoundedCornerShape(27.dp)// Remove default padding
     ) {
         // Button text or content
         Text(modifier = Modifier
@@ -197,10 +199,10 @@ fun CreateAccountStartUI(modifier: Modifier) {
             ,
             text = "STWÓRZ KONTO",
             style = TextStyle(
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                fontWeight = FontWeight(500),
-                color = Color.White,
+                fontWeight = FontWeight(1000),
+                color = Color(0xffe0e0e0),
 
                 textAlign = TextAlign.Center,
                 letterSpacing = 1.sp,
@@ -210,29 +212,33 @@ fun CreateAccountStartUI(modifier: Modifier) {
 }
 
 
-@Preview(showBackground = false)
+//@Preview(showBackground = false)
+//@Composable
+//fun CreateAccountStartUIPreview() {
+//    StartingScreenUI()
+//}
 @Composable
-fun CreateAccountStartUIPreview() {
-    StartingScreenUI()
-}
-@Composable
-fun LogInStartUI(modifier: Modifier) {
+fun LogInStartUI(modifier: Modifier, navController: NavController) {
     // Define gradient colors
     val gradientColors = listOf(
+        Color(0xB5D46161),
+        Color(0xFF007BFF)
+    )
+    val gradientFont = listOf(
         Color(0xB5D46161), // Light Red
         Color(0xFF007BFF)  // Blue
     )
 
     Button(
-        onClick = { /* Your action here */ },
+        onClick = { navController.navigate("login") },
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         modifier = modifier
-
-            .width(200.46777.dp)
-            .height(48.74976.dp)// Adjust button size
+            .clip(RoundedCornerShape(27.dp))
+            .width(250.dp)
+            .height(70.dp)// Adjust button size
             .background(
                 brush = Brush.horizontalGradient(gradientColors),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(27.dp)
 
             ),
 
@@ -245,10 +251,10 @@ fun LogInStartUI(modifier: Modifier) {
             .height(16.dp),
             text = "ZALOGUJ SIĘ",
             style = TextStyle(
-                fontSize = 12.sp,
+                fontSize = 15.sp,
                 fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                fontWeight = FontWeight(500),
-                color = Color.White,
+                fontWeight = FontWeight(1000),
+                color = Color(0xffe0e0e0),
 
                 textAlign = TextAlign.Center,
                 letterSpacing = 1.sp,
@@ -260,9 +266,9 @@ fun LogInStartUI(modifier: Modifier) {
 fun RowWithDifferentOptions(modifier: Modifier) {
     Row(
         modifier = modifier
-
+            
             .width(349.dp)
-            .height(51.dp)
+            .height(40.dp)
             .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(64.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.Bottom,
