@@ -130,7 +130,7 @@ class RegisterActivity : ComponentActivity() {
                 ) {
                     AnimatedNavHost(
                         navController = navController,
-                        startDestination = if (auth.currentUser != null) "mainApp" else "register",
+                        startDestination = if (auth.currentUser != null) "mainApp" else "StartingScreen",
                         enterTransition = {
                             slideInHorizontally(
                                 initialOffsetX = { -1000 },
@@ -150,6 +150,7 @@ class RegisterActivity : ComponentActivity() {
                             ) + fadeOut(animationSpec = tween(durationMillis = 300))
                         }
                     ) {
+                        composable("StartingScreen") { StartingScreenUI(navController)}
                         composable("register") { RegisterScreen(navController) }
                         composable("login") { LoginScreen(navController) }
                         composable("forgotPassword") { ForgotPasswordScreen(navController) }

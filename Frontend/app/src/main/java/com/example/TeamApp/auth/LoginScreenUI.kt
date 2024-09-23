@@ -51,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -134,7 +135,7 @@ fun LoginScreen(navController: NavController){
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (arrow, upperText, emailBox, passwordBox, forgotPass, loginButton,
                 googleButton, spacer, registerText) = createRefs()
-            val arrowTop = createGuidelineFromTop(0.05f)
+            val arrowTop = createGuidelineFromTop(0.050f)
             val arrowStart = createGuidelineFromStart(0.1f)
             Image(
                 painter = painterResource(id = R.drawable.arrow_icon),
@@ -144,15 +145,15 @@ fun LoginScreen(navController: NavController){
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {
-                        viewModel.getToRegisterScreen(navController)
+                        navController.navigate("StartingScreen")
                     }
-                    .size(22.dp)
+                    .size(30.dp)
                     .constrainAs(arrow) {
                         top.linkTo(arrowTop)
                         start.linkTo(arrowStart)
                     }
             )
-            val upperTextTop = createGuidelineFromTop(0.1f)
+            val upperTextTop = createGuidelineFromTop(0.15f)
             val upperTextStart = createGuidelineFromStart(0.1f)
             val upperTextEnd = createGuidelineFromEnd(0.9f)
             val upperTextBottom = createGuidelineFromTop(0.13f)
@@ -249,13 +250,7 @@ fun LoginScreen(navController: NavController){
                         height = Dimension.fillToConstraints
                         width = Dimension.fillToConstraints
                     }
-                    .shadow(
-                        elevation = 35.dp,
-                        spotColor = Color(0x406F7EC9),
-                        ambientColor = Color(0x406F7EC9)
-                    )
-                    .background(color = Color(0xFF007BFF),
-                        shape = RoundedCornerShape(20.dp))
+
                     .padding(0.dp)
             )
 
@@ -478,6 +473,10 @@ fun ButtonSignIN(navController: NavController,
                  modifier: Modifier) {
     val viewModel: LoginViewModel = viewModel()
     val isLoading by viewModel.isLoading.observeAsState(false)
+    val gradientColors = listOf(
+        Color(0xB5D46161),
+        Color(0xFF007BFF)
+    )
 
     Button(
         onClick = { viewModel.onLoginClick(navController){ result ->
@@ -491,17 +490,19 @@ fun ButtonSignIN(navController: NavController,
             onShowSnackbar(true)
         }
                   },
+        shape = RoundedCornerShape(20.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(30.dp),
+
         modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
             .shadow(
-                elevation = 35.dp,
+                elevation = 20.dp,
                 spotColor = Color(0x406F7EC9),
                 ambientColor = Color(0x406F7EC9),
-                shape = RoundedCornerShape(30.dp)
+                shape = RoundedCornerShape(20.dp)
             )
-            .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(30.dp))
+            .background(brush = Brush.horizontalGradient(gradientColors), shape = RoundedCornerShape(20.dp))
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -517,6 +518,7 @@ fun ButtonSignIN(navController: NavController,
             } else {
                 Box(
                     modifier = Modifier
+                        .clip(RoundedCornerShape(30.dp))
                         .weight(1f)
                         .wrapContentWidth(align = Alignment.CenterHorizontally)
                 ) {
