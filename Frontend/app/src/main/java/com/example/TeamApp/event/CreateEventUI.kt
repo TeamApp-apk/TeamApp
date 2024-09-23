@@ -380,7 +380,7 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
                                             locationID = locationID
                                         )
 
-                                        viewModel.createEvent(newEvent) { result ->
+                                        viewModel.createEvent(newEvent, creatorID.toString()) { result ->
                                             if (result == null) {
                                                 snackbarMessage = "Utworzono Event"
                                                 snackbarSuccess = true
