@@ -14,11 +14,16 @@ import androidx.navigation.NavController
 import com.example.TeamApp.auth.RegisterActivity
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.data.User
+import com.example.TeamApp.event.CreateEventViewModel
+import com.example.TeamApp.event.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import java.time.LocalDate
 
 class SearchThroughViewModel : ViewModel(){
+
+    private val _filteredEvents = MutableLiveData<List<Event>>()
+    val filteredEvents: LiveData<List<Event>> = _filteredEvents
 
     private val _sex = MutableLiveData("")
     val sex: LiveData<String> = _sex
@@ -60,6 +65,14 @@ class SearchThroughViewModel : ViewModel(){
         _filtersOn.value = false
         Log.d("SearchThrough", "OnFilterReset ${_minAge.value}")
     }
+
+    fun onFilterAccept()
+    {
+        val otherViewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+            otherViewModel.fetchEvents()
+
+    }
+
 
 
 }

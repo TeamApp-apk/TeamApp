@@ -193,7 +193,8 @@ fun FiltersScreen(navController: NavController) {
         AcceptButton(
             text = "Filtruj",
             onClick = {
-
+                viewModel.onFilterAccept()
+                navController.popBackStack()
             },
             modifier = Modifier
                 .constrainAs(acceptButton) {
@@ -295,8 +296,10 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val availableSports = viewModel.getAvailableSports()
     var showDialog by remember { mutableStateOf(false) }
-    val selectedSport by viewModel.sport.observeAsState("")
     val hapticFeedback = LocalHapticFeedback.current
+
+    val selectedSports = remember { mutableStateListOf<String>() }
+
     // Przycisk, który otwiera popup
     Box(
         modifier = modifier
@@ -319,15 +322,15 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = if (selectedSport.isEmpty()) "Dyscyplina" else selectedSport,
+                text ="Dyscypliny",
                 modifier = Modifier
                     .weight(1f)
                     .wrapContentSize(Alignment.Center),
                 style = TextStyle(
                     fontSize = 16.sp,
-                    fontFamily = if (selectedSport.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
-                    fontWeight = if(selectedSport.isEmpty()) FontWeight.Medium else FontWeight.Bold,
-                    color = if (selectedSport.isEmpty()) Color.Gray else Color(0xFF003366),
+                    fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+                    fontWeight = FontWeight.Medium,
+                    color =  Color.Gray,
                     textAlign = TextAlign.Center
                 ),
                 maxLines = 1,
@@ -349,18 +352,32 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(
-                        text = "Wybierz dyscyplinę",
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                            color = Color.Black
-                        ),
-                        modifier = Modifier
-                            .padding(bottom = 16.dp)
-                            .align(Alignment.CenterHorizontally)
-                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween, // Space between elements
+                        verticalAlignment = Alignment.CenterVertically // Align items vertically
+                    ) {
+                        Text(
+                            text = "Wybierz dyscyplinę",
+                            style = TextStyle(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                                color = Color.Black
+                            ),
+                        )
+
+                        IconButton(
+                            onClick = { showDialog = false },
+                            modifier = Modifier
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.close), // Replace with your icon
+                                contentDescription = "Close"
+                            )
+                        }
+                    }
 
                     // Lista przewijalna
                     LazyColumn(
@@ -369,25 +386,44 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                             .heightIn(max = 300.dp) // Ograniczenie wysokości popupu
                     ) {
                         items(availableSports) { sport ->
+                            val isSelected = selectedSports.contains(sport)
                             Text(
                                 text = sport,
+                                color = if (isSelected) Color(0xff4fc3f7) else Color.Black,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
                                     .fillMaxWidth()
                                     .clickable {
 
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        showDialog = false // Zamknięcie popupu po wybraniu opcji
+                                        if (isSelected) {
+                                            selectedSports.remove(sport) // Remove from selected
+                                        } else {
+                                            selectedSports.add(sport) // Add to selected
+                                        }
                                     }
-
                                     .padding(12.dp),
                                 style = TextStyle(
                                     fontSize = 16.sp,
                                     fontFamily = FontFamily(Font(R.font.proximanovalight)),
-                                    color = Color.Black
                                 )
                             )
                         }
+                    }
+
+                    Button(
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xff4fc3f7), // Button background color
+                            contentColor = Color.White // Button text color
+                        ),
+                        onClick = {
+                            selectedSports.clear()
+                        },
+                        modifier = Modifier
+                            //.padding(vertical = 16.dp)
+                            .align(Alignment.CenterHorizontally),
+                    ) {
+                        Text("Wyczyść")
                     }
                 }
             }
