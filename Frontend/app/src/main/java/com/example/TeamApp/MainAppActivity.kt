@@ -51,6 +51,7 @@ import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.event.CreateEventViewModel
 import com.example.TeamApp.event.DetailsScreen
+//import com.example.TeamApp.event.MapScreen
 import com.example.TeamApp.event.ViewModelProvider
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.searchThrough.SearchScreen
@@ -89,13 +90,13 @@ class MainAppActivity : AppCompatActivity() {
             val userViewModel: UserViewModel = viewModel()
             val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
             LaunchedEffect(navController) {
-                navController.addOnDestinationChangedListener { _, destination, _ ->
-                    isBottomBarVisible = when (destination.route) {
-                        "details/{activityId}" -> false
-                        else -> true
-                    }
-                }
-                //isBottomBarVisible = true
+//                navController.addOnDestinationChangedListener { _, destination, _ ->
+//                    isBottomBarVisible = when (destination.route) {
+//                        "details/{activityId}" -> false
+//                        else -> true
+//                    }
+//                }
+                isBottomBarVisible = true
             }
             LaunchedEffect(Unit){
                 Log.d("LaunchedEffect", "LaunchedEffect called")
