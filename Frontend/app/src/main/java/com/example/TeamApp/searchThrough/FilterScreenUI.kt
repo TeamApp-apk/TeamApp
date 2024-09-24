@@ -75,8 +75,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FiltersScreen(navController: NavController) {
     val viewModel: SearchThroughViewModel = viewModel()
-    var showEmptyMessage by remember { mutableStateOf(false) }
-    //val context = LocalContext.current
+
 
     ConstraintLayout(modifier = Modifier.fillMaxSize()
         .background(color = Color(0xFFF2F2F2))) {
@@ -146,6 +145,7 @@ fun FiltersScreen(navController: NavController) {
                 end.linkTo(sportEnd)
                 width = Dimension.fillToConstraints
             },
+            viewModel,
         )
 
         val distanceSliderTop = createGuidelineFromTop(0.56f)
@@ -160,7 +160,7 @@ fun FiltersScreen(navController: NavController) {
                 width = Dimension.fillToConstraints
             },
             onValueChange = { distance ->
-                // Handle distance changes
+                viewModel.onDistanceChange(distance.toInt())
             }
         )
 
@@ -184,9 +184,9 @@ fun FiltersScreen(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            GenderButtonWithLabel("mężczyźni")
-            GenderButtonWithLabel("mieszane")
-            GenderButtonWithLabel("kobiety")
+            GenderButtonWithLabel("mężczyźni", viewModel)
+            GenderButtonWithLabel("mieszane", viewModel)
+            GenderButtonWithLabel("kobiety", viewModel)
         }
 
         AcceptButton(
@@ -221,7 +221,8 @@ fun FiltersScreen(navController: NavController) {
                     width = Dimension.fillToConstraints
 
                 },
-            navController = navController
+            navController = navController,
+            viewModel
         )
     }
 }
@@ -258,8 +259,7 @@ fun AcceptButton(
     }
 }
 @Composable
-fun ClickableResetTextComponent(modifier: Modifier = Modifier, navController: NavController) {
-    val viewModel: LoginViewModel = viewModel()
+fun ClickableResetTextComponent(modifier: Modifier = Modifier, navController: NavController, viewModel: SearchThroughViewModel) {
     val context = LocalContext.current
     val loginText = "Resetuj filtry"
     val annotatedString = buildAnnotatedString {
@@ -283,7 +283,7 @@ fun ClickableResetTextComponent(modifier: Modifier = Modifier, navController: Na
             modifier = Modifier,
             style = TextStyle(textAlign = TextAlign.Center), // Center text horizontally
             onClick = {
-
+                viewModel.onFilterReset()
             }
         )
     }
@@ -395,12 +395,12 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun GenderButtonWithLabel(label: String) {
+fun GenderButtonWithLabel(label: String, viewModel: SearchThroughViewModel) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         IconButton(
-            onClick = { /* Handle button click */ },
+            onClick = { viewModel.onSexChange(label)},
             modifier = Modifier
                 .size(50.dp)
                 .border(1.dp, Color.Gray, RoundedCornerShape(4.dp)) // Placeholder border for icon
@@ -463,7 +463,7 @@ fun DistanceSlider(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RangeSliderExample(modifier: Modifier = Modifier) {
+fun RangeSliderExample(modifier: Modifier = Modifier, viewModel: SearchThroughViewModel) {
     var sliderPosition by remember { mutableStateOf(0f..100f) }
 
     Column(
@@ -481,7 +481,10 @@ fun RangeSliderExample(modifier: Modifier = Modifier) {
 
         RangeSlider(
             value = sliderPosition,
-            onValueChange = { sliderPosition = it },
+            onValueChange = { sliderPosition = it
+                viewModel.onMinAgeChange(it.start.toInt())
+                viewModel.onMaxAgeChange(it.endInclusive.toInt())
+                            },
             valueRange = 0f..100f,
             onValueChangeFinished = {
 
