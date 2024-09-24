@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -74,8 +75,7 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FiltersScreen(navController: NavController) {
-    val viewModel: SearchThroughViewModel = viewModel()
-    val distance by viewModel.distance.observeAsState(75)
+    val viewModel: SearchThroughViewModel = SearchViewModelProvider.searchThroughViewModel
 
     ConstraintLayout(modifier = Modifier.fillMaxSize()
         .background(color = Color(0xFFF2F2F2))) {
@@ -115,12 +115,14 @@ fun FiltersScreen(navController: NavController) {
         )
 
 
+
+
         //mozna tworzyc guideline nie od poczatku ekranu tylko od innych obiektow
         //np top.linkTo(reset.bottom, margin = 16.dp)
         val sportStart = createGuidelineFromStart(0.1f)
         val sportEnd = createGuidelineFromStart(0.9f)
-        val sportTop = createGuidelineFromTop(0.20f)
-        val sportBottom = createGuidelineFromTop(0.28f)
+        val sportTop = createGuidelineFromTop(0.46f)
+        val sportBottom = createGuidelineFromTop(0.54f)
 
         SportPopupButton(
             modifier = Modifier
@@ -134,45 +136,9 @@ fun FiltersScreen(navController: NavController) {
                 }
         )
 
-        val ageSliderTop = createGuidelineFromTop(0.45f)
-        val ageSliderBottom = createGuidelineFromTop(0.50f)
 
-        RangeSliderExample(
-            modifier = Modifier.constrainAs(ageSlider) {
-                top.linkTo(ageSliderTop)
-                bottom.linkTo(ageSliderBottom)
-                start.linkTo(sportStart)
-                end.linkTo(sportEnd)
-                width = Dimension.fillToConstraints
-            },
-            viewModel,
-        )
-
-        val distanceSliderTop = createGuidelineFromTop(0.56f)
-        val distanceSliderBottom = createGuidelineFromTop(0.66f)
-
-        DistanceSlider(
-            modifier = Modifier.constrainAs(distanceSlider) {
-                top.linkTo(distanceSliderTop)
-                bottom.linkTo(distanceSliderBottom)
-                start.linkTo(sportStart)
-                end.linkTo(sportEnd)
-                width = Dimension.fillToConstraints
-            },
-            onValueChange = { distance ->
-                viewModel.onDistanceChange(distance.toInt())
-            },
-            sliderValue = distance
-        )
-
-
-        val passStart = createGuidelineFromStart(0.1f)
-        val passEnd = createGuidelineFromStart(0.9f)
-        val passTop = createGuidelineFromTop(0.86f)
-        val passBottom = createGuidelineFromTop(0.94f)
-
-        val genderButtonsTop = createGuidelineFromTop(0.32f)
-        val genderButtonsBottom = createGuidelineFromTop(0.42f)
+        val genderButtonsTop = createGuidelineFromTop(0.15f)
+        val genderButtonsBottom = createGuidelineFromTop(0.25f)
         Row(
             modifier = Modifier
                 .constrainAs(genderButtons) {
@@ -185,10 +151,55 @@ fun FiltersScreen(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Text(
+                text = "Płeć",
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                ),
+                modifier = Modifier.padding(end = 8.dp) // Optional padding for spacing
+            )
+
             GenderButtonWithLabel("mężczyźni", viewModel)
             GenderButtonWithLabel("mieszane", viewModel)
             GenderButtonWithLabel("kobiety", viewModel)
         }
+
+        val ageSliderTop = createGuidelineFromTop(0.28f)
+        val ageSliderBottom = createGuidelineFromTop(0.33f)
+
+        RangeSliderExample(
+            modifier = Modifier.constrainAs(ageSlider) {
+                top.linkTo(ageSliderTop)
+                bottom.linkTo(ageSliderBottom)
+                start.linkTo(sportStart)
+                end.linkTo(sportEnd)
+                width = Dimension.fillToConstraints
+            },
+            viewModel,
+        )
+
+        val distanceSliderTop = createGuidelineFromTop(0.36f)
+        val distanceSliderBottom = createGuidelineFromTop(0.46f)
+
+        DistanceSlider(
+            modifier = Modifier.constrainAs(distanceSlider) {
+                top.linkTo(distanceSliderTop)
+                bottom.linkTo(distanceSliderBottom)
+                start.linkTo(sportStart)
+                end.linkTo(sportEnd)
+                width = Dimension.fillToConstraints
+            },
+            onValueChange = { distance ->
+                viewModel.onDistanceChange(distance.toInt())
+            },
+        )
+
+        val passStart = createGuidelineFromStart(0.1f)
+        val passEnd = createGuidelineFromStart(0.9f)
+        val passTop = createGuidelineFromTop(0.86f)
+        val passBottom = createGuidelineFromTop(0.94f)
 
         AcceptButton(
             text = "Filtruj",
@@ -293,13 +304,14 @@ fun ClickableResetTextComponent(modifier: Modifier = Modifier, navController: Na
 
 @Composable
 fun SportPopupButton(modifier: Modifier = Modifier) {
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
-    val availableSports = viewModel.getAvailableSports()
+    val otherviewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel: SearchThroughViewModel = SearchViewModelProvider.searchThroughViewModel
+    val availableSports = viewModel.availableSports
     var showDialog by remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
 
-    val selectedSports = remember { mutableStateListOf<String>() }
-
+    val selectedSports by viewModel.selectedSports.observeAsState(availableSports)
+    var isSelectAll by remember { mutableStateOf(false) }
     // Przycisk, który otwiera popup
     Box(
         modifier = modifier
@@ -396,11 +408,7 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                                     .clickable {
 
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        if (isSelected) {
-                                            selectedSports.remove(sport) // Remove from selected
-                                        } else {
-                                            selectedSports.add(sport) // Add to selected
-                                        }
+                                        viewModel.updateSportSelection(sport)
                                     }
                                     .padding(12.dp),
                                 style = TextStyle(
@@ -412,18 +420,17 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                     }
 
                     Button(
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xff4fc3f7), // Button background color
-                            contentColor = Color.White // Button text color
-                        ),
                         onClick = {
-                            selectedSports.clear()
+                            viewModel.toggleAllSports(!isSelectAll)
+                            isSelectAll = !isSelectAll
                         },
-                        modifier = Modifier
-                            //.padding(vertical = 16.dp)
-                            .align(Alignment.CenterHorizontally),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xff4fc3f7),
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     ) {
-                        Text("Wyczyść")
+                        Text(if (isSelectAll) "Zaznacz wszystkie" else "Odznacz wszystkie")
                     }
                 }
             }
@@ -463,32 +470,45 @@ fun DistanceSlider(
     modifier: Modifier = Modifier,
     range: IntRange = 0..150,
     onValueChange: (Float) -> Unit,
-    sliderValue : Int
 ) {
+    val viewModel: SearchThroughViewModel = SearchViewModelProvider.searchThroughViewModel
+    val distance by viewModel.distance.observeAsState(75)
+    var sliderValue = distance
 
-
-    Column(
-        modifier = modifier.padding(horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Row(
+        modifier = modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start // Adjust spacing as needed
     ) {
 
-        Text(text = "odległość", fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.align(Alignment.Start))
+        // Distance label
+        Text(
+            text = "Odległość:",
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            modifier = Modifier.align(Alignment.CenterVertically) // Align vertically in the row
+        )
 
+        // Distance value text
         Text(
             text = sliderValue.toInt().toString(),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(vertical = 8.dp)
+            modifier = Modifier.padding(horizontal = 8.dp) // Add padding for spacing
         )
 
-
+        // Slider
         Slider(
             value = sliderValue.toFloat(),
             onValueChange = { newValue ->
-                onValueChange(newValue)
+                sliderValue = newValue.toInt() // Update the local slider value
+                onValueChange(newValue) // Notify value change
             },
             valueRange = range.first.toFloat()..range.last.toFloat(),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .weight(1f) // Allow the slider to fill remaining space
+                .padding(start = 8.dp, end = 8.dp), // Padding around the slider
             colors = SliderDefaults.colors(
                 thumbColor = Color(0xff4fc3f7),
                 activeTrackColor = Color(0xff4fc3f7)

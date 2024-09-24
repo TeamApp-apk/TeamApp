@@ -153,6 +153,37 @@ class CreateEventViewModel : ViewModel() {
                 Log.w("CreateEventViewModel", "Error fetching events", e)
             }
     }
+
+    fun fetchFilteredEvents(selectedSports: List<String>) {
+        Log.d("CreateEventViewModel", "fetchFilteredEvents: Fetching events with selected sports")
+
+        if (selectedSports.isEmpty()) {
+            Log.d("CreateEventViewModel", "Selected sports list is empty, fetching all events.")
+            fetchEvents() // Fetch all events or handle the empty case as needed
+            return
+        }
+
+        val db = Firebase.firestore
+        db.collection("events")
+            .whereIn("activityName", selectedSports) // Assuming "sport" is a field in your Firestore event documents
+            .get()
+            .addOnSuccessListener { result ->
+                activityList.clear()
+                for (document in result) {
+                    val event = document.toObject(Event::class.java)
+                    activityList.add(event)
+                }
+                if (activityList.isNotEmpty()) {
+                    Log.d("CreateEventViewModel", "Filtered events found")
+                } else {
+                    Log.d("CreateEventViewModel", "No events matched the selected sports")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w("CreateEventViewModel", "Error fetching filtered events", e)
+            }
+    }
+
     fun getEventById(id: String): Event? {
         return activityList.find { it.id == id }
     }

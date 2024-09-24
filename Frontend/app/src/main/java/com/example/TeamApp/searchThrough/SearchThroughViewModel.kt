@@ -21,9 +21,15 @@ import com.google.firebase.firestore.firestore
 import java.time.LocalDate
 
 class SearchThroughViewModel : ViewModel(){
+    val otherViewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
 
     private val _filteredEvents = MutableLiveData<List<Event>>()
     val filteredEvents: LiveData<List<Event>> = _filteredEvents
+
+    val availableSports = otherViewModel.getAvailableSports()
+
+    private val _selectedSports = MutableLiveData<List<String>>(availableSports.toList())
+    val selectedSports: LiveData<List<String>> = _selectedSports
 
     private val _sex = MutableLiveData("")
     val sex: LiveData<String> = _sex
@@ -37,8 +43,8 @@ class SearchThroughViewModel : ViewModel(){
     private val _maxAge = MutableLiveData<Int>(100)
     val maxAge: LiveData<Int> = _maxAge
 
-    private val _filtersOn = MutableLiveData<Boolean?>(null)
-    val filtersOn: LiveData<Boolean?> = _filtersOn
+    private val _filtersOn = MutableLiveData(false)
+    val filtersOn: LiveData<Boolean> = _filtersOn
 
     fun onSexChange(newValue: String) {
         _sex.value = newValue
@@ -64,15 +70,34 @@ class SearchThroughViewModel : ViewModel(){
         _maxAge.value = 100
         _filtersOn.value = false
         Log.d("SearchThrough", "OnFilterReset ${_minAge.value}")
+        otherViewModel.isDataFetched = false
+        otherViewModel.fetchEvents()
+    }
+
+    fun toggleAllSports(selected: Boolean) {
+        _selectedSports.value = if (selected) {
+            mutableListOf()
+        } else {
+            availableSports.toMutableList()
+        }
+    }
+
+    fun updateSportSelection(sport: String) {
+        val currentList = _selectedSports.value?.toMutableList() ?: mutableListOf()
+        if (currentList.contains(sport)) {
+            currentList.remove(sport)
+        } else {
+            currentList.add(sport)
+        }
+        _selectedSports.value = currentList
     }
 
     fun onFilterAccept()
     {
-        val otherViewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
-            otherViewModel.fetchEvents()
-
+        _filtersOn.value = true
+        Log.d("SearchThroughViewModel", "Filters applied, sports: $selectedSports, filtersOn = ${_filtersOn.value}")
+        val selectedSports = _selectedSports.value ?: listOf()
+        otherViewModel.fetchFilteredEvents(selectedSports)
     }
-
-
 
 }
