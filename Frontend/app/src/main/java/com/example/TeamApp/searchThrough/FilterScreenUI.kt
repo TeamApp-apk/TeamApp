@@ -75,7 +75,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun FiltersScreen(navController: NavController) {
     val viewModel: SearchThroughViewModel = viewModel()
-
+    val distance by viewModel.distance.observeAsState(75)
 
     ConstraintLayout(modifier = Modifier.fillMaxSize()
         .background(color = Color(0xFFF2F2F2))) {
@@ -161,7 +161,8 @@ fun FiltersScreen(navController: NavController) {
             },
             onValueChange = { distance ->
                 viewModel.onDistanceChange(distance.toInt())
-            }
+            },
+            sliderValue = distance
         )
 
 
@@ -425,10 +426,10 @@ fun GenderButtonWithLabel(label: String, viewModel: SearchThroughViewModel) {
 fun DistanceSlider(
     modifier: Modifier = Modifier,
     range: IntRange = 0..150,
-    initialValue: Float = 75f,
-    onValueChange: (Float) -> Unit
+    onValueChange: (Float) -> Unit,
+    sliderValue : Int
 ) {
-    var sliderValue by remember { mutableStateOf(initialValue) }
+
 
     Column(
         modifier = modifier.padding(horizontal = 16.dp),
@@ -446,10 +447,9 @@ fun DistanceSlider(
 
 
         Slider(
-            value = sliderValue,
+            value = sliderValue.toFloat(),
             onValueChange = { newValue ->
-                sliderValue = newValue
-                onValueChange(sliderValue)
+                onValueChange(newValue)
             },
             valueRange = range.first.toFloat()..range.last.toFloat(),
             modifier = Modifier.fillMaxWidth(),
@@ -464,7 +464,10 @@ fun DistanceSlider(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RangeSliderExample(modifier: Modifier = Modifier, viewModel: SearchThroughViewModel) {
-    var sliderPosition by remember { mutableStateOf(0f..100f) }
+    val minAge by viewModel.minAge.observeAsState(0)
+    val maxAge by viewModel.maxAge.observeAsState(100)
+
+    val sliderPosition = minAge.toFloat()..maxAge.toFloat()
 
     Column(
         modifier = modifier
@@ -481,7 +484,8 @@ fun RangeSliderExample(modifier: Modifier = Modifier, viewModel: SearchThroughVi
 
         RangeSlider(
             value = sliderPosition,
-            onValueChange = { sliderPosition = it
+            onValueChange = { val newMin = it.start.toInt()
+                val newMax = it.endInclusive.toInt()
                 viewModel.onMinAgeChange(it.start.toInt())
                 viewModel.onMaxAgeChange(it.endInclusive.toInt())
                             },

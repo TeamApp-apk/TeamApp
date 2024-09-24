@@ -23,7 +23,7 @@ class SearchThroughViewModel : ViewModel(){
     private val _sex = MutableLiveData("")
     val sex: LiveData<String> = _sex
 
-    private val _distance = MutableLiveData<Int>(150)
+    private val _distance = MutableLiveData<Int>(75)
     val distance: LiveData<Int> = _distance
 
     private val _minAge = MutableLiveData<Int>(0)
@@ -54,10 +54,11 @@ class SearchThroughViewModel : ViewModel(){
     fun onFilterReset()
     {
         _sex.value = ""
-        _distance.value = 150
+        _distance.value = 75
         _minAge.value = 0
         _maxAge.value = 100
         _filtersOn.value = false
+        Log.d("SearchThrough", "OnFilterReset ${_minAge.value}")
     }
 
 
