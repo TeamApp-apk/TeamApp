@@ -112,6 +112,7 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
         val mapTop = createGuidelineFromTop(0.115f)
         val mapBottom = createGuidelineFromTop(0.373f)
         val (topAppBar, map, lazyColumn) = createRefs()
+
         if (locationID != null) {
 
             Box(modifier = Modifier.constrainAs(map) {
@@ -365,8 +366,14 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
             drawableId: Int,
             width: Int,
             height: Int
-        ): Bitmap {
+        ): Bitmap? {
             val originalBitmap = BitmapFactory.decodeResource(context.resources, drawableId)
+
+            if (originalBitmap == null) {
+                Log.e("BitmapError", "Failed to decode resource with ID: $drawableId")
+                return null
+            }
+
             val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, width, height, true)
 
             val antialiasedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -406,7 +413,7 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                 }
             }
 
-            if (isMapFragmentReady && mapFragment != null) {
+            if (isMapFragmentReady && mapFragment?.view != null) {
                 val fragmentView = mapFragment?.view
                 if (fragmentView != null) {
                     // Dopiero jeśli fragment ma widok, inicjalizuj AndroidView
@@ -429,14 +436,21 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                                     )
                                     val antialiasedBitmap =
                                         createBitmapWithAntialiasing(context, resourceId, 90, 120)
-                                    val markerOptions = MarkerOptions(
-                                        coordinate = GeoPoint(cords.latitude, cords.longitude),
-                                        pinImage = ImageFactory.fromBitmap(antialiasedBitmap),
-                                        pinIconImage = ImageFactory.fromBitmap(antialiasedBitmap),
-                                    )
-                                    tomTomMap.addMarker(markerOptions)
+                                    if (antialiasedBitmap != null)
+                                    {
+                                        val markerOptions = MarkerOptions(
+                                            coordinate = GeoPoint(cords.latitude, cords.longitude),
+                                            pinImage = ImageFactory.fromBitmap(antialiasedBitmap),
+                                            pinIconImage = ImageFactory.fromBitmap(antialiasedBitmap),
+                                        )
+                                        tomTomMap.addMarker(markerOptions)
 
-                                    tomTomMap.addMarkerClickListener { }
+                                        tomTomMap.addMarkerClickListener { }
+                                    }
+                                 else {
+                                    Log.e("MapMarker", "Failed to create bitmap for marker.")
+                                }
+
                                 }
                             }
                         },
