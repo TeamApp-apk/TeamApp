@@ -85,23 +85,26 @@ fun EditProfile(user: User){
     ConstraintLayout(modifier= Modifier
         .fillMaxSize()
         .background(Brush.linearGradient(colors = gradientColors))
-        .padding(vertical = 24.dp, horizontal = 10.dp)){
+        ){
         val (WhiteBox,TopRow,AvatarImage,NameTextField,BirthdayTextField,GenderRow,AcceptButton) = createRefs()
-//        val WhiteBoxStart = createGuidelineFromStart(0.1f)
-//        val WhiteBoxEnd = createGuidelineFromStart(0.9f)
-//        val WhiteBoxTop = createGuidelineFromTop(0.1f)
-//        val WhiteBoxBottom = createGuidelineFromBottom(0.56f)
+        val WhiteBoxStart = createGuidelineFromStart(0.05f)
+        val WhiteBoxEnd = createGuidelineFromStart(0.95f)
+        val WhiteBoxTop = createGuidelineFromTop(0.08f)
+        val WhiteBoxBottom = createGuidelineFromBottom(0.25f)
 
         Column(
             modifier = Modifier
                 .constrainAs(WhiteBox) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    top.linkTo(parent.top) // Aligning to the top of the parent within the padding
+                    start.linkTo(WhiteBoxStart)
+                    end.linkTo(WhiteBoxEnd)
+                    top.linkTo(WhiteBoxTop) // Aligning to the top of the parent within the padding
                     bottom.linkTo(
-                        parent.bottom,
-                        margin = 250.dp
-                    ) // Adjust the margin to control how far from the bottom it should go
+                        WhiteBoxBottom,
+
+
+                    )
+                    height = Dimension.fillToConstraints
+                    width = Dimension.fillToConstraints// Adjust the margin to control how far from the bottom it should go
                 }
                 .width(360.dp)
                 .height(570.dp)
