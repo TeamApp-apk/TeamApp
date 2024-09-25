@@ -179,11 +179,17 @@ class LoginViewModel : ViewModel() {
     fun getToRegisterScreen(navController: NavController) {
         navController.navigate("register")
     }
+
     fun getToChangePasswordScreen(navController: NavController){
         navController.navigate("forgotPassword") {
             popUpTo("login") { inclusive = true }
         }
     }
+
+    fun getToSexChoiceScreen(navController: NavController){
+        navController.navigate("sexChoice")
+    }
+
     fun onRegisterClick(navController: NavController, callback: (String?) -> Unit){
         Log.e("LoginViewModel", "onRegisterClick")
 
@@ -336,7 +342,7 @@ class LoginViewModel : ViewModel() {
             name = "Jan",
             email = "jan@example.com",
             birthDay = "01/01/1990",
-            gender = "Male",
+            gender = "Female",
             avatar = "null"
         )
         loadAvatars(10)

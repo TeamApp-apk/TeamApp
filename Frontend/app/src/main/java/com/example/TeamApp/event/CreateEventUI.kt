@@ -75,6 +75,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
@@ -180,17 +182,17 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
         viewModel.initializeMapIfNeeded(context)
     }
 
-    Box(
-        modifier = Modifier
+    Surface( modifier = Modifier.fillMaxSize() ) {
+        Box(modifier = Modifier
             .fillMaxSize()
-            .background(brush = Brush.linearGradient(colors = gradientColors))
-            .padding(horizontal = 20.dp, vertical = 60.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Spacer(modifier = Modifier.height(20.dp))
+            .background(brush = Brush.linearGradient(colors = gradientColors)) ){}
 
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val (topText, menu) = createRefs()
+            val topTextStart = createGuidelineFromStart(0.1f)
+            val topTextEnd = createGuidelineFromStart(0.9f)
+            val topTextTop = createGuidelineFromTop(0.07f)
+            val topTextBottom = createGuidelineFromTop(0.14f)
             Text(
                 text = "Stwórz wydarzenie",
                 style = TextStyle(
@@ -201,11 +203,211 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
                     textAlign = TextAlign.Center,
                     lineHeight = 25.sp,
                 ),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .constrainAs(topText) {
+                        top.linkTo(topTextTop)
+                        bottom.linkTo(topTextBottom)
+                        start.linkTo(topTextStart)
+                        end.linkTo(topTextEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                        centerHorizontallyTo(parent)
+                    }
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            val menuStart = createGuidelineFromStart(0.05f)
+            val menuEnd = createGuidelineFromStart(0.95f)
+            val menuTop = createGuidelineFromTop(0.17f)
+            val menuBottom = createGuidelineFromTop(0.9f)
+            Box (
+                modifier = Modifier
+                    .constrainAs(menu) {
+                        top.linkTo(menuTop)
+                        bottom.linkTo(menuBottom)
+                        start.linkTo(menuStart)
+                        end.linkTo(menuEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+                    .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 30.dp))
+            ) {
+                ConstraintLayout ( modifier = Modifier.fillMaxSize() ) {
+                    val (descriptionField, localisation, discipline,
+                        number, date, create, animation, animation1) = createRefs()
 
+                    val descriptionStart = createGuidelineFromStart(0.1f)
+                    val descriptionEnd = createGuidelineFromStart(0.9f)
+                    val descriptionTop = createGuidelineFromTop(0.05f)
+                    val descriptionBottom = createGuidelineFromTop(0.15f)
+
+                    DescriptionInputField(
+                        description = description,
+                        onEditClick = { showDialog = true },
+                        modifier = Modifier
+                            .constrainAs(descriptionField) {
+                                top.linkTo(descriptionTop)
+                                bottom.linkTo(descriptionBottom)
+                                start.linkTo(descriptionStart)
+                                end.linkTo(descriptionEnd)
+                                height = Dimension.fillToConstraints
+                                width = Dimension.fillToConstraints
+                            }
+                    )
+
+                    val localisationStart = createGuidelineFromStart(0.1f)
+                    val localisationEnd = createGuidelineFromStart(0.9f)
+                    val localisationTop = createGuidelineFromTop(0.18f)
+                    val localisationBottom = createGuidelineFromTop(0.28f)
+                    SearchStreetField(modifier = Modifier
+                        .constrainAs(localisation) {
+                            top.linkTo(localisationTop)
+                            bottom.linkTo(localisationBottom)
+                            start.linkTo(localisationStart)
+                            end.linkTo(localisationEnd)
+                            height = Dimension.fillToConstraints
+                            width = Dimension.fillToConstraints
+                        }
+                    )
+
+                    val disciplineStart = createGuidelineFromStart(0.1f)
+                    val disciplineEnd = createGuidelineFromStart(0.9f)
+                    val disciplineTop = createGuidelineFromTop(0.31f)
+                    val disciplineBottom = createGuidelineFromTop(0.41f)
+                    SportPopupButton(modifier = Modifier
+                        .constrainAs(discipline) {
+                            top.linkTo(disciplineTop)
+                            bottom.linkTo(disciplineBottom)
+                            start.linkTo(disciplineStart)
+                            end.linkTo(disciplineEnd)
+                            height = Dimension.fillToConstraints
+                            width = Dimension.fillToConstraints
+                        }
+                    )
+
+                    val numberStart = createGuidelineFromStart(0.1f)
+                    val numberEnd = createGuidelineFromStart(0.9f)
+                    val numberTop = createGuidelineFromTop(0.44f)
+                    val numberBottom = createGuidelineFromTop(0.54f)
+
+                    ParticipantsPopupButton(modifier = Modifier
+                        .constrainAs(number) {
+                            top.linkTo(numberTop)
+                            bottom.linkTo(numberBottom)
+                            start.linkTo(numberStart)
+                            end.linkTo(numberEnd)
+                            height = Dimension.fillToConstraints
+                            width = Dimension.fillToConstraints
+                        }
+                    )
+
+                    val dateStart = createGuidelineFromStart(0.1f)
+                    val dateEnd = createGuidelineFromStart(0.9f)
+                    val dateTop = createGuidelineFromTop(0.57f)
+                    val dateBottom = createGuidelineFromTop(0.67f)
+                    MyDateTimePickerv2(modifier = Modifier
+                        .constrainAs(date) {
+                            top.linkTo(dateTop)
+                            bottom.linkTo(dateBottom)
+                            start.linkTo(dateStart)
+                            end.linkTo(dateEnd)
+                            height = Dimension.fillToConstraints
+                            width = Dimension.fillToConstraints
+                        }
+                    )
+
+                    val createStart = createGuidelineFromStart(0.1f)
+                    val createEnd = createGuidelineFromStart(0.9f)
+                    val createTop = createGuidelineFromTop(0.7f)
+                    val createBottom = createGuidelineFromTop(0.9f)
+
+                    Box (
+                        modifier = Modifier
+                            .constrainAs(create) {
+                                top.linkTo(createTop)
+                                bottom.linkTo(createBottom)
+                                start.linkTo(createStart)
+                                end.linkTo(createEnd)
+                                height = Dimension.fillToConstraints
+                                width = Dimension.fillToConstraints
+                            }
+                    ) {
+                        if (isLoading) {
+                            LottieAnimation(
+                                composition = composition,
+                                progress = progress,
+                                modifier = Modifier.size(100.dp)
+                                    .align(Alignment.Center)
+                            )
+                            LaunchedEffect(Unit) {
+                                isPlaying = true
+                            }
+                        } else if (showTick) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Success",
+                                tint = Color.Green,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .alpha(tickAlpha)
+                                    .align(Alignment.Center)
+                            )
+                        } else {
+                            EventButton(
+                                text = "Stwórz",
+                                onClick = {
+                                    Log.d("CreateEventScreen", "Submit button clicked")
+                                    val participantLimit = limit.toIntOrNull()
+                                    Log.d("CreateEventScreen", "Address: $address")
+                                    if (sport.isNotEmpty() && address.isNotEmpty() && location.isNotEmpty()) {
+                                        isLoading = true
+                                        isPlaying = true
+                                        Log.d("CreateEventScreen", "Valid input")
+                                        //Log.d("CreateEventScreen", "Valid input")
+                                        val creatorID = user?.userID ?: ""
+                                        val participantsList =
+                                            if (creatorID.isNotEmpty()) mutableListOf<Any>(creatorID) else mutableListOf()
+                                        val newEvent = Event(
+                                            participants = participantsList,
+                                            creatorID = creatorID.takeIf { it.isNotEmpty() },
+                                            iconResId = Event.sportIcons[sport] ?: "",
+                                            pinIconResId = Event.sportPinIcons[sport] ?: "",
+                                            date = dateTime,
+                                            activityName = sport,
+                                            currentParticipants = participantsList.size,
+                                            maxParticipants = participantLimit ?: 0,
+                                            location = address,
+                                            description = description,
+                                            locationID = locationID
+                                        )
+
+                                        viewModel.createEvent(newEvent, creatorID.toString()) { result ->
+                                            if (result == null) {
+                                                snackbarMessage = "Utworzono Event"
+                                                snackbarSuccess = true
+                                            } else {
+                                                snackbarMessage = result
+                                                snackbarSuccess = false
+                                            }
+                                            showSnackbar = true
+                                        }
+                                    } else {
+                                        snackbarMessage = "Uzupełnij wszystkie pola"
+                                        snackbarSuccess = false
+                                        showSnackbar = true
+                                    }
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    /*
+    {
+        {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -232,11 +434,6 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
                         modifier = Modifier.padding(horizontal = 20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        SearchStreetField()
-                        ButtonsColumn()
-                        MyDateTimePickerv2()
-                        Spacer(modifier = Modifier.height(25.dp))
-
                         if (isLoading) {
                             LottieAnimation(
                                 composition = composition,
@@ -256,7 +453,8 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
                                     .alpha(tickAlpha)
                             )
                         } else {
-                            EventButton(text = "Stwórz", onClick = {
+                            EventButton(text = "Stwórz",
+                                onClick = {
                                 Log.d("CreateEventScreen", "Submit button clicked")
                                 val participantLimit = limit.toIntOrNull()
                                 Log.d("CreateEventScreen", "Address: $address")
@@ -304,7 +502,7 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
 
             Spacer(modifier = Modifier.height(20.dp))
         }
-    }
+    }*/
 
 
 
@@ -324,14 +522,12 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
 @Composable
 fun DescriptionInputField(
     description: String,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    modifier: Modifier
 ) {
     val hapticFeedback = LocalHapticFeedback.current
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 27.dp, vertical = 8.dp)
-            .height(56.dp)
+        modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(
                 color = Color.White,
@@ -497,7 +693,7 @@ fun getApiKey(context: Context): String {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchStreetField() {
+fun SearchStreetField( modifier : Modifier ) {
     var query by remember { mutableStateOf("") }
     var suggestions by remember { mutableStateOf(listOf<Suggestion>()) }
     var expanded by remember { mutableStateOf(false) }
@@ -561,14 +757,12 @@ fun SearchStreetField() {
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .height(56.dp)
+                .fillMaxSize()
                 .clip(RoundedCornerShape(16.dp))
                 .background(Color.White, RoundedCornerShape(16.dp))
                 .clickable {
@@ -740,7 +934,7 @@ fun SearchStreetField() {
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun MyDateTimePickerv2() {
+fun MyDateTimePickerv2 ( modifier : Modifier ) {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     var selectedDateTime by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
@@ -772,10 +966,7 @@ fun MyDateTimePickerv2() {
 
     // Zastępuje Button -> Box
     Box(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-            .height(56.dp)
+        modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(color = Color.White)
             .clickable { showDialog = true },
@@ -929,10 +1120,10 @@ fun MyDateTimePickerv2() {
 
 
 
-
 @SuppressLint("DefaultLocale")
 @Composable
-fun MyDateTimePicker(onDateChange: (String) -> Unit) {
+fun MyDateTimePicker(onDateChange: (String) -> Unit,
+                     modifier : Modifier) {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     var selectedDateTime by remember { mutableStateOf("") }
     val calendar = Calendar.getInstance()
@@ -976,11 +1167,8 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .clip(RoundedCornerShape(16.dp))
-                .padding(8.dp)
-                .fillMaxWidth()
-                .height(56.dp)
                 .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
                 .clickable { datePickerDialog.show() },
             contentAlignment = Alignment.Center
@@ -999,35 +1187,8 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit) {
     }
 }
 
-
-
-
 @Composable
-fun ButtonsColumn() {  // Zmieniłem nazwę na ButtonsColumn, bo teraz to będzie kolumna
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        // Sport Dropdown Button
-        SportPopupButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp) // Dystans między przyciskami
-        )
-
-        // Participants Dropdown Button
-        ParticipantsPopupButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp) // Dystans między przyciskami
-        )
-    }
-}
-
-
-@Composable
-fun SportPopupButton(modifier: Modifier = Modifier) {
+fun SportPopupButton(modifier: Modifier) {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
     val availableSports = viewModel.getAvailableSports()
     var showDialog by remember { mutableStateOf(false) }
@@ -1133,7 +1294,7 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
+fun ParticipantsPopupButton(modifier: Modifier) {
     var selectedPeople by remember { mutableStateOf<Int?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
@@ -1233,14 +1394,3 @@ fun ParticipantsPopupButton(modifier: Modifier = Modifier) {
         }
     }
 }
-
-
-
-//@Preview(showBackground = false)
-//@Composable
-//fun CreateEventv2Preview() {
-//    CreateEventv2()
-//}
-
-
-

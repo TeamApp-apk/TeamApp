@@ -11,6 +11,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +45,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -68,6 +71,21 @@ import com.tomtom.sdk.map.display.ui.MapFragment
 import com.google.firebase.firestore.FirebaseFirestore
 import com.tomtom.sdk.map.display.image.ImageFactory
 import com.tomtom.sdk.map.display.marker.MarkerOptions
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.zIndex
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -80,208 +98,260 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
     val locationID = event?.locationID
     val cachedMapFragment = viewModel.mapFragment
     val context: Context = LocalContext.current
-    LaunchedEffect(Unit){
+
+    LaunchedEffect(Unit) {
         Log.d("DetailsScreen", " user : $user")
     }
     var isJoined by remember { mutableStateOf(user?.let { event?.participants?.contains(it.userID) }) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.CenterEnd // Align to the end
+    ConstraintLayout(modifier = Modifier.fillMaxSize()
+        .background(color = Color(0xFFF2F2F2))) {
+        // Map as the background
+        val mapStart = createGuidelineFromStart(0f)
+        val mapEnd = createGuidelineFromStart(1f)
+        val mapTop = createGuidelineFromTop(0.115f)
+        val mapBottom = createGuidelineFromTop(0.373f)
+        val (topAppBar, map, lazyColumn) = createRefs()
 
-                    ) {
+        if (locationID != null) {
+
+            Box(modifier = Modifier.constrainAs(map) {
+                top.linkTo(mapTop)
+                bottom.linkTo(mapBottom)
+                start.linkTo(mapStart)
+                end.linkTo(mapEnd)
+                height = Dimension.fillToConstraints
+                width = Dimension.fillToConstraints
+            })
+            {
+                TomTomMapView(
+                    context = LocalContext.current,
+                    locationID = locationID,
+                    selectedAddress = locationQuery,
+                    cachedMapFragment = cachedMapFragment,
+                    event = event,
+
+                )
+            }
+        }
+        // TopAppBar fixed at the top of the screen
+        val barStart = createGuidelineFromStart(0f)
+        val barEnd = createGuidelineFromStart(1f)
+        val barTop = createGuidelineFromTop(0f)
+        val barBottom = createGuidelineFromTop(0.115f)
+
+        TopAppBar(
+            title = {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.CenterEnd // Align to the end
+
+                ) {
+                    Text(
+                        text = "Szczegóły wydarzenia",
+                        style = TextStyle(
+                            fontSize = 24.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight(900),
+                            color = Color(0xFF003366),
+                            textAlign = TextAlign.End,
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            navigationIcon = {
+                IconButton(modifier = Modifier.padding(8.dp), onClick = { navController.popBackStack() }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrowleft),
+                        contentDescription = "Back"
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.White),
+            modifier = Modifier
+                .constrainAs(topAppBar) {
+                    top.linkTo(barTop)
+                    bottom.linkTo(barBottom)
+                    start.linkTo(barStart)
+                    end.linkTo(barEnd)
+                    height = Dimension.fillToConstraints
+                    width = Dimension.fillToConstraints
+                }
+        )
+
+        val lazyStart = createGuidelineFromStart(0f)
+        val lazyEnd = createGuidelineFromStart(1f)
+        val lazyTop = createGuidelineFromTop(0.36f)
+        val lazyBottom = createGuidelineFromTop(1f)
+
+            LazyColumn(
+                modifier = Modifier
+                    //.padding(16.dp)
+                    .fillMaxSize()
+                    .background(Color.White, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .constrainAs(lazyColumn) {
+                        top.linkTo(lazyTop)
+                        bottom.linkTo(lazyBottom)
+                        start.linkTo(lazyStart)
+                        end.linkTo(lazyEnd)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    }
+            ) {
+                item {
+                    Box(modifier = Modifier.padding(16.dp))
+                    {
                         Text(
-                            text = "Szczegóły wydarzenia",
+                        text = "Opis wydarzenia",
+                        style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    )}
+
+                    if (event != null) {
+                        DescriptionTextField(
+                            label = "Opis wydarzenia",
+                            isEditable = false,
+                            text = event.description
+                        )
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 5.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = if (isJoined == true) R.drawable.joinstatuson else R.drawable.joinstatusoff),
+                            contentDescription = "Join status",
+                            modifier = Modifier
+                                .size(40.dp)
+                                .wrapContentWidth()
+                                .height(10.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = if (isJoined == true) "Dołączono" else "Nie dołączono",
                             style = TextStyle(
                                 fontSize = 24.sp,
-                                fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                                fontWeight = FontWeight(900),
+                                fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
+                                fontWeight = FontWeight.ExtraBold,
                                 color = Color(0xFF003366),
-                                textAlign = TextAlign.End,
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(modifier = Modifier.padding(8.dp), onClick = { navController.popBackStack() }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.arrowleft),
-                            contentDescription = "Back Icon"
-                        )
-
-                    }
-                },
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.White)
-            )
-        },
-        content = { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = Color(0xFFF2F2F2))
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxSize()
-                        .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 16.dp))
-                ) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .navigationBarsPadding()
-                            .padding(horizontal = 16.dp)
-                    ) {
-
-                        item {
-                            if (event != null) {
-                                DescriptionTextField(
-                                    label = "Opis wydarzenia",
-                                    isEditable = false,
-                                    text = event.description
-                                )
-                            }
-                        }
-
-                        item {
-                            Text(
-                                text = "Lokalizacja:",
-                                style = TextStyle(
-                                    fontSize = 22.sp,
-                                    fontFamily = FontFamily(Font(R.font.robotobold)),
-                                    fontWeight = FontWeight(900),
-                                    color = Color(0xFF003366),
-                                    textAlign = TextAlign.Start,
-                                    lineHeight = 25.sp,
-                                ),
-                                modifier = Modifier.padding(horizontal = 8.dp)
-                                    .padding(bottom = 20.dp)
                             )
-                        }
+                        )
+                    }
+                }
 
-                        item {
-                            if (locationID != null) {
-                                Box(modifier = Modifier.padding(horizontal = 8.dp))
-                                {
-                                    TomTomMapView(
-                                        context = LocalContext.current,
-                                        locationID = locationID,
-                                        selectedAddress = locationQuery,
-                                        cachedMapFragment = cachedMapFragment,
-                                        event = event
-                                    )
+                item {
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 24.dp)
+                            .navigationBarsPadding()
+                    ) {
+                        EventButton(
+                            text = if (isJoined == true) "OPUŚĆ" else "DOŁĄCZ",
+                            onClick = {
+                                val db = FirebaseFirestore.getInstance()
+                                val eventRef = db.collection("events").document(activityId)
+                                Log.d("DetailsScreen", "User when clicking join: $user")
+                                val userRef =
+                                    user?.let { db.collection("users").document(it.userID) }
+
+
+                                if (!isJoined!!) {
+                                    if (event != null) {
+                                        user?.let {
+                                            event.participants.add(it.userID)
+                                            eventRef.update("participants", event.participants)
+                                                .addOnSuccessListener {
+                                                    Log.d(
+                                                        "Firebase",
+                                                        "User added to participants"
+                                                    )
+                                                }
+                                            eventRef.update(
+                                                "currentParticipants",
+                                                event.participants.size
+                                            )
+                                        }
+                                        userRef?.update(
+                                            "attendedEvents",
+                                            FieldValue.arrayUnion(eventRef.id)
+                                        )
+                                            ?.addOnSuccessListener {
+                                                Log.d(
+                                                    "CreateEventViewModel",
+                                                    "Event ID successfully added to user's attendedEvents"
+                                                )
+                                            }?.addOnFailureListener { e ->
+                                                Log.w(
+                                                    "CreateEventViewModel",
+                                                    "Error updating attendedEvents",
+                                                    e
+                                                )
+                                            }
+                                    }
+                                } else {
+                                    if (event != null) {
+                                        user?.let {
+                                            event.participants.remove(it.userID)
+                                            eventRef.update("participants", event.participants)
+                                                .addOnSuccessListener {
+                                                    Log.d(
+                                                        "Firebase",
+                                                        "User removed from participants"
+                                                    )
+                                                }
+                                            eventRef.update(
+                                                "currentParticipants",
+                                                event.participants.size
+                                            )
+                                        }
+                                        userRef?.update(
+                                            "attendedEvents",
+                                            FieldValue.arrayRemove(eventRef.id)
+                                        )
+                                            ?.addOnSuccessListener {
+                                                Log.d(
+                                                    "CreateEventViewModel",
+                                                    "Event ID successfully removed from user's attendedEvents"
+                                                )
+                                            }?.addOnFailureListener { e ->
+                                                Log.w(
+                                                    "CreateEventViewModel",
+                                                    "Error removing Event ID from attendedEvents",
+                                                    e
+                                                )
+                                            }
+                                    }
+                                }
+                                isJoined = !isJoined!!
+                            }
+                        )
+
+                        EventButton(
+                            text = "CZAT",
+                            onClick = {
+                                if (isJoined == true) {
+                                    navController.navigate("chat/$activityId")
+                                } else {
+                                    Log.d("DetailsScreen", "User is not a participant")
                                 }
                             }
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 5.dp)
-                            ) {
-                                Image(
-                                    painter = painterResource(id = if (isJoined == true) R.drawable.joinstatuson else R.drawable.joinstatusoff),
-                                    contentDescription = "Join status",
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .wrapContentWidth()
-                                        .height(10.dp)
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = if (isJoined==true) "Dołączono" else "Nie dołączono",
-                                    style = TextStyle(
-                                        fontSize = 24.sp,
-                                        fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = Color(0xFF003366),
-                                    )
-                                )
-                            }
-                        }
-
-                        item {
-                            Column(
-                                modifier = Modifier
-                                    .padding(horizontal = 24.dp)
-                                    .navigationBarsPadding()
-                            ) {
-                                EventButton(
-                                    text = if (isJoined == true) "OPUŚĆ" else "DOŁĄCZ",
-                                    onClick = {
-                                        val db = FirebaseFirestore.getInstance()
-                                        val eventRef = db.collection("events").document(activityId)
-                                        Log.d("DetailsScreen", "User when clicking join: $user")
-                                        val userRef = user?.let { db.collection("users").document(it.userID) }
-
-
-                                        if (!isJoined!!) {
-                                            if (event != null) {
-                                                user?.let {
-                                                    event.participants.add(it.userID)
-                                                    eventRef.update("participants", event.participants)
-                                                        .addOnSuccessListener { Log.d("Firebase", "User added to participants") }
-                                                    eventRef.update("currentParticipants", event.participants.size)
-                                                }
-                                                userRef?.update("attendedEvents", FieldValue.arrayUnion(eventRef.id))
-                                                    ?.addOnSuccessListener {
-                                                        Log.d("CreateEventViewModel", "Event ID successfully added to user's attendedEvents")
-                                                    }?.addOnFailureListener { e ->
-                                                    Log.w("CreateEventViewModel", "Error updating attendedEvents", e)
-                                                }
-                                            }
-                                        } else {
-                                            if (event != null) {
-                                                user?.let {
-                                                    event.participants.remove(it.userID)
-                                                    eventRef.update("participants", event.participants)
-                                                        .addOnSuccessListener { Log.d("Firebase", "User removed from participants") }
-                                                    eventRef.update("currentParticipants", event.participants.size)
-                                                }
-                                                userRef?.update("attendedEvents", FieldValue.arrayRemove(eventRef.id))
-                                                    ?.addOnSuccessListener {
-                                                        Log.d("CreateEventViewModel", "Event ID successfully removed from user's attendedEvents")
-                                                    }?.addOnFailureListener { e ->
-                                                        Log.w("CreateEventViewModel", "Error removing Event ID from attendedEvents", e)
-                                                    }
-                                            }
-                                        }
-                                        isJoined = !isJoined!!
-                                    }
-                                )
-
-                                EventButton(
-                                    text = "CZAT",
-                                    onClick = {
-                                        if (isJoined == true) {
-                                            navController.navigate("chat/$activityId")
-                                        } else {
-                                            Log.d("DetailsScreen", "User is not a participant")
-                                        }
-                                    }
-                                )
-                            }
-                        }
+                        )
                     }
                 }
             }
-        }
-    )
+
+    }
 }
 
-
-//@Composable
+        //@Composable
 //fun TomTomMapView(
 //    context: Context,
 //    coordinates: GeoPoint,
@@ -291,84 +361,103 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
 //    val mapFragment = MapFragment.newInstance(mapOptions)
 //
 //}
-fun createBitmapWithAntialiasing(context: Context, drawableId: Int, width: Int, height: Int): Bitmap {
-    val originalBitmap = BitmapFactory.decodeResource(context.resources, drawableId)
-    val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, width, height, true)
+        fun createBitmapWithAntialiasing(
+            context: Context,
+            drawableId: Int,
+            width: Int,
+            height: Int
+        ): Bitmap? {
+            val originalBitmap = BitmapFactory.decodeResource(context.resources, drawableId)
 
-    val antialiasedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(antialiasedBitmap)
+            if (originalBitmap == null) {
+                Log.e("BitmapError", "Failed to decode resource with ID: $drawableId")
+                return null
+            }
 
-    val paint = Paint(Paint.ANTI_ALIAS_FLAG) // Antialiasing enabled
-    canvas.drawBitmap(scaledBitmap, 0f, 0f, paint)
+            val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, width, height, true)
 
-    return antialiasedBitmap
-}
+            val antialiasedBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(antialiasedBitmap)
 
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG) // Antialiasing enabled
+            canvas.drawBitmap(scaledBitmap, 0f, 0f, paint)
 
+            return antialiasedBitmap
+        }
 
-@Composable
-fun TomTomMapView(context: Context, locationID: Map<String, Coordinates>, selectedAddress: String, cachedMapFragment: MapFragment?, event: Event) {
+        @Composable
+        fun TomTomMapView(
+            context: Context,
+            locationID: Map<String, Coordinates>,
+            selectedAddress: String,
+            cachedMapFragment: MapFragment?,
+            event: Event
+        ) {
 
+            var mapFragment by remember { mutableStateOf(cachedMapFragment) }
+            var isMapFragmentReady by remember { mutableStateOf(cachedMapFragment != null) }
+            val fragmentManager = (context as FragmentActivity).supportFragmentManager
 
-    var mapFragment by remember { mutableStateOf(cachedMapFragment) }
-    var isMapFragmentReady by remember { mutableStateOf(cachedMapFragment != null) }
-    val fragmentManager = (context as FragmentActivity).supportFragmentManager
+            val cords = locationID[selectedAddress]
 
-    val cords = locationID[selectedAddress]
+            if (!isMapFragmentReady) {
+                val mapOptions = MapOptions(
+                    mapKey = getApiKey(context),
+                )
+                Log.d("MapFragment", "Creating MapFragment")
+                LaunchedEffect(Unit) {
+                    createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
+                        mapFragment = fragment
+                        isMapFragmentReady = true
+                    }
+                }
+            }
 
-    if (!isMapFragmentReady) {
-        val mapOptions = MapOptions(
-            mapKey = getApiKey(context),
-        )
-        Log.d("MapFragment", "Creating MapFragment")
-        LaunchedEffect(Unit) {
-            createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
-                mapFragment = fragment
-                isMapFragmentReady = true
+            if (isMapFragmentReady && mapFragment?.view != null) {
+                val fragmentView = mapFragment?.view
+                if (fragmentView != null) {
+                    // Dopiero jeśli fragment ma widok, inicjalizuj AndroidView
+                    AndroidView(
+                        factory = { fragmentView },
+                        update = {
+                            mapFragment?.getMapAsync { tomTomMap ->
+                                if (cords != null) {
+                                    tomTomMap.moveCamera(
+                                        CameraOptions(
+                                            position = GeoPoint(cords.latitude, cords.longitude),
+                                            zoom = 15.0
+                                        )
+                                    )
+                                    val iconName = event.pinIconResId // np. "balonobraz"
+                                    val resourceId = context.resources.getIdentifier(
+                                        iconName,
+                                        "drawable",
+                                        context.packageName
+                                    )
+                                    val antialiasedBitmap =
+                                        createBitmapWithAntialiasing(context, resourceId, 90, 120)
+                                    if (antialiasedBitmap != null)
+                                    {
+                                        val markerOptions = MarkerOptions(
+                                            coordinate = GeoPoint(cords.latitude, cords.longitude),
+                                            pinImage = ImageFactory.fromBitmap(antialiasedBitmap),
+                                            pinIconImage = ImageFactory.fromBitmap(antialiasedBitmap),
+                                        )
+                                        tomTomMap.addMarker(markerOptions)
+
+                                        tomTomMap.addMarkerClickListener { }
+                                    }
+                                 else {
+                                    Log.e("MapMarker", "Failed to create bitmap for marker.")
+                                }
+
+                                }
+                            }
+                        },
+                    )
+                }
             }
         }
-    }
-
-    if (isMapFragmentReady && mapFragment != null) {
-        val fragmentView = mapFragment?.view
-        if (fragmentView != null) {
-            // Dopiero jeśli fragment ma widok, inicjalizuj AndroidView
-            AndroidView(
-                factory = { fragmentView },
-                update = {
-                    mapFragment?.getMapAsync { tomTomMap ->
-                        if (cords != null) {
-                            tomTomMap.moveCamera(
-                                CameraOptions(
-                                    position = GeoPoint(cords.latitude, cords.longitude),
-                                    zoom = 15.0
-                                )
-                            )
-                            val iconName = event.pinIconResId // np. "balonobraz"
-                            val resourceId = context.resources.getIdentifier(iconName, "drawable", context.packageName)
-                            val antialiasedBitmap = createBitmapWithAntialiasing(context, resourceId, 90, 120)
-                            val markerOptions = MarkerOptions(
-                                coordinate = GeoPoint(cords.latitude, cords.longitude),
-                                pinImage = ImageFactory.fromBitmap(antialiasedBitmap),
-                                pinIconImage = ImageFactory.fromBitmap(antialiasedBitmap),
-                            )
-                            tomTomMap.addMarker(markerOptions)
-
-                            tomTomMap.addMarkerClickListener { }
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .fillMaxWidth()
-                    .height(220.dp)
-                    .border(2.dp, Color.Black, RoundedCornerShape(16.dp))
-            )
-        }
-    }
-}
-
-
 
 
 //@Composable

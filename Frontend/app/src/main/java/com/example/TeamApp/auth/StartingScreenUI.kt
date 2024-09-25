@@ -106,23 +106,19 @@ fun StartingScreenUI(navController: NavController){
         val imageEnd = createGuidelineFromStart(0.9f)
         val imageTop = createGuidelineFromTop(0.1f)
         val imageBottom = createGuidelineFromBottom(0.56f)
-
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = null,
-                modifier= Modifier
-                    .fillMaxSize()
-
-                    .constrainAs(image) {
-                        top.linkTo(imageTop)
-                        start.linkTo(imageStart)
-                        end.linkTo(imageEnd)
-                        bottom.linkTo(imageBottom)
-                        height = Dimension.fillToConstraints
-                        width = Dimension.fillToConstraints
-
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            contentDescription = null,
+            modifier= Modifier
+                .fillMaxSize()
+                .constrainAs(image) {
+                    top.linkTo(imageTop)
+                    start.linkTo(imageStart)
+                    end.linkTo(imageEnd)
+                    bottom.linkTo(imageBottom)
+                    height = Dimension.fillToConstraints
+                    width = Dimension.fillToConstraints
                     }
-
             )
         Text(
             modifier = Modifier

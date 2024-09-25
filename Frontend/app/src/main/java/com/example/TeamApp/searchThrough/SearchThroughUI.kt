@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.TeamApp.excludedUI.ActivityCard
@@ -61,6 +63,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boolean) -> Unit) {
     val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val SearchViewModel: SearchThroughViewModel = SearchViewModelProvider.searchThroughViewModel
     var showEmptyMessage by remember { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
     val activityList = remember { viewModel.activityList }
@@ -70,11 +73,23 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
     val pullRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = {
         isRefreshing = true
     })
+    val filtersOn by SearchViewModel.filtersOn.observeAsState(false)
+
     LaunchedEffect(isRefreshing) {
         if (isRefreshing) {
             viewModel.isDataFetched = false
-            Log.d("SearchScreen", "Refreshing")
-            viewModel.fetchEvents()
+
+            Log.d("SearchScreen", "isRefreshing = $isRefreshing, filtersOn = $filtersOn")
+            if (filtersOn) {
+
+                val selectedSports = SearchViewModel.selectedSports.value ?: listOf()
+                Log.d("SearchScreen", "Fetching filtered events with sports: $selectedSports")
+                viewModel.fetchFilteredEvents(selectedSports)
+            } else {
+
+                Log.d("SearchScreen", "Fetching all events")
+                viewModel.fetchEvents()
+            }
             delay(300)
             isRefreshing = false
         }
