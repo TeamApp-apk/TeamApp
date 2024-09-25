@@ -41,7 +41,7 @@ data class Event(
             "Siłownia" to "figma_gym_icon",
             "Szermierka" to "figma_fencing_icon",
             "Tenis" to "figma_tennis_icon",
-            "Wędkarstwo" to "figma_fising_icon"
+            "Wędkarstwo" to "figma_fishing_icon"
         )
         val sportPinIcons: Map<String,String> = mapOf(
             "Badminton" to "figma_badminton_pin",
@@ -65,7 +65,6 @@ data class Event(
             "Szermierka" to "figma_fencing_pin",
             "Tenis" to "figma_tennis_pin",
             "Wędkarstwo" to "figma_fishing_pin"
-
         )
 
     }

@@ -40,7 +40,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.TeamApp.R
 import com.example.TeamApp.chat.Message
@@ -93,7 +92,7 @@ fun ChatScreen(navController: NavController, eventId: String, userViewModel: Use
         "Siłownia" to R.drawable.figma_gym_icon,
         "Szermierka" to R.drawable.figma_fencing_icon,
         "Tenis" to R.drawable.figma_tennis_icon,
-        "Wędkarstwo" to R.drawable.figma_fising_icon
+        "Wędkarstwo" to R.drawable.figma_fishing_icon
     )
 
     // Fetch the event name when eventId is passed
