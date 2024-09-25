@@ -1075,7 +1075,7 @@ fun MyDateTimePickerv2 ( modifier : Modifier ) {
                                 .clip(RoundedCornerShape(8.dp))
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
-                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                    indication = rememberRipple()
                                 ) {
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                     showDialog = false
@@ -1099,7 +1099,7 @@ fun MyDateTimePickerv2 ( modifier : Modifier ) {
                                 .clip(RoundedCornerShape(8.dp))
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
-                                    indication = rememberRipple() // Efekt "fal" przy kliknięciu
+                                    indication = rememberRipple()
                                 ) {
                                     viewModel.onDateChange(selectedDateTime)
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
