@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.graphics.Paint.Align
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,6 +46,10 @@ import androidx.constraintlayout.compose.Dimension
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Female
+import androidx.compose.material.icons.filled.Male
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -99,14 +104,14 @@ fun EditProfile(user: User){
                     ) // Adjust the margin to control how far from the bottom it should go
                 }
                 .width(360.dp)
-                .height(550.dp)
+                .height(570.dp)
                 .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
                 .padding(10.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ConstraintLayout() {
+            ConstraintLayout {
                 Row(
                     modifier = Modifier
                         .width(359.dp)
@@ -182,6 +187,16 @@ fun EditProfile(user: User){
                         user.birthDay = newBirthdayValue
                     }
                 )
+                SelectedSex(user = user, modifier =Modifier.constrainAs(GenderRow){
+                    top.linkTo(BirthdayTextField.bottom,margin=12.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                } )
+                AcceptChangesButton(modifier = Modifier.constrainAs(AcceptButton){
+                    top.linkTo(GenderRow.bottom, margin = 12.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                })
 
 
 
@@ -310,5 +325,105 @@ fun MyDatePicker(
         )
     }
 }
+@Composable
+fun SelectedSex(user: User, modifier: Modifier) {
+    var selectedSex by remember { mutableStateOf(user.gender) } // Store the selected gender
+
+    Row(
+        modifier = modifier
+            .width(317.dp)
+            .height(56.dp)
+            .padding(start = 10.dp, end = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        // Male button
+        Button(
+            onClick = {
+                selectedSex = "Male" // Update selected gender
+                user.gender = selectedSex // Assuming User class has a mutable gender property
+            },
+            modifier = Modifier
+                .weight(1f)
+                .width(140.dp)
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (selectedSex == "Male") Color(0xFF007BFF) else Color.LightGray
+            ),
+            shape = RoundedCornerShape(12.dp)
+
+        ) {
+            // Male Icon
+            Icon(
+                imageVector = Icons.Filled.Male, // Replace with your specific male icon if available
+                contentDescription = "Male",
+                tint = if (selectedSex == "Male") Color.White else Color.Black
+            )
+        }
+
+        // Female button
+        Button(
+            onClick = {
+                selectedSex = "Female" // Update selected gender
+                user.gender = selectedSex // Assuming User class has a mutable gender property
+            },
+            modifier = Modifier
+                .weight(1f)
+                .width(140.dp)
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (selectedSex == "Female") Color(0xFFFF94DF) else Color.LightGray
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            // Female Icon (you can use a different icon for female if available)
+            Icon(
+                imageVector = Icons.Filled.Female, // Replace with your specific female icon if available
+                contentDescription = "Female",
+                tint = if (selectedSex == "Female") Color.White else Color.Black
+            )
+        }
+    }
+}
+@Composable
+fun AcceptChangesButton(modifier: Modifier) {
+    Row(
+        modifier = modifier
+            .width(180.dp)
+            .height(56.dp)
+            .clickable {
+                // Handle click event here
+            }
+            .background(
+                color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 8.dp)
+            ) .border(
+                width = 0.5.dp,
+                color = Color.Black, // Set your border color here
+                shape = RoundedCornerShape(size = 8.dp) // Match the corner shape of the background
+            ),
+        verticalAlignment = Alignment.CenterVertically, // Center content vertically
+        horizontalArrangement = Arrangement.Center // Center content horizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize() // Take up the full size of the Row
+                .padding(8.dp) // Optional: padding around the text
+        ) {
+            Text(
+                text = "Zapisz zmiany",
+                style = TextStyle(
+                    fontSize = 24.sp,
+                    fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+                    fontWeight = FontWeight(500),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                ),
+                modifier = Modifier.align(Alignment.Center) // Center text within the Box
+            )
+        }
+    }
+}
+
+
 
 
