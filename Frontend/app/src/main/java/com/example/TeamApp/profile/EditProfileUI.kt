@@ -11,6 +11,7 @@ import com.example.TeamApp.data.User
 import androidx.compose.foundation.layout.*
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
+import android.content.Context
 import android.graphics.Paint.Align
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -65,6 +66,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.window.Dialog
 import com.example.TeamApp.auth.user
 import java.util.Calendar
+
+
+fun getIconResourceId(context: Context, iconName: String): Int {
+    val resourceId = context.resources.getIdentifier(iconName, "drawable", context.packageName)
+    return resourceId
+}
 
 
 @Composable
@@ -227,7 +234,7 @@ fun EditProfilePreview(){
 @Composable
 fun EditAvatar(modifier: Modifier = Modifier, user: User) {
     val context = LocalContext.current
-    val iconID = getIconResourceId(context, user.avatarUrl!!)
+    val iconID = getIconResourceId(context, "testavatar")
 
     Box(
         modifier = modifier
