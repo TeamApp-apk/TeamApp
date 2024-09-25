@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -63,7 +64,7 @@ fun SexAndNameChoice (navController: NavController) {
     val nameFocusRequester = remember { FocusRequester() }
     val context = LocalContext.current
     val view = LocalView.current
-    val viewModel: LoginViewModel = viewModel()
+    val viewModel: LoginViewModel = LoginViewModelProvider.loginViewModel
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
     var snackbarSuccess by remember { mutableStateOf(false) }
@@ -74,6 +75,10 @@ fun SexAndNameChoice (navController: NavController) {
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
     )
+    LaunchedEffect(Unit){
+        viewModel.loadAvatars(25)
+
+    }
 
     Surface( modifier = Modifier.fillMaxSize() ) {
         //we are drawing on top of the box since guidelines do not work with that for some reason?
@@ -302,7 +307,7 @@ fun NameBox(labelValue: String, painterResource: Painter,
 
 @Composable
 fun ButtonNext(modifier: Modifier, navController: NavController) {
-    val viewModel: LoginViewModel = viewModel()
+    val viewModel: LoginViewModel = LoginViewModelProvider.loginViewModel
     val isLoading by viewModel.isLoading.observeAsState(false)
 
     Button(

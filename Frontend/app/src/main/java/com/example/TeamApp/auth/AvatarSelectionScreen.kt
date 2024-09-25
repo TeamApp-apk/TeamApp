@@ -1,5 +1,6 @@
 package com.example.TeamApp.auth
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -25,7 +29,15 @@ import com.example.ui.theme.textInUpperBoxForgotPassword
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AvatarSelectionScreen(navController: NavController) {
-    val viewModel: LoginViewModel = viewModel()
+    val viewModel: LoginViewModel = LoginViewModelProvider.loginViewModel
+    val avatars by viewModel.avatars.observeAsState(emptyList())
+    val selectedAvatarIndex by viewModel.selectedAvatarIndex.observeAsState(0)
+    LaunchedEffect(Unit) {
+        Log.d("AvatarSelection", "Loaded avatars: ${avatars.size}")
+        avatars.forEach { avatar ->
+            Log.d("AvatarSelection", "Avatar: faceUrl=${avatar.faceUrl}, avatarUrl=${avatar.avatarUrl}")
+        }
+    }
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF),

@@ -77,18 +77,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.example.TeamApp.R
 import com.example.TeamApp.data.Coordinates
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.data.Suggestion
-import com.example.TeamApp.data.User
 import com.example.TeamApp.excludedUI.EventButton
 import com.example.TeamApp.excludedUI.PickerExample
 import com.google.firebase.auth.FirebaseAuth
-import com.tomtom.sdk.map.display.MapOptions
 import com.tomtom.sdk.search.SearchCallback
 import com.tomtom.sdk.search.SearchOptions
 import com.tomtom.sdk.search.SearchResponse
@@ -100,13 +97,12 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 import java.util.Properties
-import java.util.UUID
 
 
 @Composable
 fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel) {
     val user by userViewModel.user.observeAsState()
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
 
     val sport by viewModel.sport.observeAsState("")
     val address by viewModel.location.observeAsState("")
@@ -565,7 +561,7 @@ fun DescriptionDialog(
 ) {
     val allowedCharsRegex = Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
     var text by remember { mutableStateOf(initialText) }
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
 
     val focusRequester = remember { FocusRequester() }
 
@@ -702,7 +698,7 @@ fun SearchStreetField( modifier : Modifier ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val hapticFeedback = LocalHapticFeedback.current
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
     val focusRequester = remember { FocusRequester() }
     val searchApi = remember { OnlineSearch.create(context, getApiKey(context)) }
 
@@ -935,7 +931,7 @@ fun SearchStreetField( modifier : Modifier ) {
 @SuppressLint("DefaultLocale")
 @Composable
 fun MyDateTimePickerv2 ( modifier : Modifier ) {
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
     var selectedDateTime by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
     val calendar = Calendar.getInstance()
@@ -1124,7 +1120,7 @@ fun MyDateTimePickerv2 ( modifier : Modifier ) {
 @Composable
 fun MyDateTimePicker(onDateChange: (String) -> Unit,
                      modifier : Modifier) {
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
     var selectedDateTime by remember { mutableStateOf("") }
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
@@ -1189,7 +1185,7 @@ fun MyDateTimePicker(onDateChange: (String) -> Unit,
 
 @Composable
 fun SportPopupButton(modifier: Modifier) {
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
     val availableSports = viewModel.getAvailableSports()
     var showDialog by remember { mutableStateOf(false) }
     val selectedSport by viewModel.sport.observeAsState("")
@@ -1297,7 +1293,7 @@ fun SportPopupButton(modifier: Modifier) {
 fun ParticipantsPopupButton(modifier: Modifier) {
     var selectedPeople by remember { mutableStateOf<Int?>(null) }
     var showDialog by remember { mutableStateOf(false) }
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
     val limit by viewModel.limit.observeAsState("")
     val hapticFeedback = LocalHapticFeedback.current
 

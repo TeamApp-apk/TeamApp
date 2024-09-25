@@ -43,13 +43,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.TeamApp.event.CreateEventViewModel
-import com.example.TeamApp.event.ViewModelProvider
+import com.example.TeamApp.event.CreateEventViewModelProvider
 import com.example.TeamApp.excludedUI.ConfirmationDialog
 import com.example.TeamApp.excludedUI.DeleteAccountDialog
 
 @Composable
 fun SettingsScreenv2(navController: NavController) {
-    val createEventViewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val createEventViewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
     val viewModel: SettingsViewModel = viewModel()
     val context = LocalContext.current
     var showConfirmation by remember { mutableStateOf(false) }

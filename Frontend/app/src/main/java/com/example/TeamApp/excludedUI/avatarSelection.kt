@@ -1,6 +1,7 @@
 package com.example.TeamApp.excludedUI
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,21 +31,26 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.auth.LoginViewModel
+import com.example.TeamApp.auth.LoginViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel as viewModel
 
 @Composable
 fun AvatarSelection(navController: NavController) {
-    val viewModel : LoginViewModel = viewModel()
+    val viewModel: LoginViewModel = LoginViewModelProvider.loginViewModel
     // Observe avatars and selected avatar
     val avatars by viewModel.avatars.observeAsState(emptyList())
     val selectedAvatarIndex by viewModel.selectedAvatarIndex.observeAsState(0)
     val listState = rememberLazyListState()
+    LaunchedEffect(Unit) {
+        Log.d("AvatarSelection", "Loaded avatars: ${avatars.size}")
+    }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
         // Display selected avatar (the one in the center)
         avatars.getOrNull(selectedAvatarIndex)?.let { avatar ->
+            Log.d("AvatarSelection", "Selected avatar: $avatar")
             DisplaySelectedAvatar(avatar.avatarUrl)
         }
 
@@ -88,11 +94,11 @@ fun AvatarSelection(navController: NavController) {
         }
 
         // Trigger loading more avatars when user scrolls close to the end
-        LaunchedEffect(shouldLoadMore.value) {
-            if (shouldLoadMore.value) {
-                viewModel.loadAvatars(25)
-            }
-        }
+//        LaunchedEffect(shouldLoadMore.value) {
+//            if (shouldLoadMore.value) {
+//                viewModel.loadAvatars(25)
+//            }
+//        }
 
         Button(onClick = {
             val selectedAvatar = avatars.getOrNull(selectedAvatarIndex)

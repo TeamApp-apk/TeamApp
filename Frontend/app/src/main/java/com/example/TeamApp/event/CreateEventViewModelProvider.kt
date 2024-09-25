@@ -1,6 +1,6 @@
 package com.example.TeamApp.event
 
-object ViewModelProvider {
+object CreateEventViewModelProvider {
     val createEventViewModel: CreateEventViewModel by lazy {
         CreateEventViewModel()
     }

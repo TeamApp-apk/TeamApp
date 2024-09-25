@@ -2,7 +2,6 @@ package com.example.TeamApp
 
 import BottomNavBar
 import ChatScreen
-import MessageScreen
 import UserViewModel
 import android.os.Bundle
 import android.util.Log
@@ -10,27 +9,19 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,25 +30,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.TeamApp.auth.ForgotPasswordScreen
-import com.example.TeamApp.auth.RegisterScreen
-import com.example.TeamApp.data.User
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.event.CreateEventViewModel
 import com.example.TeamApp.event.DetailsScreen
 //import com.example.TeamApp.event.MapScreen
-import com.example.TeamApp.event.ViewModelProvider
+import com.example.TeamApp.event.CreateEventViewModelProvider
 import com.example.TeamApp.profile.ProfileScreen
 import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.searchThrough.FiltersScreen
 import com.example.TeamApp.settings.SendMessageScreen
-import com.example.TeamApp.settings.SettingsScreen
 import com.example.TeamApp.settings.SettingsScreenv2
 import com.example.TeamApp.settings.TermsOfUse
 import com.example.TeamApp.settings.YourEventsScreen
@@ -66,7 +51,6 @@ import com.example.TeamApp.utils.SystemUiUtils
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import com.google.accompanist.swiperefresh.SwipeRefreshState
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
@@ -88,7 +72,7 @@ class MainAppActivity : AppCompatActivity() {
             var showMainContent by remember { mutableStateOf(false) }
             var isRefreshing by remember { mutableStateOf(false) }
             val userViewModel: UserViewModel = viewModel()
-            val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+            val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
             LaunchedEffect(navController) {
 //                navController.addOnDestinationChangedListener { _, destination, _ ->
 //                    isBottomBarVisible = when (destination.route) {

@@ -49,12 +49,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
 import com.example.TeamApp.excludedUI.ActivityCard
 import com.example.TeamApp.event.CreateEventViewModel
-import com.example.TeamApp.event.ViewModelProvider
+import com.example.TeamApp.event.CreateEventViewModelProvider
 import kotlinx.coroutines.delay
 
 
@@ -62,7 +61,7 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boolean) -> Unit) {
-    val viewModel: CreateEventViewModel = ViewModelProvider.createEventViewModel
+    val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
     val SearchViewModel: SearchThroughViewModel = SearchViewModelProvider.searchThroughViewModel
     var showEmptyMessage by remember { mutableStateOf(false) }
     val scrollState = rememberLazyListState()

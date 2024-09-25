@@ -345,10 +345,13 @@ class LoginViewModel : ViewModel() {
             gender = "Female",
             avatar = "null"
         )
-        loadAvatars(10)
     }
 
     fun loadAvatars(limit: Int) {
+        if (_avatars.value?.isNotEmpty() == true) {
+            Log.d("AvatarLoading", "Awatary są już załadowane.")
+            return
+        }
         val storage = FirebaseStorage.getInstance()
         //val limit = minOf(_loadedCount + 10, TOTAL_AVATARS_COUNT)
         if(limit <= TOTAL_AVATARS_COUNT){
