@@ -1,6 +1,6 @@
 package com.example.TeamApp.profile
 
-import android.content.Context
+import UserViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -21,30 +20,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.example.TeamApp.R
 import com.example.TeamApp.excludedUI.UserProfileButton
 import com.example.TeamApp.excludedUI.Variables
 
 
-fun getIconResourceId(context: Context, iconName: String): Int {
-    val resourceId = context.resources.getIdentifier(iconName, "drawable", context.packageName)
-    return resourceId
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController) {
+fun ProfileScreen(navController: NavController, vieModel:UserViewModel) {
     val context = LocalContext.current
-    val loginViewModel: LoginViewModel = viewModel()
-    val user by loginViewModel.user.observeAsState()
+    val user by vieModel.user.observeAsState()
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF),
     )
     user?.let { userData ->
-        val iconId = getIconResourceId(context, userData.avatarUrl!!)
+        val avatarUrl = user!!.avatar
         Box(modifier = Modifier
             .fillMaxSize()
             .background(brush = Brush.linearGradient(colors = gradientColors))
@@ -60,7 +54,7 @@ fun ProfileScreen(navController: NavController) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ){
                     Image(
-                        painter = painterResource(iconId),
+                        painter = rememberImagePainter(avatarUrl),
                         contentDescription = "Profile picture",
                         modifier = Modifier
                             .padding(bottom = 12.dp)

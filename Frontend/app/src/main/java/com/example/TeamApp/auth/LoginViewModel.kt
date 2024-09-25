@@ -401,31 +401,62 @@ class LoginViewModel : ViewModel() {
 
 
     fun saveSelectedAvatar(avatarUrl: String) {
-//        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-//        val db = FirebaseFirestore.getInstance()
-//        val userRef = db.collection("users").document(userId)
-//
-//        // Sprawdź, czy dokument istnieje
-//        userRef.get()
-//            .addOnSuccessListener { document ->
-//                if (document.exists()) {
-//                    // Dokument istnieje, zaktualizuj avatar
-//                    userRef.update("avatar", avatarUrl)
-//                        .addOnSuccessListener {
-//                            Log.d("Firestore", "Avatar updated for user $userId")
-//                        }
-//                        .addOnFailureListener { e ->
-//                            Log.e("Firestore", "Error updating avatar: ${e.message}")
-//                        }
-//                } else {
-//                    // Dokument nie istnieje, zgłoś błąd
-//                    Log.e("Firestore", "User document not found for user ID: $userId")
-//                }
-//            }
-//            .addOnFailureListener { e ->
-//                Log.e("Firestore", "Error fetching user document: ${e.message}")
-//            }
-        _user.value!!.avatarUrl = avatarUrl
-        Log.d("USER","avatarURL: ${_user.value!!.avatarUrl}")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val db = FirebaseFirestore.getInstance()
+        val userRef = db.collection("users").document(userId)
+
+        // Sprawdź, czy dokument istnieje
+        userRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // Dokument istnieje, zaktualizuj avatar
+                    userRef.update("avatar", avatarUrl)
+                        .addOnSuccessListener {
+                            Log.d("Firestore", "Avatar updated for user $userId")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("Firestore", "Error updating avatar: ${e.message}")
+                        }
+                    _user.value?.avatar = avatarUrl
+                } else {
+                    // Dokument nie istnieje, zgłoś błąd
+                    Log.e("Firestore", "User document not found for user ID: $userId")
+                }
+            }
+           .addOnFailureListener { e ->
+                Log.e("Firestore", "Error fetching user document: ${e.message}")
+            }
+        Log.d("USER","avatarURL: ${_user.value!!.avatar}")
+    }
+    fun saveUserData(name: String, birthDate: String, gender: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val db = FirebaseFirestore.getInstance()
+        val userRef = db.collection("users").document(userId)
+
+        // Check if the document exists
+        userRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // Document exists, update name, birth date, and gender
+                    userRef.update(mapOf(
+                        "name" to name,
+                        "birthDay" to birthDate,
+                        "gender" to gender
+                    ))
+                        .addOnSuccessListener {
+                            Log.d("Firestore", "User data updated for user $userId")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("Firestore", "Error updating user data: ${e.message}")
+                        }
+                } else {
+                    // Document does not exist, report error
+                    Log.e("Firestore", "User document not found for user ID: $userId")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error fetching user document: ${e.message}")
+            }
     }
 }
+

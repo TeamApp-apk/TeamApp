@@ -162,7 +162,7 @@ class MainAppActivity : AppCompatActivity() {
                                     exitTransition = { fadeOut(animationSpec = tween(300)) },
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
-                                ) { ProfileScreen(navController) }
+                                ) { ProfileScreen(navController, userViewModel) }
 
                                 composable(
                                     route = "settings",

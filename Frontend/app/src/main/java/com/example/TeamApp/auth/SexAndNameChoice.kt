@@ -1,5 +1,6 @@
 package com.example.TeamApp.auth
 
+import UserViewModel
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -57,19 +58,23 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
+import com.example.TeamApp.data.User
 import com.example.ui.theme.buttonLogIn
 
 @Composable
-fun SexAndNameChoice (navController: NavController) {
+fun SexAndNameChoice (navController: NavController, userViewModel: UserViewModel) {
     val nameFocusRequester = remember { FocusRequester() }
     val context = LocalContext.current
     val view = LocalView.current
     val viewModel: LoginViewModel = LoginViewModelProvider.loginViewModel
+    val user = userViewModel.user.observeAsState()
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
     var snackbarSuccess by remember { mutableStateOf(false) }
     var isMale by remember { mutableStateOf(false) }
     var isFemale by remember { mutableStateOf(false) }
+    var name by remember { mutableStateOf("") }
+    var birthDate by remember { mutableStateOf("") }
 
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
@@ -113,38 +118,39 @@ fun SexAndNameChoice (navController: NavController) {
             val nameEnd = createGuidelineFromStart(0.9f)
             val nameTop = createGuidelineFromTop(0.2f)
             val nameBottom = createGuidelineFromTop(0.265f)
-            NameBox (labelValue = "Imię",
-                painterResource (id = R.drawable.user_icon),
+            NameBox(
+                labelValue = "Imię",
+                painterResource = painterResource(id = R.drawable.user_icon),
                 nextFocusRequester = null,
                 focusRequester = nameFocusRequester,
-                modifier = Modifier
-                    .constrainAs(nameBox) {
-                        top.linkTo(nameTop)
-                        bottom.linkTo(nameBottom)
-                        start.linkTo(nameStart)
-                        end.linkTo(nameEnd)
-                        height = Dimension.fillToConstraints
-                        width = Dimension.fillToConstraints
-                    }
+                modifier = Modifier.constrainAs(nameBox) { top.linkTo(nameTop)
+                    bottom.linkTo(nameBottom)
+                    start.linkTo(nameStart)
+                    end.linkTo(nameEnd)
+                    height = Dimension.fillToConstraints
+                    width = Dimension.fillToConstraints },
+                textValue = name, // Przekazujemy bieżące imię
+                onTextChanged = { newName -> name = newName } // Aktualizujemy wartość imienia
             )
 
             val birthdayStart = createGuidelineFromStart(0.1f)
             val birthdayEnd = createGuidelineFromStart(0.9f)
             val birthdayTop = createGuidelineFromTop(0.3f)
             val birthdayBottom = createGuidelineFromTop(0.365f)
-            NameBox (labelValue = "Data urodzenia",
-                painterResource (id = R.drawable.user_icon),
+            NameBox(
+                labelValue = "Data urodzenia",
+                painterResource = painterResource(id = R.drawable.user_icon),
                 nextFocusRequester = null,
                 focusRequester = nameFocusRequester,
-                modifier = Modifier
-                    .constrainAs(birthdayBox) {
-                        top.linkTo(birthdayTop)
-                        bottom.linkTo(birthdayBottom)
-                        start.linkTo(birthdayStart)
-                        end.linkTo(birthdayEnd)
-                        height = Dimension.fillToConstraints
-                        width = Dimension.fillToConstraints
-                    }
+                modifier = Modifier.constrainAs(birthdayBox) {  top.linkTo(birthdayTop)
+                    bottom.linkTo(birthdayBottom)
+                    start.linkTo(birthdayStart)
+                    end.linkTo(birthdayEnd)
+                    height = Dimension.fillToConstraints
+                    width = Dimension.fillToConstraints
+                },
+                textValue = birthDate, // Przekazujemy bieżącą datę
+                onTextChanged = { newBirthDate -> birthDate = newBirthDate } // Aktualizujemy wartość daty
             )
 
             val maleStart = createGuidelineFromStart(0.15f)
@@ -160,7 +166,7 @@ fun SexAndNameChoice (navController: NavController) {
                     height = Dimension.fillToConstraints
                     width = Dimension.fillToConstraints
                 }
-                .clip( shape = RoundedCornerShape(23.dp))
+                .clip(shape = RoundedCornerShape(23.dp))
                 .background(if (isMale) Color.Cyan else Color.White)
                 .clickable()
                 {
@@ -195,7 +201,7 @@ fun SexAndNameChoice (navController: NavController) {
                     height = Dimension.fillToConstraints
                     width = Dimension.fillToConstraints
                 }
-                .clip( shape = RoundedCornerShape(23.dp))
+                .clip(shape = RoundedCornerShape(23.dp))
                 .background(if (isFemale) Color.Cyan else Color.White)
                 .clickable()
                 {
@@ -221,17 +227,18 @@ fun SexAndNameChoice (navController: NavController) {
             val nextEnd = createGuidelineFromStart(0.9f)
             val nextTop = createGuidelineFromTop(0.5f)
             val nextBottom = createGuidelineFromTop(0.565f)
-            ButtonNext( modifier = Modifier
-                .background(color = Color(0xFF007BFF), shape = RoundedCornerShape(23.dp))
-                .constrainAs(nextButton) {
-                    top.linkTo(nextTop)
+            ButtonNext(
+                modifier = Modifier.constrainAs(nextButton) { top.linkTo(nextTop)
                     bottom.linkTo(nextBottom)
                     start.linkTo(nextStart)
                     end.linkTo(nextEnd)
                     height = Dimension.fillToConstraints
-                    width = Dimension.fillToConstraints
-                }
-                ,navController
+                    width = Dimension.fillToConstraints },
+                navController = navController,
+                userViewModel = userViewModel,
+                name = name, // przekazujemy imię
+                birthDate = birthDate, // przekazujemy datę urodzenia
+                gender = if (isMale) "Male" else if (isFemale) "Female" else ""
             )
         }
     }
@@ -239,59 +246,40 @@ fun SexAndNameChoice (navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NameBox(labelValue: String, painterResource: Painter,
-                    nextFocusRequester: FocusRequester?,
-                    focusRequester: FocusRequester,
-                    modifier: Modifier
+fun NameBox(
+    labelValue: String,
+    painterResource: Painter,
+    nextFocusRequester: FocusRequester?,
+    focusRequester: FocusRequester,
+    modifier: Modifier,
+    textValue: String, // Przekazujemy wartość tekstową
+    onTextChanged: (String) -> Unit // Przekazujemy funkcję do obsługi zmiany tekstu
 ) {
-
-    val textValue = remember { mutableStateOf("") }
-    val viewModel: LoginViewModel = viewModel()
-    val email by viewModel.email.observeAsState("")
     val focusManager = LocalFocusManager.current
 
     TextField(
         modifier = modifier,
-        label = {
-            Text(
-                text = labelValue,
-            )
-        },
-        value = if (labelValue == "E-mail") email else textValue.value,
+        label = { Text(text = labelValue) },
+        value = textValue, // Ustawiamy aktualną wartość tekstową
         onValueChange = { newText ->
-
-            if (labelValue == "E-mail") {
-                val allowedCharsRegex =
-                    Regex("^[0-9a-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
-                if (allowedCharsRegex.matches(newText)) {
-                    viewModel.onEmailChange(newText)
-
-                }
-            } else {
-                val allowedCharsRegex =
-                    Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
-                if (allowedCharsRegex.matches(newText)) {
-                    textValue.value = newText
-                }
+            // Aktualizujemy tekst, gdy użytkownik coś wpisze
+            val allowedCharsRegex =
+                Regex("^[0-9\\sa-zA-Z!@#\$%^&*()_+=\\-{}\\[\\]:\";'<>?,./]*\$")
+            if (allowedCharsRegex.matches(newText)) {
+                onTextChanged(newText) // Wywołujemy funkcję, która aktualizuje wartość
             }
         },
         keyboardOptions = KeyboardOptions.Default.copy(
-            imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done,
-            keyboardType = KeyboardType.Password
+            imeAction = if (nextFocusRequester != null) ImeAction.Next else ImeAction.Done
         ),
         keyboardActions = KeyboardActions(
-            onNext = {
-                nextFocusRequester?.requestFocus() ?: focusManager.clearFocus()
-            },
-            onDone = {
-                focusManager.clearFocus()
-            }
+            onNext = { nextFocusRequester?.requestFocus() ?: focusManager.clearFocus() },
+            onDone = { focusManager.clearFocus() }
         ),
         colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             containerColor = Color.White
-
         ),
         leadingIcon = {
             Icon(
@@ -306,19 +294,28 @@ fun NameBox(labelValue: String, painterResource: Painter,
 }
 
 @Composable
-fun ButtonNext(modifier: Modifier, navController: NavController) {
+fun ButtonNext(modifier: Modifier, navController: NavController, userViewModel: UserViewModel, name: String, birthDate: String, gender: String) {
     val viewModel: LoginViewModel = LoginViewModelProvider.loginViewModel
     val isLoading by viewModel.isLoading.observeAsState(false)
-
+    val user by userViewModel.user.observeAsState()
     Button(
         onClick = {
             Log.d("SexAndNameChoice", "ButtonNext: onClick")
+
+            user?.name = name
+            user?.birthDay = birthDate
+            user?.gender = gender
+
+            // Save data to Firebase
+            viewModel.saveUserData(name, birthDate, gender)
+
+            // Navigate to the next screen (avatar selection)
             navController.navigate("avatarSelection") {
                 popUpTo("sexName") {
                     inclusive = false
                 }
             }
-        }, // TODO
+        },
         colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(10.dp),
@@ -338,10 +335,8 @@ fun ButtonNext(modifier: Modifier, navController: NavController) {
             } else {
                 Box(
                     modifier = Modifier
-                        .weight(1f) // Take up remaining space on the left
+                        .weight(1f)
                         .wrapContentWidth(align = Alignment.CenterHorizontally)
-
-
                 ) {
                     Text(
                         text = "Dalej",
@@ -358,3 +353,4 @@ fun ButtonNext(modifier: Modifier, navController: NavController) {
         }
     }
 }
+

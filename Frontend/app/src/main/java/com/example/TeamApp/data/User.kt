@@ -8,7 +8,7 @@ class User {
     var email: String? = null
     var birthDay: String? = null
     var gender: String? = null;
-    var avatarUrl: String? = null;
+    var avatar: String? = null;
     var userID: String = UUID.randomUUID().toString()
     var attendedEvents: MutableList<Any> = ArrayList()
     //age do dodania
@@ -24,14 +24,15 @@ class User {
         this.email = email
         this.birthDay = birthDay
         this.gender = gender
-        this.avatarUrl = avatar
+        this.avatar = avatar
     }
 
     override fun toString(): String {
         return "User{" +
                 "name='" + name + '\'' +
                 ", email='" + email + '\'' +
-                ", userID='" + userID + '\'' +  // Dodajemy userID do toString()
+                ", userID='" + userID + '\'' +
+                ", avatarUrl" + avatar + '\'' + // Dodajemy userID do toString()
                 '}'
     }
 
