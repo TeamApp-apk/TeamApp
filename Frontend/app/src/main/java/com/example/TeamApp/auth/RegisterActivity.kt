@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import com.example.TeamApp.MainAppActivity
 import com.example.TeamApp.data.User
+import com.example.TeamApp.data.UserViewModelProvider.userViewModel
 import com.example.TeamApp.ui.LoadingScreen
 import com.example.TeamApp.utils.SystemUiUtils
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -43,6 +44,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import kotlinx.coroutines.delay
 
@@ -154,7 +156,7 @@ class RegisterActivity : ComponentActivity() {
                         composable("register") { RegisterScreen(navController) }
                         composable("login") { LoginScreen(navController) }
                         composable("forgotPassword") { ForgotPasswordScreen(navController) }
-                        composable("sexName") { SexAndNameChoice(navController) }
+                        composable("sexName") { SexAndNameChoice(navController, userViewModel) }
                         composable("avatarSelection") { AvatarSelectionScreen(navController) }
 
                     }

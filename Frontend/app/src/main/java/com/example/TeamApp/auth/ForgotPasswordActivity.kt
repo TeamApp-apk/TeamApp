@@ -1,5 +1,6 @@
 package com.example.TeamApp.auth
 
+import UserViewModel
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -41,7 +42,7 @@ class ForgotPasswordActivity : ComponentActivity() {
                 //composable("createEvent") { CreateEventScreen(navController, ) }
                 composable("register") { RegisterScreen(navController) }
                 //dodalem to user zeby moc zobaczyc czy bedzie mi dzialalo korzystanie z tej metody getResourceId
-                composable("profile"){ ProfileScreen(navController) }
+                composable("profile"){ ProfileScreen(navController, UserViewModel()) }
                 composable("settings"){ SettingsScreen(navController) }
                 //composable("search"){ SearchScreen(navController) }
             }

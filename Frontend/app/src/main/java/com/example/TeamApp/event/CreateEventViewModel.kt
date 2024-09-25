@@ -152,6 +152,7 @@ class CreateEventViewModel : ViewModel() {
             .addOnFailureListener { e ->
                 Log.w("CreateEventViewModel", "Error fetching events", e)
             }
+
     }
 
     fun fetchFilteredEvents(selectedSports: List<String>) {

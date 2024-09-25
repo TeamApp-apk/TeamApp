@@ -174,32 +174,10 @@ fun RegisterScreen(navController: NavController){
                         width = Dimension.fillToConstraints
                     }
             )
-
-            /*
-            val nameStart = createGuidelineFromStart(0.1f)
-            val nameEnd = createGuidelineFromStart(0.9f)
-            val nameTop = createGuidelineFromTop(0.17f)
-            val nameBottom = createGuidelineFromTop(0.235f)
-            NameAndEmailBox(labelValue = "Nazwa", painterResource (id = R.drawable.user_icon),
-                nextFocusRequester = emailFocusRequester,
-                focusRequester = nameFocusRequester,
-                modifier = Modifier
-                    .constrainAs(nameBox) {
-                        top.linkTo(nameTop)
-                        bottom.linkTo(nameBottom)
-                        start.linkTo(nameStart)
-                        end.linkTo(nameEnd)
-                        height = Dimension.fillToConstraints
-                        width = Dimension.fillToConstraints
-                    }
-                    .focusRequester(nameFocusRequester)
-            )
-            */
-
             val emailStart = createGuidelineFromStart(0.1f)
             val emailEnd = createGuidelineFromStart(0.9f)
-            val emailTop = createGuidelineFromTop(0.27f)
-            val emailBottom = createGuidelineFromTop(0.335f)
+            val emailTop = createGuidelineFromTop(0.17f)
+            val emailBottom = createGuidelineFromTop(0.235f)
             NameAndEmailBox(labelValue = "E-mail", painterResource (id = R.drawable.mail_icon),
                 nextFocusRequester = passwordFocusRequester,
                 focusRequester = emailFocusRequester,
@@ -217,8 +195,8 @@ fun RegisterScreen(navController: NavController){
 
             val passStart = createGuidelineFromStart(0.1f)
             val passEnd = createGuidelineFromStart(0.9f)
-            val passTop = createGuidelineFromTop(0.37f)
-            val passBottom = createGuidelineFromTop(0.435f)
+            val passTop = createGuidelineFromTop(0.27f)
+            val passBottom = createGuidelineFromTop(0.335f)
             PasswordTextField(labelValue ="Hasło" , painterResource (id=R.drawable.lock_icon),
                 nextFocusRequester = repeatpasswordFocusRequester,
                 focusRequester = passwordFocusRequester,
@@ -236,8 +214,8 @@ fun RegisterScreen(navController: NavController){
 
             val repeatStart = createGuidelineFromStart(0.1f)
             val repeatEnd = createGuidelineFromStart(0.9f)
-            val repeatTop = createGuidelineFromTop(0.47f)
-            val repeatBottom = createGuidelineFromTop(0.535f)
+            val repeatTop = createGuidelineFromTop(0.37f)
+            val repeatBottom = createGuidelineFromTop(0.435f)
             PasswordTextFieldRepeatPassword(labelValue ="Powtórz hasło" , painterResource (id=R.drawable.lock_icon),
                 nextFocusRequester = null,
                 focusRequester = repeatpasswordFocusRequester,
@@ -255,8 +233,8 @@ fun RegisterScreen(navController: NavController){
 
             val signUpStart = createGuidelineFromStart(0.1f)
             val signUpEnd = createGuidelineFromStart(0.9f)
-            val signUpTop = createGuidelineFromTop(0.57f)
-            val signUpBottom = createGuidelineFromTop(0.66f)
+            val signUpTop = createGuidelineFromTop(0.50f)
+            val signUpBottom = createGuidelineFromTop(0.59f)
             ButtonSignUP(navController,
                 onSnackbarMessageChanged = { message -> snackbarMessage = message ?: "" },
                 onShowSnackbar = { showSnackbar = it },
@@ -272,7 +250,7 @@ fun RegisterScreen(navController: NavController){
                     }
             )
 
-            val dividerTop = createGuidelineFromTop(0.7f)
+            val dividerTop = createGuidelineFromTop(0.65f)
             val dividerStart = createGuidelineFromStart(0.1f)
             val dividerEnd = createGuidelineFromStart(0.9f)
             DividerTextComponent(modifier = Modifier
@@ -286,8 +264,8 @@ fun RegisterScreen(navController: NavController){
 
             val googleStart = createGuidelineFromStart(0.1f)
             val googleEnd = createGuidelineFromStart(0.9f)
-            val googleTop = createGuidelineFromTop(0.75f)
-            val googleBottom = createGuidelineFromTop(0.85f)
+            val googleTop = createGuidelineFromTop(0.7f)
+            val googleBottom = createGuidelineFromTop(0.8f)
             GoogleLoginButton(modifier = Modifier
                 .shadow(
                     elevation = 30.dp,
@@ -306,7 +284,7 @@ fun RegisterScreen(navController: NavController){
                 }
             )
 
-            val logInTextTop = createGuidelineFromTop(0.9f)
+            val logInTextTop = createGuidelineFromTop(0.85f)
             ClickableLoginTextComponent ( modifier = Modifier
                 .constrainAs(logInText) {
                     top.linkTo(logInTextTop)

@@ -9,11 +9,13 @@ import com.google.firebase.firestore.firestore
 
 class UserViewModel : ViewModel() {
     private val _user = MutableLiveData<User>()
-    val user: LiveData<User> = _user
+    val user: MutableLiveData<User> get() = _user
 
     fun setUser(user: User) {
         _user.value = user
     }
+
+
 
 
     fun fetchUserFromFirestore(email: String) {
