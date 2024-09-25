@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -36,18 +37,41 @@ fun AvatarSelectionScreen(navController: NavController) {
         Color(0xFFE8E8E8),
         Color(0xFF007BFF),
     )
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.background(brush = Brush.linearGradient(colors = gradientColors)).fillMaxSize()
 
-    ) {
-        Text(
-            textAlign = TextAlign.Center,
-            style = textInUpperBoxForgotPassword,
-            text = "Wybierz swój awatar ${viewModel.user.value!!.name}",
-            modifier = Modifier.padding(16.dp)
+    ConstraintLayout(modifier = Modifier.fillMaxSize()
+        .background(brush = Brush.linearGradient(colors = gradientColors)).fillMaxSize()) {
+        val (avatar) = createRefs()
 
-        )
-        AvatarSelection(navController)
+        val avatarStart = createGuidelineFromStart(0f)
+        val avatarEnd = createGuidelineFromStart(1f)
+        val avatarTop = createGuidelineFromTop(0.2f)
+        val avatarBottom = createGuidelineFromTop(0.70f)
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .constrainAs(avatar)
+                {
+                    top.linkTo(avatarTop)
+                    bottom.linkTo(avatarBottom)
+                    start.linkTo(avatarStart)
+                    end.linkTo(avatarEnd)
+                    height = Dimension.fillToConstraints
+                    width = Dimension.fillToConstraints
+                }
+
+
+        ) {
+            Text(
+                textAlign = TextAlign.Center,
+                style = textInUpperBoxForgotPassword,
+                text = "Wybierz swój awatar ${viewModel.user.value!!.name}",
+                modifier = Modifier.padding(16.dp)
+
+            )
+            AvatarSelection(navController)
+        }
     }
+
+
 }
