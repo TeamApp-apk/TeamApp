@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,10 +32,14 @@ import androidx.navigation.NavController
 import com.example.TeamApp.R
 
 @Composable
-fun UserProfileButton(iconId: Int, mainText: String, bottomText: String, navController: NavController, route: String ){
+fun UserProfileButton(iconId: Int,
+                      mainText: String,
+                      bottomText: String,
+                      navController: NavController,
+                      route: String,
+                      modifier: Modifier){
     Box(
-        modifier = Modifier
-            .background(color = Color(0xFFF2F2F2))
+        modifier = modifier
             .clickable { navController.navigate(route) }
     ){
         Row(
