@@ -130,7 +130,7 @@ fun RegisterScreen(navController: NavController){
         }
     }
     LaunchedEffect(Unit) {
-        delay(1000)
+        delay(500)
         viewModel.mySetSignInLauncher(launcher)
         focusManager.clearFocus()
     }

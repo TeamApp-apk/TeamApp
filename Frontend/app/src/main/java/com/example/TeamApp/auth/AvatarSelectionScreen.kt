@@ -33,6 +33,10 @@ fun AvatarSelectionScreen(navController: NavController) {
     val viewModel: LoginViewModel = LoginViewModelProvider.loginViewModel
     val avatars by viewModel.avatars.observeAsState(emptyList())
     val selectedAvatarIndex by viewModel.selectedAvatarIndex.observeAsState(0)
+    LaunchedEffect(Unit){
+        Log.d("AvatarSelection", "avatar selection")
+    }
+
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF),

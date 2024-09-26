@@ -37,6 +37,12 @@ class LoginViewModel : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
     val email: LiveData<String> = _email
 
+    private val _onClickExecuted = MutableLiveData(false)
+    val onClickExectued : LiveData<Boolean> = _onClickExecuted
+    fun setOnClickExecuted(value: Boolean){
+        _onClickExecuted.value = value
+    }
+
     private val _snackbarMessage = MutableLiveData<String?>()
     val snackbarMessage: LiveData<String?> get() = _snackbarMessage
 
@@ -61,7 +67,6 @@ class LoginViewModel : ViewModel() {
             Log.d("LoginViewModel", "signInLauncher has been initialized")
         }
     }
-
     private val _password = MutableLiveData("")
     val password: LiveData<String> = _password
 

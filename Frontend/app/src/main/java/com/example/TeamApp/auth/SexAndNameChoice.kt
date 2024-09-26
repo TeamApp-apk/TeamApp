@@ -57,6 +57,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.imageLoader
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.example.TeamApp.R
 import com.example.TeamApp.data.User
 import com.example.ui.theme.buttonLogIn
@@ -75,15 +78,46 @@ fun SexAndNameChoice (navController: NavController, userViewModel: UserViewModel
     var isFemale by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("") }
+    val avatars by viewModel.avatars.observeAsState(emptyList())
+
+    val isLoading by viewModel.isLoading.observeAsState(false)
+    val onClickExecuted by viewModel.onClickExectued.observeAsState(false)
+
+
+    var isPreloaded by remember{ mutableStateOf(false)}
 
     val gradientColors= listOf(
         Color(0xFFE8E8E8)
         ,Color(0xFF007BFF)
     )
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         viewModel.loadAvatars(25)
-
     }
+
+    LaunchedEffect(avatars) {
+        if (avatars.isNotEmpty()) {
+            val imageLoader = context.imageLoader
+            avatars.forEach { avatar ->
+                val request = ImageRequest.Builder(context)
+                    .data(avatar.faceUrl)
+                    .memoryCachePolicy(CachePolicy.ENABLED) // Use memory cache
+                    .diskCachePolicy(CachePolicy.ENABLED)   // Use disk cache
+                    .build()
+                imageLoader.execute(request)
+                Log.d("AvatarSelection", "Loaded avatar: $avatar")
+            }
+            isPreloaded = true
+            if(onClickExecuted){
+                navController.navigate("avatarSelection") {
+                    popUpTo("sexName") {
+                        inclusive = false
+                    }
+                }
+            }
+            viewModel.setLoading(false)
+        }
+    }
+
 
     Surface( modifier = Modifier.fillMaxSize() ) {
         //we are drawing on top of the box since guidelines do not work with that for some reason?
@@ -238,7 +272,9 @@ fun SexAndNameChoice (navController: NavController, userViewModel: UserViewModel
                 userViewModel = userViewModel,
                 name = name, // przekazujemy imię
                 birthDate = birthDate, // przekazujemy datę urodzenia
-                gender = if (isMale) "Male" else if (isFemale) "Female" else ""
+                gender = if (isMale) "Male" else if (isFemale) "Female" else "",
+                isLoading = isLoading,
+                isPreloaded = isPreloaded
             )
         }
     }
@@ -294,25 +330,25 @@ fun NameBox(
 }
 
 @Composable
-fun ButtonNext(modifier: Modifier, navController: NavController, userViewModel: UserViewModel, name: String, birthDate: String, gender: String) {
+fun ButtonNext(modifier: Modifier, navController: NavController, userViewModel: UserViewModel,
+               name: String, birthDate: String, gender: String, isLoading: Boolean, isPreloaded: Boolean) {
     val viewModel: LoginViewModel = LoginViewModelProvider.loginViewModel
-    val isLoading by viewModel.isLoading.observeAsState(false)
     val user by userViewModel.user.observeAsState()
     Button(
         onClick = {
-            Log.d("SexAndNameChoice", "ButtonNext: onClick")
-
-            user?.name = name
-            user?.birthDay = birthDate
-            user?.gender = gender
-
-            // Save data to Firebase
-            viewModel.saveUserData(name, birthDate, gender)
-
-            // Navigate to the next screen (avatar selection)
-            navController.navigate("avatarSelection") {
-                popUpTo("sexName") {
-                    inclusive = false
+            if (!isPreloaded) {
+                viewModel.setLoading(true)
+                viewModel.setOnClickExecuted(true)
+            } else {
+                Log.d("SexAndNameChoice", "ButtonNext: onClick")
+                user?.name = name
+                user?.birthDay = birthDate
+                user?.gender = gender
+                viewModel.saveUserData(name, birthDate, gender)
+                navController.navigate("avatarSelection") {
+                    popUpTo("sexName") {
+                        inclusive = false
+                    }
                 }
             }
         },
@@ -338,17 +374,23 @@ fun ButtonNext(modifier: Modifier, navController: NavController, userViewModel: 
                         .weight(1f)
                         .wrapContentWidth(align = Alignment.CenterHorizontally)
                 ) {
-                    Text(
-                        text = "Dalej",
-                        style = buttonLogIn
+                    if (isLoading) {
+                        CircularProgressIndicator()
+                    } else {
+                        Text(
+                            text = "Dalej",
+                            style = buttonLogIn
+                        )
+                    }
+                }
+                if (!isLoading) {
+                    Image(
+                        painter = painterResource(id = R.drawable.arrow_right_icon),
+                        contentDescription = "Send",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.size(28.dp)
                     )
                 }
-                Image(
-                    painter = painterResource(id = R.drawable.arrow_right_icon),
-                    contentDescription = "Send",
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(28.dp)
-                )
             }
         }
     }

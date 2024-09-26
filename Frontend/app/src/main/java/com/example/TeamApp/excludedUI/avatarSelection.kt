@@ -30,11 +30,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import coil.imageLoader
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.TeamApp.MainAppActivity
@@ -60,6 +63,8 @@ fun AvatarSelection(navController: NavController) {
     val listStartIndex = listScrollMiddle - listScrollMiddle % avatars.size - visibleItemsMiddle
     var isScrolledToStart by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val hapticFeedback = LocalHapticFeedback.current
+
     val preloadedAvatars = remember { mutableListOf<ImageRequest>() }
     // State for loading indicator
     var isLoading by remember { mutableStateOf(true) }
@@ -73,20 +78,23 @@ fun AvatarSelection(navController: NavController) {
         }
     }
     LaunchedEffect(avatars) {
-        if (isLoading) {
-            preloadedAvatars.clear() // Clear previous requests
-            avatars.forEach { avatar ->
-                preloadedAvatars.add(
-                    ImageRequest.Builder(context)
-                        .data(avatar.faceUrl)
-                        .memoryCacheKey(avatar.faceUrl) // Optional: Customize cache key
-                        .diskCachePolicy(CachePolicy.ENABLED)
-                        .build()
-                )
-            }
-            delay(1000)
-            isLoading = false
-        }
+//        if (isLoading) {
+//            val imageLoader = context.imageLoader
+//
+//            avatars.forEach { avatar ->
+//                val request = ImageRequest.Builder(context)
+//                    .data(avatar.faceUrl)
+//                    .memoryCachePolicy(CachePolicy.ENABLED) // Use memory cache
+//                    .diskCachePolicy(CachePolicy.ENABLED)   // Use disk cache
+//                    .build()
+//
+//                // Load each avatar into memory cache
+//                imageLoader.enqueue(request)
+//            }
+//            isLoading = false
+//        }
+        delay(200)
+        isLoading = false
     }
 
     val selectedAvatarIndex = remember { mutableStateOf(0) }
@@ -94,7 +102,12 @@ fun AvatarSelection(navController: NavController) {
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex }
             .collect { index ->
-                selectedAvatarIndex.value = (index + visibleItemsMiddle) % avatars.size
+                val newIndex = (index + visibleItemsMiddle) % avatars.size
+                if (newIndex != selectedAvatarIndex.value) {
+                    // Trigger haptic feedback when the avatar in the middle changes
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    selectedAvatarIndex.value = newIndex
+                }
             }
     }
 
