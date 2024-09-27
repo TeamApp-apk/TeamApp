@@ -1,22 +1,27 @@
 package com.example.TeamApp.searchThrough
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -301,7 +306,7 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
     val hapticFeedback = LocalHapticFeedback.current
 
     val selectedSports by viewModel.selectedSports.observeAsState(availableSports)
-    var isSelectAll by remember { mutableStateOf(false) }
+    var isSelectAll by remember { mutableStateOf(true) }
     // Przycisk, który otwiera popup
     Box(
         modifier = modifier
@@ -340,8 +345,6 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
             )
         }
     }
-
-    // Popup dialog z przewijalną listą
     if (showDialog) {
         Dialog(onDismissRequest = { showDialog = false }) {
             Surface(
@@ -389,6 +392,7 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                     ) {
                         items(availableSports) { sport ->
                             val isSelected = selectedSports.contains(sport)
+                            Log.d("SportPopupButton", "Sport: $sport, isSelected: $isSelected")
                             Text(
                                 text = sport,
                                 color = if (isSelected) Color(0xff4fc3f7) else Color.Black,
@@ -396,7 +400,6 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                                     .clip(RoundedCornerShape(8.dp))
                                     .fillMaxWidth()
                                     .clickable {
-
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                         viewModel.updateSportSelection(sport)
                                     }
@@ -409,19 +412,59 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
                         }
                     }
 
-                    Button(
-                        onClick = {
-                            viewModel.toggleAllSports(!isSelectAll)
-                            isSelectAll = !isSelectAll
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xff4fc3f7),
-                            contentColor = Color.White
-                        ),
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(if (isSelectAll) "Zaznacz wszystkie" else "Odznacz wszystkie")
+                        Text(
+                            text = "Zaznacz wszyst.",
+                            fontSize = 19.sp, // Zmniejsz rozmiar tekstu, aby dopasować
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple()
+                                ) {
+                                    isSelectAll = !isSelectAll
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    Log.d("SportPopupButton", "Select all sports")
+                                    Log.d("SportPopupButton", "isSelectAll: $isSelectAll")
+                                    viewModel.toggleAllSports(isSelectAll)
+                                }
+                                .padding(8.dp)
+                        )
+                        Text(
+                            color = Color.Black,
+                            text ="|",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
+                        Text(
+                            text = "Gotowe",
+                            fontSize = 19.sp, // Zmniejsz rozmiar tekstu, aby dopasować
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple()
+                                ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showDialog = false
+                                }
+                                .padding(8.dp)
+                        )
                     }
+
+
                 }
             }
         }

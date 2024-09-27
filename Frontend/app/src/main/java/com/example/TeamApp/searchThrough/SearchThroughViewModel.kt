@@ -64,9 +64,9 @@ class SearchThroughViewModel : ViewModel(){
 
     fun toggleAllSports(selected: Boolean) {
         _selectedSports.value = if (selected) {
-            mutableListOf()
-        } else {
             availableSports.toMutableList()
+        } else {
+            mutableListOf()
         }
     }
 
@@ -83,7 +83,9 @@ class SearchThroughViewModel : ViewModel(){
     fun onFilterAccept()
     {
         _filtersOn.value = true
-        Log.d("SearchThroughViewModel", "Filters applied, sports: $selectedSports, filtersOn = ${_filtersOn.value}")
+        val size = selectedSports.value?.size
+        val size_ = _selectedSports.value?.size
+        Log.d("SearchThroughViewModel", "size: $size, size_: $size_ filtersOn = ${_filtersOn.value}")
         val selectedSports = _selectedSports.value ?: listOf()
         otherViewModel.fetchFilteredEvents(selectedSports)
     }

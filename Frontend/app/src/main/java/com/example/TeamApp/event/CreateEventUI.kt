@@ -400,108 +400,6 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
 
         }
     }
-
-    /*
-    {
-        {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 30.dp))
-                    .padding(bottom = 16.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                        .background(
-                            color = Color(0xFFF2F2F2),
-                            shape = RoundedCornerShape(size = 16.dp)
-                        ),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    DescriptionInputField(
-                        description = description,
-                        onEditClick = { showDialog = true }
-                    )
-
-                    Column(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        if (isLoading) {
-                            LottieAnimation(
-                                composition = composition,
-                                progress = progress,
-                                modifier = Modifier.size(100.dp)
-                            )
-                            LaunchedEffect(Unit) {
-                                isPlaying = true
-                            }
-                        } else if (showTick) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Success",
-                                tint = Color.Green,
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .alpha(tickAlpha)
-                            )
-                        } else {
-                            EventButton(text = "Stwórz",
-                                onClick = {
-                                Log.d("CreateEventScreen", "Submit button clicked")
-                                val participantLimit = limit.toIntOrNull()
-                                Log.d("CreateEventScreen", "Address: $address")
-                                if (sport.isNotEmpty() && address.isNotEmpty() && location.isNotEmpty()) {
-                                    isLoading = true
-                                    isPlaying = true
-                                    Log.d("CreateEventScreen", "Valid input")
-                                    Log.d("CreateEventScreen", "Valid input")
-                                    val creatorID = user?.userID ?: ""
-                                    val participantsList = if (creatorID.isNotEmpty()) mutableListOf<Any>(creatorID) else mutableListOf()
-                                    val newEvent = Event(
-                                        participants = participantsList,
-                                        creatorID = creatorID.takeIf { it.isNotEmpty() },
-                                        iconResId = Event.sportIcons[sport] ?: "",
-                                        pinIconResId = Event.sportPinIcons[sport] ?: "",
-                                        date = dateTime,
-                                        activityName = sport,
-                                        currentParticipants = participantsList.size,
-                                        maxParticipants = participantLimit ?: 0,
-                                        location = address,
-                                        description = description,
-                                        locationID = locationID
-                                    )
-                                    Log.d("CreateEventScreen", "User: $user")
-                                    viewModel.createEvent(newEvent, creatorID.toString()) { result ->
-                                        if (result == null) {
-                                            snackbarMessage = "Utworzono Event"
-                                            snackbarSuccess = true
-                                        } else {
-                                            snackbarMessage = result
-                                            snackbarSuccess = false
-                                        }
-                                        showSnackbar = true
-                                    }
-                                } else {
-                                    snackbarMessage = "Uzupełnij wszystkie pola"
-                                    snackbarSuccess = false
-                                    showSnackbar = true
-                                }
-                            })
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-    }*/
-
-
-
     if (showDialog) {
         DescriptionDialog(
             initialText = description,
@@ -514,7 +412,6 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
     }
 
 }
-
 @Composable
 fun DescriptionInputField(
     description: String,
