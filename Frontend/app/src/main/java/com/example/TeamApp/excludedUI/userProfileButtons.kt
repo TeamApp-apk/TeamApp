@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -28,6 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.example.TeamApp.R
 
@@ -38,55 +41,84 @@ fun UserProfileButton(iconId: Int,
                       navController: NavController,
                       route: String,
                       modifier: Modifier){
-    Box(
+    ConstraintLayout (
         modifier = modifier
+            .fillMaxSize()
             .clickable { navController.navigate(route) }
-    ){
-        Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ){
-            Image(
-                painter = painterResource(id = iconId),
-                contentDescription = "Activity Icon",
-                modifier = Modifier.padding(end = 12.dp).height(28.dp).width(28.dp)
-            )
-            Column(
-                modifier = Modifier.weight(1f)
-            ){
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth().padding(end = 8.dp)
-                ){
-                    Text(
-                        text = mainText,
-                        style = TextStyle(
-                            fontSize = 24.sp,
-                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                            fontWeight = FontWeight(200),
-                            color = Variables.Black,
-                            textAlign = TextAlign.Center,
-                        )
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.arrowdownicon),
-                        contentDescription = "Activity Icon",
-                        modifier = Modifier.height(32.dp).width(32.dp),
-                    )
+    )
+    {
+        val (icon, topText, sideText, arrow) = createRefs()
+
+        val iconStart = createGuidelineFromStart(0.05f)
+        val iconTop = createGuidelineFromTop(0.25f)
+
+        Image(
+            painter = painterResource(id = iconId),
+            contentDescription = "Activity Icon",
+            modifier = Modifier
+                .size(32.dp)
+                .constrainAs(icon) {
+                    top.linkTo(iconTop)
+                    start.linkTo(iconStart)
                 }
-                Text(
-                    text = bottomText,
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontFamily = FontFamily(Font(R.font.proximanovaregular)),
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFF979797),
-                        textAlign = TextAlign.Center,
-                    )
-                )
-            }
-        }
+        )
+
+        val topTextStart = createGuidelineFromStart(0.17f)
+        val topTextTop = createGuidelineFromTop(0.2f)
+        val topTextBottom = createGuidelineFromTop(0.5f)
+        Text(
+            modifier = Modifier
+                .constrainAs(topText) {
+                    top.linkTo(topTextTop)
+                    bottom.linkTo(topTextBottom)
+                    start.linkTo(topTextStart)
+                },
+            text = mainText,
+            style = TextStyle(
+                fontSize = 24.sp,
+                fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                fontWeight = FontWeight(200),
+                color = Variables.Black,
+                textAlign = TextAlign.Center,
+            )
+        )
+
+        val sideTextStart = createGuidelineFromStart(0.17f)
+        val sideTextTop = createGuidelineFromTop(0.5f)
+        val sideTextBottom = createGuidelineFromTop(0.9f)
+
+        Text(
+            modifier = Modifier
+                .constrainAs(sideText) {
+                    top.linkTo(sideTextTop)
+                    bottom.linkTo(sideTextBottom)
+                    start.linkTo(sideTextStart)
+                },
+            text = bottomText,
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+                fontWeight = FontWeight(500),
+                color = Color(0xFF979797),
+                textAlign = TextAlign.Center,
+            )
+        )
+
+
+        val arrowStart = createGuidelineFromStart(0.85f)
+        val arrowTop = createGuidelineFromTop(0.25f)
+
+        Image(
+            painter = painterResource(id = R.drawable.arrowdownicon),
+            contentDescription = "Activity Icon",
+            modifier = Modifier
+                .size(32.dp)
+                .constrainAs(arrow) {
+                    top.linkTo(arrowTop)
+                    start.linkTo(arrowStart)
+                }
+        )
+
     }
 }
 
