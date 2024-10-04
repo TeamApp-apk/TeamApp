@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.TeamApp.R
 import com.example.TeamApp.excludedUI.UserProfileButton
+import com.example.TeamApp.excludedUI.UserProfileButtonBottom
 import com.example.TeamApp.excludedUI.Variables
 
 @Composable
@@ -259,7 +260,7 @@ fun ProfileScreen(navController: NavController, vieModel:UserViewModel) {
 
                     val shareTop = createGuidelineFromTop(0.89f)
                     val shareBottom = createGuidelineFromTop(1f)
-                    UserProfileButton(iconId = R.drawable.shareicon,
+                    UserProfileButtonBottom(iconId = R.drawable.shareicon,
                         mainText = "Udostępnij",
                         bottomText = "Niech wszyscy wiedzą",
                         navController,
