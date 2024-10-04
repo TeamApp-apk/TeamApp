@@ -135,7 +135,7 @@ fun LoginScreen(navController: NavController){
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (arrow, upperText, emailBox, passwordBox, forgotPass, loginButton,
                 googleButton, spacer, registerText) = createRefs()
-            val arrowTop = createGuidelineFromTop(0.050f)
+            val arrowTop = createGuidelineFromTop(0.05f)
             val arrowStart = createGuidelineFromStart(0.1f)
             Image(
                 painter = painterResource(id = R.drawable.arrow_icon),

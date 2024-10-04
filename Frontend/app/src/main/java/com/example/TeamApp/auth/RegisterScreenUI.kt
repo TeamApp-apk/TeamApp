@@ -153,13 +153,33 @@ fun RegisterScreen(navController: NavController){
             .background(brush = Brush.linearGradient(colors = gradientColors)) ){}
 
         ConstraintLayout (modifier = Modifier.fillMaxSize()) {
-            val (welcomeText, signUp, emailBox, nameBox, passBox, repeatBox,
+            val (welcomeText, signUp, emailBox, arrow, passBox, repeatBox,
                 divider, googleButton, logInText) = createRefs()
 
-            val startGuideline = createGuidelineFromStart(0.11f)
+            val arrowTop = createGuidelineFromTop(0.05f)
+            val arrowStart = createGuidelineFromStart(0.1f)
+            Image(
+                painter = painterResource(id = R.drawable.arrow_icon),
+                contentDescription = "arrow",
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        viewModel.getToRegisterScreen(navController)
+                        navController.navigate("StartingScreen")
+                    }
+                    .size(30.dp)
+                    .constrainAs(arrow) {
+                        top.linkTo(arrowTop)
+                        start.linkTo(arrowStart)
+                    }
+            )
+
+            val startGuideline = createGuidelineFromStart(0.095f)
             val endGuideline = createGuidelineFromStart(0.9f)
-            val topWelcomeText = createGuidelineFromTop(0.085f)
-            val bottomWelcomeText = createGuidelineFromTop(0.14f)
+            val topWelcomeText = createGuidelineFromTop(0.07f)
+            val bottomWelcomeText = createGuidelineFromTop(0.145f)
             Text(
                 textAlign = TextAlign.Center,
                 style = textInUpperBoxForgotPassword,
