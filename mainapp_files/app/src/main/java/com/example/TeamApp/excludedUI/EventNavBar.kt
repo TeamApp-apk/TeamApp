@@ -149,16 +149,16 @@ fun BottomNavBar(navController: NavController) {
                         indication = null,
                         //x do zmiany, gdy bedzie ui czatu
                         onClick = {
-                            if (currentDestination != "x") {
-                                navController.navigate("x") {
-                                    popUpTo("x") { inclusive = true }
+                            if (currentDestination != "chatList") {
+                                navController.navigate("chatList") {
+                                    popUpTo("chatList") { inclusive = true }
                                 }
                                 isPlusPlaying = true
                             }
                         }
                     )
                     .background(
-                        color = if (currentDestination == "x") Color.LightGray else Color.Transparent,
+                        color = if (currentDestination == "chatList") Color.LightGray else Color.Transparent,
                         shape = RoundedCornerShape(13.dp)
                     )
             ) {

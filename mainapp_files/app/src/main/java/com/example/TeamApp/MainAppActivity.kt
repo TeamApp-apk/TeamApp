@@ -2,6 +2,7 @@ package com.example.TeamApp
 
 import BottomNavBar
 import ChatScreen
+import ScrollDownChat
 import UserViewModel
 import android.os.Bundle
 import android.util.Log
@@ -40,6 +41,7 @@ import com.example.TeamApp.event.DetailsScreen
 //import com.example.TeamApp.event.MapScreen
 import com.example.TeamApp.event.CreateEventViewModelProvider
 import com.example.TeamApp.profile.ProfileScreen
+
 import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.searchThrough.FiltersScreen
 import com.example.TeamApp.settings.SendMessageScreen
@@ -156,6 +158,7 @@ class MainAppActivity : AppCompatActivity() {
                                     isBottomBarVisible = !isScrollingDown
                                 } }
 
+
                                 composable(
                                     route = "profile",
                                     enterTransition = { fadeIn(animationSpec = tween(300)) },
@@ -163,6 +166,16 @@ class MainAppActivity : AppCompatActivity() {
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
                                 ) { ProfileScreen(navController, userViewModel) }
+                                composable(
+                                    route = "chatList",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) {
+                                    ScrollDownChat(navController)
+                                }
+
 
                                 composable(
                                     route = "settings",
