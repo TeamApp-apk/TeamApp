@@ -32,6 +32,8 @@ An application that helps people find sports partners.
   + Developing a system that ensures participants do not declare attendance at an event and then fail to show up.
   + Introduce challenges where users can compete or collaborate with others, earning badges and rewards.
   + Adding skill level to search/create filters.
+
+Currently project is on hold due to the demanding semester.
   
   
 
