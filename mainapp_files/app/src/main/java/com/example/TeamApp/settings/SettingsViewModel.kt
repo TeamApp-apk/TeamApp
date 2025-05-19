@@ -36,7 +36,16 @@ class SettingsViewModel : ViewModel() {
 
     }
 
-    fun logout(context: Context) {
+    fun navigateToPrivacySettings(navController: NavController) {
+        navController.navigate("privacyPolicy"){
+            popUpTo("settings"){inclusive = false}
+        }
+
+    }
+
+
+
+        fun logout(context: Context) {
         FirebaseAuth.getInstance().signOut()
         val intent = Intent(context, RegisterActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
