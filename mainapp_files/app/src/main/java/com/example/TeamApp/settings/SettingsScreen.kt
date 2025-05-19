@@ -124,7 +124,7 @@ fun SettingsScreenv2(navController: NavController) {
                 Text(modifier = Modifier
                     .width(340.dp)
                     .height(25.dp)
-                    .clickable { },
+                    .clickable {viewModel.navigateToPrivacySettings(navController)},// zmiana
                     
                     text = "Polityka prywatności",
                     style = TextStyle(
@@ -133,7 +133,6 @@ fun SettingsScreenv2(navController: NavController) {
                         fontFamily = FontFamily(Font(R.font.proximanovalight)),
                         fontWeight = FontWeight(300),
                         color = Color.Black,
-
 
                         )
                 )
