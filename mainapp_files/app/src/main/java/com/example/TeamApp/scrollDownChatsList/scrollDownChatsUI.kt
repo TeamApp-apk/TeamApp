@@ -11,11 +11,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
+import com.example.TeamApp.R
 import com.example.TeamApp.scrollDownChatsList.EventItem
 import com.example.TeamApp.scrollDownChatsList.EventListViewModelProvider
 
@@ -45,16 +53,33 @@ fun ScrollDownChat(
             .background(brush = Brush.linearGradient(colors = gradientColors))
             .padding(horizontal = 8.dp)
     ) {
-        ConstraintLayout(
+        ConstraintLayout {
+            val (titleRef,lazyColumnRef) = createRefs()
+            Text(
+                text = "Twoje Czaty",
+                style = TextStyle(
+                    fontSize = 27.sp,
+                    fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                    fontWeight = FontWeight(900),
+                    color = Color(0xFF003366),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 25.sp,
+                ),
+                modifier = Modifier.constrainAs(titleRef) {
 
+                    top.linkTo(parent.top, margin = 60.dp)
 
-        ) {
-            val (lazyColumnRef) = createRefs()
-
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+            )
             LazyColumn(
+
+
+
                 modifier = Modifier
                     .constrainAs(lazyColumnRef) {
-                        top.linkTo(parent.top,margin = 40.dp)
+                        top.linkTo(titleRef.bottom, margin = 30.dp)
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
@@ -66,7 +91,7 @@ fun ScrollDownChat(
                     EventItem(event = event) {
                         navController.navigate("chat/${event.id}")
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                 }
             }
         }
