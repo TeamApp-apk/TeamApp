@@ -404,17 +404,14 @@ class LoginViewModel : ViewModel() {
     }
 
 
-
     fun saveSelectedAvatar(avatarUrl: String) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val db = FirebaseFirestore.getInstance()
         val userRef = db.collection("users").document(userId)
 
-        // Sprawdź, czy dokument istnieje
         userRef.get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    // Dokument istnieje, zaktualizuj avatar
                     userRef.update("avatar", avatarUrl)
                         .addOnSuccessListener {
                             Log.d("Firestore", "Avatar updated for user $userId")
@@ -434,30 +431,33 @@ class LoginViewModel : ViewModel() {
         Log.d("USER","avatarURL: ${_user.value!!.avatar}")
     }
     fun saveUserData(name: String, birthDate: String, gender: String) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        Log.d("SaveUserData", "Rozpoczęto saveUserData. UserId: $userId, Name: $name, BirthDate: $birthDate, Gender: $gender")
+
+        if (userId == null) {
+            Log.e("SaveUserData", "UserID jest null. Nie można zapisać danych.")
+            return
+        }
+
+        if (name.isBlank() || birthDate.isBlank() || gender.isBlank()) {
+            Log.e("SaveUserData", "Imię, data urodzenia lub płeć są puste. Przerywam zapis. Imię: '$name', DataUrodzenia: '$birthDate', Płeć: '$gender'")
+            return
+        }
+
         val db = FirebaseFirestore.getInstance()
         val userRef = db.collection("users").document(userId)
 
-        // Check if the document exists
-        userRef.get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    // Document exists, update name, birth date, and gender
-                    userRef.update(mapOf(
-                        "name" to name,
-                        "birthDay" to birthDate,
-                        "gender" to gender
-                    ))
-                        .addOnSuccessListener {
-                            Log.d("Firestore", "User data updated for user $userId")
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("Firestore", "Error updating user data: ${e.message}")
-                        }
-                } else {
-                    // Document does not exist, report error
-                    Log.e("Firestore", "User document not found for user ID: $userId")
-                }
+        val userData = mapOf(
+            "name" to name,
+            "birthDay" to birthDate,
+            "gender" to gender
+        )
+
+        Log.d("SaveUserData", "Próba zapisu/aktualizacji danych dla użytkownika: ${userRef.path} z danymi: $userData")
+        userRef.set(userData, com.google.firebase.firestore.SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d("Firestore", "Dane użytkownika (name, birthDay, gender) zapisane/zaktualizowane pomyślnie dla userId: $userId")
+
             }
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error fetching user document: ${e.message}")
