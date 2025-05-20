@@ -46,6 +46,7 @@ import com.example.TeamApp.profile.ProfileScreen
 
 import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.searchThrough.FiltersScreen
+import com.example.TeamApp.settings.PrivacyPolicyScreen
 import com.example.TeamApp.settings.SendMessageScreen
 import com.example.TeamApp.settings.SettingsScreenv2
 import com.example.TeamApp.settings.TermsOfUse
@@ -242,6 +243,14 @@ class MainAppActivity : AppCompatActivity() {
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
                                 ) { TermsOfUse() }
+
+                                composable(
+                                    route = "privacyPolicy",
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                ) { PrivacyPolicyScreen(navController)}
 
                                 composable(
                                     route = "sendUsMessage",

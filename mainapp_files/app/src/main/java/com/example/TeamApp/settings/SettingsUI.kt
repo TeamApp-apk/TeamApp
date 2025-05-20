@@ -39,12 +39,12 @@ fun SettingsScreen(navController: NavController) {
 
         SettingItem(
             title = "Notification Settings",
-            onClick = { /* Handle notification settings click */ }
+            onClick = {}
         )
 
         SettingItem(
             title = "Privacy Policy",
-            onClick = { /* Handle privacy policy click */ }
+            onClick = {}
         )
 
         SettingItem(
