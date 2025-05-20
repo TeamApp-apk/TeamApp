@@ -1,6 +1,7 @@
 package com.example.TeamApp.profile
 
 import UserViewModel
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -25,7 +26,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import com.example.TeamApp.R
 import com.example.TeamApp.excludedUI.UserProfileButton
 import com.example.TeamApp.excludedUI.UserProfileButtonBottom
@@ -79,9 +83,13 @@ fun ProfileScreen(navController: NavController, vieModel:UserViewModel) {
                     val avatarEnd = createGuidelineFromStart(0.8f)
                     val avatarTop = createGuidelineFromTop(0.03f)
                     val avatarBottom = createGuidelineFromTop(0.28f)
-                    Image(
-                        painter = rememberImagePainter(avatarUrl),
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current) //O(1) request thanks to caching an image
+                            .data(avatarUrl)
+                            .crossfade(true)
+                            .build(),
                         contentDescription = "Profile picture",
+                        placeholder = painterResource(id = R.drawable.eye),
                         modifier = Modifier
                             .constrainAs(avatar) {
                                 top.linkTo(avatarTop)
@@ -92,6 +100,7 @@ fun ProfileScreen(navController: NavController, vieModel:UserViewModel) {
                                 height = width
                             }
                     )
+
 
                     val welcomeTextStart = createGuidelineFromStart(0.1f)
                     val welcomeTextEnd = createGuidelineFromStart(0.9f)

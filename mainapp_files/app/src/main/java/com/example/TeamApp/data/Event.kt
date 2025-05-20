@@ -9,6 +9,9 @@ data class Event(
     val pinIconResId: String = "",
     val date: String = "",
     val activityName: String = "",
+    val eventName: String? = null,
+    val price: String? = null,
+    val skillLevel: String? = null,
     val currentParticipants: Int = 0,
     val maxParticipants: Int = 0,
     val location: String = "",
@@ -17,7 +20,9 @@ data class Event(
     val id: String = "",
     val lastMessage: Map<String, Any>? = null
 ) {
-    constructor() : this(mutableListOf(),null,"","", "", "", 0, 0, "", "", null, "")
+    constructor() : this(mutableListOf(),null,"",
+        "", "", "","","","", 0, 0,
+        "", "", null, "")
 
 
     companion object {

@@ -34,8 +34,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.util.Properties
+
 class CreateEventViewModel : ViewModel() {
     private val _sport = MutableLiveData<String>()
+
+    private val _eventName = MutableLiveData<String>()
+    val eventName: LiveData<String> get() = _eventName
+
+    private val _price = MutableLiveData<String>()
+    val price: LiveData<String> get() = _price
+
+    private val _skillLevel = MutableLiveData<String>()
+    val skillLevel: LiveData<String> get() = _skillLevel
+    val availableSkillLevels = listOf("Rekreacyjny", "Rekreacyjny/Średni", "Średni", "Zaawansowany", "Profesjonalny")
+
+
     val activityList =   mutableStateListOf<Event>()
     val sport: LiveData<String> get()= _sport
     var isDataFetched = false
@@ -53,7 +67,6 @@ class CreateEventViewModel : ViewModel() {
 
         }
     }
-
     private var _mapFragment: MutableState<MapFragment?> = mutableStateOf(null)
     val mapFragment: MapFragment?
         get() = _mapFragment.value
@@ -70,7 +83,6 @@ class CreateEventViewModel : ViewModel() {
                 mapKey = getApiKey(context),
                 // add more options
             )
-
             createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
                 Log.d("CreateEventViewModel", "Map fragment created")
                 setMapFragment(fragment)
@@ -194,6 +206,9 @@ class CreateEventViewModel : ViewModel() {
         _limit.value = ""
         _description.value = ""
         _dateTime.value = ""
+        _eventName.value = ""
+        _skillLevel.value = ""
+        _price.value = ""
     }
     //temporary here
     fun logout(navController: NavController) {
@@ -202,12 +217,27 @@ class CreateEventViewModel : ViewModel() {
             popUpTo("createEvent") { inclusive = true }
         }
     }
+
+
     fun onSportChange(newSport: String) {
         _sport.value = newSport.toString()
     }
     fun onAddressChange(newAddress: String) {
         _location.value = newAddress
     }
+    fun onPriceChange(newPrice: String) {
+        _price.value = newPrice
+    }
+    fun onSkillLevelChange(newSkillLevel: String) {
+        _skillLevel.value = newSkillLevel
+    }
+    fun onActivityNameChange(newActivityName: String) {
+        _eventName.value = newActivityName
+    }
+    fun onEventNameChange(newEventName: String) {
+        _eventName.value = newEventName
+    }
+
     fun onDateChange(newDate: String) {
         _dateTime.value = newDate
     }
@@ -224,3 +254,4 @@ class CreateEventViewModel : ViewModel() {
 
 
 }
+
