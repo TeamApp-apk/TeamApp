@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -83,6 +84,7 @@ class MainAppActivity : AppCompatActivity() {
                 isBottomBarVisible = true
             }
             //to do remain this screen to wait
+            val context = LocalContext.current
             LaunchedEffect(Unit){
                 Log.d("LaunchedEffect", "LaunchedEffect called")
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
@@ -91,11 +93,13 @@ class MainAppActivity : AppCompatActivity() {
                 }
                 Log.d("LaunchedEffect", "${userViewModel.user}")
                 viewModel.fetchEvents()
+                Log.d("MainAppActivity", "Events fetched: ${viewModel.isMapInitialized}")
+                viewModel.initializeMapIfNeeded(context)
+
                 delay(1000)
                 isLoading = false
-                delay(300)
+                delay(500)
                 showMainContent = true
-
             }
 
             Box(
@@ -137,48 +141,48 @@ class MainAppActivity : AppCompatActivity() {
                         ) {
                             AnimatedNavHost(
                                 navController = navController,
-                                startDestination = "search"
+                                startDestination = "createEvent"
                             ) {
                                 composable(
                                     route = "createEvent",
-                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
-                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
-                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
-                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                    enterTransition = { fadeIn(animationSpec = tween(250)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(250)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(250)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(250)) }
                                 ) { CreateEventScreen(navController,userViewModel) }
 
                                 composable(
                                     route = "search",
-                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
-                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
-                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
-                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                    enterTransition = { fadeIn(animationSpec = tween(250)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(250)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(250)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(250)) }
                                 ) { SearchScreen(navController) { isScrollingDown ->
                                     isBottomBarVisible = !isScrollingDown
                                 } }
 
                                 composable(
                                     route = "profile",
-                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
-                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
-                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
-                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                    enterTransition = { fadeIn(animationSpec = tween(250)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(250)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(250)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(250)) }
                                 ) { ProfileScreen(navController, userViewModel) }
 
                                 composable(
                                     route = "settings",
-                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
-                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
-                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
-                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                    enterTransition = { fadeIn(animationSpec = tween(250)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(250)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(250)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(250)) }
                                 ) { SettingsScreenv2(navController) }
 
                                 composable(
                                     route = "filterScreen",
-                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
-                                    exitTransition = { fadeOut(animationSpec = tween(300)) },
-                                    popEnterTransition = { fadeIn(animationSpec = tween(300)) },
-                                    popExitTransition = { fadeOut(animationSpec = tween(300)) }
+                                    enterTransition = { fadeIn(animationSpec = tween(250)) },
+                                    exitTransition = { fadeOut(animationSpec = tween(0)) },
+                                    popEnterTransition = { fadeIn(animationSpec = tween(250)) },
+                                    popExitTransition = { fadeOut(animationSpec = tween(0)) }
                                 ) { FiltersScreen(navController) }
 
                                 composable(

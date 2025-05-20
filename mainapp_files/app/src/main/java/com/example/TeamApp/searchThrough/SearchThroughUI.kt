@@ -121,11 +121,11 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
         }
     }
 
-    LaunchedEffect(Unit){
-        delay(700)
-        Log.d("CreateEventScreen", "Initializing map")
-        viewModel.initializeMapIfNeeded(context)
-    }
+//    LaunchedEffect(Unit){
+//        delay(700)
+//        Log.d("CreateEventScreen", "Initializing map")
+//        viewModel.initializeMapIfNeeded(context)
+//    }
 
     val gradientColors = listOf(
         Color(0xFFE8E8E8),

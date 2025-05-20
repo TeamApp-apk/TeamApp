@@ -83,7 +83,6 @@ class CreateEventViewModel : ViewModel() {
                 mapKey = getApiKey(context),
                 // add more options
             )
-
             createTomTomMapFragment(fragmentManager, mapOptions) { fragment ->
                 Log.d("CreateEventViewModel", "Map fragment created")
                 setMapFragment(fragment)
