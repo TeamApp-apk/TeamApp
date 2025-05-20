@@ -1,78 +1,37 @@
 package com.example.TeamApp.settings
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.TeamApp.R
-import com.example.compose.primaryLight
-import com.example.compose.secondaryLight
-import com.example.ui.theme.fontFamily
-import com.example.TeamApp.excludedUI.CustomSnackbar
-
-
 
 @Composable
 fun PrivacyPolicyScreen(navController: NavController) {
-    val gradientColors = listOf(
-        Color(0xFFE8E8E8),
-        Color(0xFF007BFF)
-    )
+    val scrollState = rememberScrollState()
+    val gradientColors = listOf(Color(0xFFE8E8E8), Color(0xFF007BFF))
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -80,74 +39,106 @@ fun PrivacyPolicyScreen(navController: NavController) {
     ) {
         Column(
             modifier = Modifier
-                .align(Alignment.Center) // Center the Column within the Box
-                .width(360.dp)
-                .height(764.dp)
-                .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 16.dp))
-                .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 10.dp),
+                .fillMaxWidth()
+                .verticalScroll(scrollState)
+                .padding(16.dp)
+                .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(16.dp))
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Nagłówek
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
-                verticalAlignment = Alignment.Top, modifier = Modifier
-                    .width(359.dp)
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
                     .height(45.dp)
-                    .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 10.dp)
+                    .padding(horizontal = 10.dp)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.arrow_icon),
                     contentDescription = "arrow",
                     modifier = Modifier
-                        .clickable {
-
-                        }
+                        .clickable { navController.popBackStack() }
                         .size(24.dp)
-                        .padding(1.dp)
-
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    modifier = Modifier
-                        .width(303.dp)
-                        .height(25.dp),
                     text = "Polityka prywatności",
+                    modifier = Modifier.weight(1f),
                     style = TextStyle(
                         fontSize = 20.sp,
-                        lineHeight = 25.sp,
                         fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                        fontWeight = FontWeight(900),
+                        fontWeight = FontWeight.Bold,
                         color = Color(0xFF003366),
-                        textAlign = TextAlign.Right,
+                        textAlign = TextAlign.Center
                     )
                 )
-
             }
-            Text(
+
+            // Treść
+            Column(
                 modifier = Modifier
-                    .width(331.dp)
-                    .height(617.dp)
-                    .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp)),
-                text = "",
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    lineHeight = 25.sp,
-                    fontFamily = FontFamily(Font(R.font.proximanovalight)),
-                    fontWeight = FontWeight(900),
-                    color = Color(0xFF003366),
-                    textAlign = TextAlign.Center,
+                    .fillMaxWidth()
+                    .background(Color.White, shape = RoundedCornerShape(16.dp))
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = """
+Twoja prywatność jest dla nas ważna. Korzystając z aplikacji TeamApp, akceptujesz zasady opisane w niniejszej Polityce Prywatności.
+
+1. Dane, które zbieramy:
+- dane podstawowe (np. imię, lokalizacja, adres e-mail),
+- informacje o Twojej aktywności sportowej,
+- dane techniczne (model urządzenia, system, IP).
+
+2. Cel przetwarzania danych:
+- umawianie gier sportowych,
+- poprawa działania aplikacji,
+- bezpieczeństwo użytkowników.
+
+3. Udostępnianie danych:
+- wyłącznie partnerom technicznym i organom prawnym w razie potrzeby.
+
+4. Analityka:
+- anonimowe dane zbierane dla ulepszania działania aplikacji.
+
+5. Twoje prawa:
+- dostęp, poprawa, usunięcie danych.
+
+6. Automatyczna akceptacja:
+- korzystając z aplikacji, akceptujesz niniejszą politykę.
+
+7. Kontakt: teamapp@support.com
+""".trimIndent(),
+                    style = TextStyle(
+                        fontSize = 13.sp,
+                        lineHeight = 22.sp,
+                        fontFamily = FontFamily(Font(R.font.proximanovalight)),
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF003366),
+                        textAlign = TextAlign.Justify
+                    )
                 )
-            )
+            }
+
+            // Przycisk
+            Button(
+                onClick = { navController.popBackStack() },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF007BFF)),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .fillMaxWidth(0.7f)
+                    .height(48.dp)
+            ) {
+                Text(
+                    text = "Rozumiem",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
-/*
-@Composable
-@Preview(showBackground = false)
-    fun PrivacyPolicyScreenPreview(){
-    PrivacyPolicyScreen(null)
-    }
-
-
- */
-

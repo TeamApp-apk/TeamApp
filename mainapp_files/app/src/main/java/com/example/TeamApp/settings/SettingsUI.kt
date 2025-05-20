@@ -44,7 +44,7 @@ fun SettingsScreen(navController: NavController) {
 
         SettingItem(
             title = "Privacy Policy",
-            onClick = {}
+            onClick = {viewModel.navigateToPrivacySettings(navController)}
         )
 
         SettingItem(
