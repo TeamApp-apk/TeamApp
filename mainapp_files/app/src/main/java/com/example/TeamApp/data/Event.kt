@@ -14,7 +14,8 @@ data class Event(
     val location: String = "",
     val description: String = "",
     val locationID: Map<String, Coordinates>? = null,
-    val id: String = ""
+    val id: String = "",
+    val lastMessage: Map<String, Any>? = null
 ) {
     constructor() : this(mutableListOf(),null,"","", "", "", 0, 0, "", "", null, "")
 
@@ -88,6 +89,7 @@ data class Event(
                 "location='$location', " +
                 "description='$description', " +
                 "locationID=$locationID, " +
-                "participants=$participants)"
+                "participants=$participants, " +
+                "lastMessage=$lastMessage)"
     }
 }

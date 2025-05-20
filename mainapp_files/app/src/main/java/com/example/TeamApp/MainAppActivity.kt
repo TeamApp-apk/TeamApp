@@ -3,6 +3,7 @@ package com.example.TeamApp
 import BottomNavBar
 import ChatScreen
 import ScrollDownChat
+
 import UserViewModel
 import android.os.Bundle
 import android.util.Log
@@ -41,6 +42,7 @@ import com.example.TeamApp.event.DetailsScreen
 //import com.example.TeamApp.event.MapScreen
 import com.example.TeamApp.event.CreateEventViewModelProvider
 import com.example.TeamApp.profile.ProfileScreen
+
 
 import com.example.TeamApp.searchThrough.SearchScreen
 import com.example.TeamApp.searchThrough.FiltersScreen
