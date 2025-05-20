@@ -116,6 +116,11 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
     var shouldScrollAfterParticipantsSelection by remember { mutableStateOf(false) }
 
     val sport by viewModel.sport.observeAsState("")
+
+    val eventName by viewModel.eventName.observeAsState("")
+    val price by viewModel.price.observeAsState("")
+    val skillLevel by viewModel.skillLevel.observeAsState("")
+
     val address by viewModel.location.observeAsState("")
     val limit by viewModel.limit.observeAsState("")
     val description by viewModel.description.observeAsState("")
@@ -403,6 +408,9 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
                                             pinIconResId = Event.sportPinIcons[sport] ?: "",
                                             date = dateTime,
                                             activityName = sport,
+                                            eventName = eventName,
+                                            price = price,
+                                            skillLevel = skillLevel,
                                             currentParticipants = participantsList.size,
                                             maxParticipants = participantLimit ?: 0,
                                             location = address,
