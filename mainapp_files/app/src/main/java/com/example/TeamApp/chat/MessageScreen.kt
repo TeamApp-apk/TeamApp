@@ -5,6 +5,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
@@ -18,6 +19,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -68,17 +70,29 @@ fun MessageScreen(
         (currentTimestamp - it) > 300000// 5mins in milli
     } ?: true
 
+
+
+    val bubbleShape = if (isCurrentUser) {
+        RoundedCornerShape(topStart = 16.dp, bottomStart = 16.dp, topEnd = 4.dp, bottomEnd = 16.dp)
+    } else {
+        RoundedCornerShape(topStart = 4.dp, bottomStart = 16.dp, topEnd = 16.dp, bottomEnd = 16.dp)
+    }
+
+    val bubbleColor = if (isCurrentUser) Color(0xFF007BFF) else Color(0xFFEFEFEF) // Jasnoszary
+    val textColor = if (isCurrentUser) Color.White else Color.Black
+    val usernameColor = if (isCurrentUser) Color.White.copy(alpha = 0.7f) else Color.DarkGray.copy(alpha = 0.7f)
+    val timeColor = if (isCurrentUser) Color.White.copy(alpha = 0.6f) else Color.Gray
+
     Column {
         if (showTimestampSeparator) {
-            // Display timestamp separator
             Text(
                 text = formattedTime,
                 fontFamily = FontFamily(Font(R.font.proximanovaregular)),
-                style = MaterialTheme.typography.overline,
+                fontSize = 12.sp, // Użyj sp
                 color = Color.Gray,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = 8.dp), // Większy padding
                 textAlign = TextAlign.Center
             )
         }
@@ -86,39 +100,39 @@ fun MessageScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp) // Zmniejsz pionowy padding między wiadomościami
                 .clickable {
-                    // Perform haptic feedback
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    // Toggle expanded state
                     isExpanded = !isExpanded
                 },
             horizontalArrangement = if (isCurrentUser) Arrangement.End else Arrangement.Start
         ) {
             Column(
                 modifier = Modifier
+                    .widthIn(max = 280.dp) // Ogranicz szerokość dymka
                     .background(
-                        if (isCurrentUser) Color(0xFF007BFF) else Color(0xFFF2F2F2),
-                        shape = RoundedCornerShape(8.dp)
+                        color = bubbleColor,
+                        shape = bubbleShape
                     )
-                    .padding(8.dp)
+                    .padding(horizontal = 12.dp, vertical = 8.dp) // Większy padding wewnątrz dymka
             ) {
                 // Display user name
-                Text(
-                    text = username ?: "",
-                    style = MaterialTheme.typography.caption,
-                    fontFamily = FontFamily(Font(R.font.proximanovaregular)),
-                    color = if (isCurrentUser) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
+                if (!isCurrentUser) { // Nazwa użytkownika tylko dla wiadomości drugiej osoby
+                    Text(
+                        text = username ?: "",
+                        fontFamily = FontFamily(Font(R.font.proximanovabold)), // Lekko pogrubiona nazwa
+                        fontSize = 13.sp,
+                        color = usernameColor
+                    )
+                    Spacer(modifier = Modifier.height(2.dp)) // Mniejszy odstęp
+                }
 
                 // Display message content
                 Text(
                     text = message.message,
                     fontFamily = FontFamily(Font(R.font.proximanovaregular)),
-                    style = MaterialTheme.typography.body1,
-                    color = if (isCurrentUser) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
+                    fontSize = 16.sp, // Normalny rozmiar tekstu wiadomości
+                    color = textColor
                 )
 
                 // Display full date/time only if message is expanded
@@ -127,8 +141,9 @@ fun MessageScreen(
                     Text(
                         text = formattedDate,
                         fontFamily = FontFamily(Font(R.font.proximanovaregular)),
-                        style = MaterialTheme.typography.overline,
-                        color = if (isCurrentUser) MaterialTheme.colors.onPrimary else MaterialTheme.colors.onSurface
+                        fontSize = 10.sp, // Mniejszy rozmiar
+                        color = timeColor,
+                        modifier = Modifier.align(Alignment.End) // Wyrównaj do prawej
                     )
                 }
             }

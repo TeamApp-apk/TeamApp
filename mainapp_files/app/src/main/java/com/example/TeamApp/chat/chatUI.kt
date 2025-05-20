@@ -1,5 +1,6 @@
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -47,11 +50,13 @@ import com.example.TeamApp.chat.sendMessage
 import com.google.firebase.firestore.FirebaseFirestore
 
 
-
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.navigation.NavController
 
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -70,7 +75,7 @@ fun ChatScreen(navController: NavController, eventId: String, userViewModel: Use
     val hapticFeedback = LocalHapticFeedback.current
     var showParticipantsDialog by remember { mutableStateOf(false) }
     var participants by remember { mutableStateOf<List<String>>(emptyList()) }
-    // Updated sportIcons map with drawable resource IDs
+    val keyboardController = LocalSoftwareKeyboardController.current
     val sportIcons: Map<String, Int> = mapOf(
         "Badminton" to R.drawable.figma_badminton_icon,
         "Bilard" to R.drawable.figma_pool_icon,
@@ -95,7 +100,6 @@ fun ChatScreen(navController: NavController, eventId: String, userViewModel: Use
         "Wędkarstwo" to R.drawable.figma_fishing_icon
     )
 
-    // Fetch the event name when eventId is passed
     LaunchedEffect(eventId) {
         delay(500)
         getEventNameById(eventId) { name ->
@@ -109,7 +113,6 @@ fun ChatScreen(navController: NavController, eventId: String, userViewModel: Use
     val iconResourceId =
         sportIcons[activityName] ?: R.drawable.chevron_down
 
-    /*TODO: Dodac spinning wheel do animacji ładowania, ten sleep jest potrzebny do zaladowania animacji*/
     LaunchedEffect(eventId) {
         delay(500)
         val messagesRef = db.collection("events").document(eventId).collection("messages")
@@ -135,184 +138,176 @@ fun ChatScreen(navController: NavController, eventId: String, userViewModel: Use
         }
     }
 
-
-
-        Column(modifier = Modifier.fillMaxSize()) {
-            // Add a top bar with the activity name and sport icon
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth() // Make sure the Row takes full width
-                    ) {
-                        // Left Arrow with Padding
-                        Image(
-                            painter = painterResource(id = R.drawable.chevron_left_white),
-                            contentDescription = "back",
-                            modifier = Modifier
-                                .size(40.dp)
-                                // Add padding to match desired space
-                                .clickable { /* Handle back click */ }
-                        )
-
-                        Spacer(modifier = Modifier.weight(1f)) // Pushes the text and icon to the center
-
-                        // Centered Text and Icon
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.weight(8f) // Adjust the weight to center it properly
-                        ) {
-                            Image(
-                                painter = painterResource(id = iconResourceId),
-                                contentDescription = activityName,
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .border(
-                                        width = 1.dp,
-                                        color = Color.White
-                                    ) // Adjust size of the icon
-                            )
-                            Spacer(modifier = Modifier.width(8.dp)) // Spacing between icon and text
-                            Text(
-                                text = activityName
-                                    ?: "Loading...", // Display activity name or "Loading..."
-                                color = Color.White,
-                                fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                                fontSize = androidx.compose.ui.unit.TextUnit(
-                                    28f,
-                                    androidx.compose.ui.unit.TextUnitType.Sp
-                                ) // Set the font size
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.weight(1f)) // Balances the layout
-
-                        // Info Icon on the Right with Padding
-                        Image(
-                            painter = painterResource(id = R.drawable.info),
-                            contentDescription = "info",
-                            modifier = Modifier
-                                .size(40.dp)
-                                .padding(end = 4.dp) // Add padding around the info icon to match the arrow
-                                .clickable { showParticipantsDialog = true }
-                        )
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth(),
-
-                colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF007BFF)) // Set the top bar color
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color(0xFFE8E8E8),
+                        Color(0xFF74B5FC)
+                    ),
+                    startY = 0f,
+                    endY = Float.POSITIVE_INFINITY
+                )
             )
 
+    ) {
+        TopAppBar(
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.chevron_left_white),
+                        contentDescription = "back",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clickable { navController.popBackStack() } // Use navController.popBackStack() to go back
+                    )
 
+                    Spacer(modifier = Modifier.weight(1f))
 
-
-
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentPadding = PaddingValues(8.dp)
-            ) {
-                var previousMessageTimestamp: Long? = null
-
-                items(messages) { message ->
-                    user?.let {
-                        MessageScreen(
-                            message = message,
-                            currentUserId = it.userID,
-                            previousMessageTimestamp = previousMessageTimestamp
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.weight(8f)
+                    ) {
+                        Image(
+                            painter = painterResource(id = iconResourceId),
+                            contentDescription = activityName,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .border(
+                                    width = 1.dp,
+                                    color = Color.White
+                                )
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = activityName ?: "Loading...",
+                            color = Color.White,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontSize = androidx.compose.ui.unit.TextUnit(
+                                28f,
+                                androidx.compose.ui.unit.TextUnitType.Sp
+                            )
                         )
                     }
-                    // Update previous message timestamp
-                    previousMessageTimestamp = message.timestamp?.toDate()?.time
-                }
-            }
 
-            Row(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Use Box to make the TextField grow based on its content
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                         // Add border if needed
-                         // Make corners rounded
-                ) {
-                    OutlinedTextField(
-                        value = messageText,
-                        onValueChange = { messageText = it },
-                        placeholder = { Text("Napisz wiadomość...") },
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Image(
+                        painter = painterResource(id = R.drawable.info),
+                        contentDescription = "info",
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 48.dp) // Set minimum height
-                            .padding(
-                                horizontal = 4.dp,
-                                vertical = 12.dp
-                            ), // Adjust padding inside the text field
-                        singleLine = false, // Allow multiple lines
-                        maxLines = 5, // Limit to 5 lines max
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            containerColor = Color.Transparent,
-                            focusedBorderColor = Color.Black,
-                            unfocusedBorderColor = Color.Black
-                        ),
-                        shape = RoundedCornerShape(16.dp)
+                            .size(40.dp)
+                            .padding(end = 4.dp)
+                            .clickable { showParticipantsDialog = true }
                     )
                 }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color(0xFF007BFF))
+        )
 
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .weight(1f) // This makes LazyColumn take up all available space
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(8.dp)
+        ) {
+            var previousMessageTimestamp: Long? = null
 
-                IconButton(
-                    onClick = {
-                        // Perform haptic feedback
-                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                        if (messageText.isNotBlank()) {
-                            user?.let { sendMessage(eventId, it.userID, messageText) }
-                            messageText = "" // Clear text field after sending message
-                        }
-                    },
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(48.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.sendmessage),
-                        contentDescription = "send message",
-                        modifier = Modifier.size(40.dp) // Adjust icon size
+            items(messages) { message ->
+                user?.let {
+                    MessageScreen(
+                        message = message,
+                        currentUserId = it.userID,
+                        previousMessageTimestamp = previousMessageTimestamp
                     )
                 }
+                previousMessageTimestamp = message.timestamp?.toDate()?.time
             }
         }
 
-            if (showParticipantsDialog) {
-            AlertDialog(
-                onDismissRequest = { showParticipantsDialog = false },
-                title = { Text("Participants") },
-                text = {
-                    Column {
-                        participants.forEach { participant ->
-                            Text(text = participant)
-                        }
+        // This Row will stay at the bottom, pushed up by imePadding
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier
+                    .weight(1f)
+                    .shadow(4.dp, RoundedCornerShape(24.dp)),
+                shape = RoundedCornerShape(24.dp),
+                color = Color.White
+            ) {
+                OutlinedTextField(
+                    value = messageText,
+                    onValueChange = { messageText = it },
+                    placeholder = { Text("Napisz wiadomość...", color = Color.Gray) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        ,
+                    singleLine = false,
+                    maxLines = 5,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        containerColor = Color.Transparent,
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        cursorColor = Color.Black
+                    ),
+                    shape = RoundedCornerShape(24.dp)
+                )
+            }
+
+            IconButton(
+                onClick = {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    if (messageText.isNotBlank()) {
+                        user?.let { sendMessage(eventId, it.userID, messageText) }
+                        messageText = ""
+                        keyboardController?.hide()
                     }
                 },
-                confirmButton = {
-                    Button(onClick = { showParticipantsDialog = false }) {
-                        Text("Close")
-                    }
-                }
-            )
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .size(48.dp)
+                    .background(Color(0xFF007BFF), RoundedCornerShape(50))
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.sendmessage),
+                    contentDescription = "send message",
+                    modifier = Modifier.size(24.dp),
+                    tint = Color.White
+                )
+            }
         }
     }
 
-
-
+    if (showParticipantsDialog) {
+        AlertDialog(
+            onDismissRequest = { showParticipantsDialog = false },
+            title = { Text("Participants") },
+            text = {
+                Column {
+                    participants.forEach { participant ->
+                        Text(text = participant)
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = { showParticipantsDialog = false }) {
+                    Text("Close")
+                }
+            }
+        )
+    }
+}
 
 fun getEventNameById(eventId: String, onResult: (String?) -> Unit) {
     val db = FirebaseFirestore.getInstance()
@@ -322,15 +317,16 @@ fun getEventNameById(eventId: String, onResult: (String?) -> Unit) {
         .addOnSuccessListener { document ->
             if (document != null && document.exists()) {
                 val activityName = document.getString("activityName")
-                onResult(activityName) // Return the activity name
+                onResult(activityName)
             } else {
-                onResult(null) // Document does not exist
+                onResult(null)
             }
         }
         .addOnFailureListener { exception ->
-            onResult(null) // Handle failure
+            onResult(null)
         }
 }
+
 fun fetchParticipants(eventId: String, onResult: (List<String>) -> Unit) {
     val db = FirebaseFirestore.getInstance()
     val participantsRef = db.collection("events").document(eventId).collection("participants")
@@ -343,17 +339,14 @@ fun fetchParticipants(eventId: String, onResult: (List<String>) -> Unit) {
                 return@addOnSuccessListener
             }
 
-            // Extract user IDs
             val userIds = result.documents.mapNotNull { it.getString("userID") }
 
-            // If no user IDs are found, return empty list
             if (userIds.isEmpty()) {
                 Log.d("Firestore", "No user IDs found")
                 onResult(emptyList())
                 return@addOnSuccessListener
             }
 
-            // Fetch user names based on user IDs
             val userNames = mutableListOf<String>()
             val userCollection = db.collection("users")
             val nameFetchTasks = userIds.map { userId ->
@@ -369,7 +362,6 @@ fun fetchParticipants(eventId: String, onResult: (List<String>) -> Unit) {
                     }
             }
 
-            // Wait for all name fetch tasks to complete
             Tasks.whenAllComplete(nameFetchTasks).addOnCompleteListener {
                 if (it.isSuccessful) {
                     onResult(userNames)
@@ -385,24 +377,12 @@ fun fetchParticipants(eventId: String, onResult: (List<String>) -> Unit) {
         }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun PreviewChatScreen() {
-//    // Replace `eventId` and `currentUserId` with test values
-//    val testEventId = "YUCN1qQeFfEcJ4LXHVuL"
-//    val testUserId = "huj"
-//
-//
-//    // Call the `ChatScreen` function in `Preview`
-//    ChatScreen(eventId = testEventId, user.userI = testUserId)
-//}
 @Composable
 fun TransparentStatusBar() {
     val systemUiController = rememberSystemUiController()
 
-    // Make the status bar transparent
     systemUiController.setSystemBarsColor(
-        color = Color.Transparent, // Set status bar color to transparent
-        darkIcons = false // Adjust icons for light or dark status bar (true for dark icons on light background)
+        color = Color.Transparent,
+        darkIcons = false
     )
 }

@@ -68,7 +68,7 @@ import com.example.TeamApp.excludedUI.CustomSnackbar
 
 
 @Composable
-fun PrivacyPolicyScreen() {
+fun PrivacyPolicyScreen(navController: NavController) {
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF)
@@ -141,10 +141,13 @@ fun PrivacyPolicyScreen() {
         }
     }
 }
+/*
 @Composable
 @Preview(showBackground = false)
     fun PrivacyPolicyScreenPreview(){
-    PrivacyPolicyScreen()
+    PrivacyPolicyScreen(null)
     }
 
+
+ */
 

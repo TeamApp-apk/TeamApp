@@ -124,7 +124,7 @@ fun SettingsScreenv2(navController: NavController) {
                 Text(modifier = Modifier
                     .width(340.dp)
                     .height(25.dp)
-                    .clickable {viewModel.navigateToPrivacySettings(navController)},// zmiana
+                    .clickable { },
                     
                     text = "Polityka prywatności",
                     style = TextStyle(
