@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -82,7 +83,9 @@ class MainAppActivity : AppCompatActivity() {
             var isLoading by remember { mutableStateOf(true) }
             var showMainContent by remember { mutableStateOf(false) }
             var isRefreshing by remember { mutableStateOf(false) }
+
             val userViewModel: UserViewModel = viewModel()
+            val user by userViewModel.user.observeAsState()
             val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
             LaunchedEffect(navController) {
 //                navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -95,33 +98,42 @@ class MainAppActivity : AppCompatActivity() {
             }
             //to do remain this screen to wait
             val context = LocalContext.current
-            LaunchedEffect(Unit){
-                Log.d("LaunchedEffect", "LaunchedEffect called")
+            LaunchedEffect(Unit) {
+                Log.d("LaunchedEffect", "LaunchedEffect(Unit) called - Initiating user fetch")
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 firebaseUser?.email?.let { email ->
                     userViewModel.fetchUserFromFirestore(email)
+                    Log.d("UserViewModel", "fetchUserFromFirestore called for email: $email")
+                }
+            }
+            LaunchedEffect(user) {
+                Log.d("LaunchedEffect", "LaunchedEffect(user) called - User state changed: $user")
+                if (user != null) {
+                    Log.d("LaunchedEffect1", "User data available: $user")
 
-
-                    userViewModel.user.value?.avatar?.let { avatarUrl ->
+                    user?.avatar?.let { avatarUrl ->
                         val imageLoader = context.imageLoader
                         val request = ImageRequest.Builder(context)
                             .data(avatarUrl)
-                            .memoryCachePolicy(CachePolicy.ENABLED) // It tells coil to cache the image in memory
+                            .memoryCachePolicy(CachePolicy.ENABLED)
                             .diskCachePolicy(CachePolicy.ENABLED)
                             .build()
                         imageLoader.enqueue(request)
                         Log.d("Avatar", "Prefetching avatar to shared cache: $avatarUrl")
                     }
-                }
-                Log.d("LaunchedEffect", "${userViewModel.user}")
-                viewModel.fetchEvents()
-                Log.d("MainAppActivity", "Events fetched: ${viewModel.isMapInitialized}")
-                viewModel.initializeMapIfNeeded(context)
 
-                delay(1000)
-                isLoading = false
-                delay(500)
-                showMainContent = true
+                    // Inne akcje zależne od załadowania użytkownika
+                    viewModel.fetchEvents() // Zakładając, że 'viewModel' to Twój MainViewModel
+                    viewModel.initializeMapIfNeeded(context)
+                    delay(1000) // Opcjonalne opóźnienie dla płynniejszego przejścia
+                    isLoading = false
+                    delay(500)  // Opcjonalne opóźnienie
+                    showMainContent = true
+                    Log.d("LaunchedEffect", "Main content will be shown. isLoading: $isLoading, showMainContent: $showMainContent")
+
+                } else {
+                    Log.d("LaunchedEffect1", "User is null. Waiting for user data or login.")
+                }
             }
 
             Box(
@@ -129,11 +141,7 @@ class MainAppActivity : AppCompatActivity() {
                     .fillMaxSize()
                     .background(Brush.linearGradient(colors = gradientColors))
             ) {
-//                AnimatedVisibility(
-//                    visible = isLoading
-//                ) {
-//                    LoadingScreen()
-//                }
+
                 AnimatedVisibility(
                     visible = isLoading,
                     enter = fadeIn(animationSpec = tween(400)) + scaleIn(initialScale = 1.0f, animationSpec = tween(400)),
