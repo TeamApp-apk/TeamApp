@@ -1,15 +1,20 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
 package com.example.TeamApp.event
 
 //import androidx.hilt.navigation.compose.hiltViewModel
 import UserViewModel
 import android.annotation.SuppressLint
+import androidx.compose.ui.text.input.KeyboardType
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.util.Log
+import androidx.activity.result.launch
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateTo
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -77,6 +82,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.constraintlayout.motion.widget.Animatable
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.example.TeamApp.R
@@ -92,17 +98,22 @@ import com.tomtom.sdk.search.SearchResponse
 import com.tomtom.sdk.search.common.error.SearchFailure
 import com.tomtom.sdk.search.online.OnlineSearch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 import java.util.Properties
-
+import androidx.compose.animation.core.tween
+import kotlinx.coroutines.launch
 
 @Composable
 fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel) {
     val user by userViewModel.user.observeAsState()
     val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
+
+    val lazyListState = rememberLazyListState()
+    var shouldScrollAfterParticipantsSelection by remember { mutableStateOf(false) }
 
     val sport by viewModel.sport.observeAsState("")
     val address by viewModel.location.observeAsState("")
@@ -126,6 +137,34 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
         speed = 1f,
         restartOnPlay = false
     )
+    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(limit) { // This lambda block (blockA) IS a CoroutineScope
+        if (limit.isNotEmpty() && shouldScrollAfterParticipantsSelection) {
+            if (lazyListState.layoutInfo.totalItemsCount > 7) {
+
+                val currentScrollOffset = lazyListState.firstVisibleItemScrollOffset
+                val itemSize = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()?.size ?: 0
+                val estimatedTargetItemOffset = (7 - lazyListState.firstVisibleItemIndex) * itemSize +
+                        (lazyListState.layoutInfo.visibleItemsInfo.find { it.index == 7 }?.offset ?: 0)
+
+                val scrollAnimatable = androidx.compose.animation.core.Animatable(initialValue = currentScrollOffset.toFloat())
+
+                val job = this.launch {
+                    scrollAnimatable.animateTo(
+                        targetValue = estimatedTargetItemOffset.toFloat(),
+                        animationSpec = androidx.compose.animation.core.tween(durationMillis = 800)
+                    ) {
+                        val delta = this.value - lazyListState.firstVisibleItemScrollOffset.toFloat()
+                        lazyListState.dispatchRawDelta(delta)
+                    }
+
+                    lazyListState.animateScrollToItem(index = 7, scrollOffset = 0)
+                }
+
+            }
+            shouldScrollAfterParticipantsSelection = false
+        }
+    }
 
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
@@ -227,111 +266,106 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
                     }
                     .background(color = Color(0xFFF2F2F2), shape = RoundedCornerShape(size = 30.dp))
             ) {
-                ConstraintLayout ( modifier = Modifier.fillMaxSize() ) {
-                    val (descriptionField, localisation, discipline,
-                        number, date, create, animation, animation1) = createRefs()
-
-                    val descriptionStart = createGuidelineFromStart(0.1f)
-                    val descriptionEnd = createGuidelineFromStart(0.9f)
-                    val descriptionTop = createGuidelineFromTop(0.05f)
-                    val descriptionBottom = createGuidelineFromTop(0.15f)
-
-                    DescriptionInputField(
-                        description = description,
-                        onEditClick = { showDialog = true },
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // Formularz z polami w LazyColumn
+                    LazyColumn(
+                        state = lazyListState,
                         modifier = Modifier
-                            .constrainAs(descriptionField) {
-                                top.linkTo(descriptionTop)
-                                bottom.linkTo(descriptionBottom)
-                                start.linkTo(descriptionStart)
-                                end.linkTo(descriptionEnd)
-                                height = Dimension.fillToConstraints
-                                width = Dimension.fillToConstraints
-                            }
-                    )
-
-                    val localisationStart = createGuidelineFromStart(0.1f)
-                    val localisationEnd = createGuidelineFromStart(0.9f)
-                    val localisationTop = createGuidelineFromTop(0.18f)
-                    val localisationBottom = createGuidelineFromTop(0.28f)
-                    SearchStreetField(modifier = Modifier
-                        .constrainAs(localisation) {
-                            top.linkTo(localisationTop)
-                            bottom.linkTo(localisationBottom)
-                            start.linkTo(localisationStart)
-                            end.linkTo(localisationEnd)
-                            height = Dimension.fillToConstraints
-                            width = Dimension.fillToConstraints
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        item {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            EventNameButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
-                    )
 
-                    val disciplineStart = createGuidelineFromStart(0.1f)
-                    val disciplineEnd = createGuidelineFromStart(0.9f)
-                    val disciplineTop = createGuidelineFromTop(0.31f)
-                    val disciplineBottom = createGuidelineFromTop(0.41f)
-                    SportPopupButton(modifier = Modifier
-                        .constrainAs(discipline) {
-                            top.linkTo(disciplineTop)
-                            bottom.linkTo(disciplineBottom)
-                            start.linkTo(disciplineStart)
-                            end.linkTo(disciplineEnd)
-                            height = Dimension.fillToConstraints
-                            width = Dimension.fillToConstraints
+
+                        item {
+                            DescriptionInputField(
+                                description = description,
+                                onEditClick = { showDialog = true },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
-                    )
 
-                    val numberStart = createGuidelineFromStart(0.1f)
-                    val numberEnd = createGuidelineFromStart(0.9f)
-                    val numberTop = createGuidelineFromTop(0.44f)
-                    val numberBottom = createGuidelineFromTop(0.54f)
-
-                    ParticipantsPopupButton(modifier = Modifier
-                        .constrainAs(number) {
-                            top.linkTo(numberTop)
-                            bottom.linkTo(numberBottom)
-                            start.linkTo(numberStart)
-                            end.linkTo(numberEnd)
-                            height = Dimension.fillToConstraints
-                            width = Dimension.fillToConstraints
+                        item {
+                            SearchStreetField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
-                    )
 
-                    val dateStart = createGuidelineFromStart(0.1f)
-                    val dateEnd = createGuidelineFromStart(0.9f)
-                    val dateTop = createGuidelineFromTop(0.57f)
-                    val dateBottom = createGuidelineFromTop(0.67f)
-                    MyDateTimePickerv2(modifier = Modifier
-                        .constrainAs(date) {
-                            top.linkTo(dateTop)
-                            bottom.linkTo(dateBottom)
-                            start.linkTo(dateStart)
-                            end.linkTo(dateEnd)
-                            height = Dimension.fillToConstraints
-                            width = Dimension.fillToConstraints
+                        item {
+                            SportPopupButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
-                    )
 
-                    val createStart = createGuidelineFromStart(0.1f)
-                    val createEnd = createGuidelineFromStart(0.9f)
-                    val createTop = createGuidelineFromTop(0.7f)
-                    val createBottom = createGuidelineFromTop(0.9f)
+                        item {
+                            ParticipantsPopupButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp),
+                                onParticipantsSelected = {
+                                    shouldScrollAfterParticipantsSelection = true
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
 
-                    Box (
+                        item {
+                            MyDateTimePickerv2(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                        item{
+                            PriceButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                        item{
+                            SkillLevelButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp)
+                            )
+                        }
+
+                    }
+                    Box(
                         modifier = Modifier
-                            .constrainAs(create) {
-                                top.linkTo(createTop)
-                                bottom.linkTo(createBottom)
-                                start.linkTo(createStart)
-                                end.linkTo(createEnd)
-                                height = Dimension.fillToConstraints
-                                width = Dimension.fillToConstraints
-                            }
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .height(100.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         if (isLoading) {
                             LottieAnimation(
                                 composition = composition,
                                 progress = progress,
-                                modifier = Modifier.size(100.dp)
+                                modifier = Modifier
+                                    .size(100.dp)
                                     .align(Alignment.Center)
                             )
                             LaunchedEffect(Unit) {
@@ -477,9 +511,13 @@ fun DescriptionDialog(
                     style = TextStyle(
                         fontSize = 18.sp,
                         fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center  // Wyśrodkowanie samego tekstu
                     ),
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)  // Wyśrodkowanie całego komponentu
                 )
 
                 Box(
@@ -1186,8 +1224,405 @@ fun SportPopupButton(modifier: Modifier) {
     }
 }
 
+
 @Composable
-fun ParticipantsPopupButton(modifier: Modifier) {
+fun PriceButton(modifier: Modifier) {
+    var showDialog by remember { mutableStateOf(false) }
+    val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
+    var inputPrice by remember { mutableStateOf("") }
+    val price by viewModel.price.observeAsState("")
+    val hapticFeedback = LocalHapticFeedback.current
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                Color.White,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                showDialog = true
+            }
+            .padding(16.dp)
+            .heightIn(min = 28.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = if (price.isEmpty()) "Cena" else "$price zł",
+            style = TextStyle(
+                fontSize = 16.sp,
+                fontFamily = if (price.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
+                fontWeight = if (price.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                color = if (price.isEmpty()) Color.Gray else Color(0xFF003366),
+                textAlign = TextAlign.Center
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    // Dialog do wprowadzenia ceny
+    if (showDialog) {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, shape = RoundedCornerShape(16.dp))
+                    .padding(16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "Podaj cenę (zł)",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                    TextField(
+                        value = inputPrice,
+                        onValueChange = { newValue ->
+                            if (newValue.isEmpty() || newValue.matches(Regex("^\\d*(\\.\\d{0,2})?$"))) {
+                                inputPrice = newValue
+                            }
+                        },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
+                        textStyle = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovaregular))
+                        ),
+                        colors = TextFieldDefaults.textFieldColors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        Text(
+                            text = "Anuluj",
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple()
+                                ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showDialog = false
+                                }
+                                .padding(8.dp)
+                        )
+                        Divider(
+                            color = Color.Black,
+                            thickness = 6.dp,
+                            modifier = Modifier
+                                .height(20.dp)
+                                .width(1.dp)
+                        )
+                        Text(
+                            text = "Gotowe",
+                            fontSize = 22.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple()
+                                ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    viewModel.onPriceChange(inputPrice)
+                                    showDialog = false
+                                }
+                                .padding(8.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    // Automatycznie ustawiaj focus na pole tekstowe i pokazuj klawiaturę
+    if (showDialog) {
+        LaunchedEffect(Unit) {
+            delay(100)
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
+}
+
+@Composable
+fun SkillLevelButton(modifier: Modifier) {
+    var showDialog by remember { mutableStateOf(false) }
+    val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
+    val skillLevel by viewModel.skillLevel.observeAsState("")
+    val availableSkillLevels = viewModel.availableSkillLevels
+    val hapticFeedback = LocalHapticFeedback.current
+
+    // Przycisk pokazujący aktualny wybór
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                Color.White,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                showDialog = true
+            }
+            .padding(16.dp)
+            .heightIn(min = 28.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = if (skillLevel.isEmpty()) "Poziom umiejętności" else skillLevel,
+            style = TextStyle(
+                fontSize = 16.sp,
+                fontFamily = if (skillLevel.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
+                fontWeight = if (skillLevel.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                color = if (skillLevel.isEmpty()) Color.Gray else Color(0xFF003366),
+                textAlign = TextAlign.Center
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    // Dialog z listą poziomów umiejętności
+    if (showDialog) {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = Color.White,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Wybierz poziom umiejętności",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            color = Color.Black
+                        ),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                    // Lista poziomów umiejętności
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp)
+                    ) {
+                        items(availableSkillLevels) { level ->
+                            Text(
+                                text = level,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        viewModel.onSkillLevelChange(level)
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        showDialog = false
+                                    }
+                                    .padding(12.dp),
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    fontFamily = FontFamily(Font(R.font.proximanovalight)),
+                                    color = Color.Black
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EventNameButton(modifier: Modifier) {
+    var showDialog by remember { mutableStateOf(false) }
+    var inputName by remember { mutableStateOf("") }
+    val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
+    val eventName by viewModel.eventName.observeAsState("")
+    val hapticFeedback = LocalHapticFeedback.current
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // Przycisk otwierający dialog
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                Color.White,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .clickable {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                showDialog = true
+            }
+            .padding(16.dp)
+            .heightIn(min = 28.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = if (eventName.isEmpty()) "Nazwa wydarzenia" else eventName,
+            style = TextStyle(
+                fontSize = 16.sp,
+                fontFamily = if (eventName.isEmpty()) FontFamily(Font(R.font.proximanovaregular)) else FontFamily(Font(R.font.proximanovabold)),
+                fontWeight = if (eventName.isEmpty()) FontWeight.Medium else FontWeight.Bold,
+                color = if (eventName.isEmpty()) Color.Gray else Color(0xFF003366),
+                textAlign = TextAlign.Center
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    // Dialog do wprowadzenia nazwy wydarzenia
+    if (showDialog) {
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, shape = RoundedCornerShape(16.dp))
+                    .padding(16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "Podaj nazwę wydarzenia",
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold
+                        ),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+
+                    TextField(
+                        value = inputName,
+                        onValueChange = { inputName = it },
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
+                        textStyle = TextStyle(
+                            fontSize = 16.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovaregular))
+                        ),
+                        colors = TextFieldDefaults.textFieldColors(
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        Text(
+                            text = "Anuluj",
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple()
+                                ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    showDialog = false
+                                }
+                                .padding(8.dp)
+                        )
+                        Divider(
+                            color = Color.Black,
+                            thickness = 6.dp,
+                            modifier = Modifier
+                                .height(20.dp)
+                                .width(1.dp)
+                        )
+                        Text(
+                            text = "Gotowe",
+                            fontSize = 22.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = rememberRipple()
+                                ) {
+                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    viewModel.onEventNameChange(inputName)
+                                    showDialog = false
+                                }
+                                .padding(8.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    // Automatycznie ustawiaj focus na pole tekstowe i pokazuj klawiaturę
+    if (showDialog) {
+        LaunchedEffect(Unit) {
+            delay(100)
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
+}
+
+
+
+@Composable
+fun ParticipantsPopupButton(
+    modifier: Modifier,
+    onParticipantsSelected: () -> Unit = {}
+) {
     var selectedPeople by remember { mutableStateOf<Int?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     val viewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
@@ -1256,13 +1691,12 @@ fun ParticipantsPopupButton(modifier: Modifier) {
                             .align(Alignment.CenterHorizontally)
                     )
 
-                    // Lista przewijalna
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(max = 300.dp) // Ograniczenie wysokości popupu
                     ) {
-                        items((1..22).toList()) { peopleCount ->
+                        items((2..22).toList()) { peopleCount ->
                             Text(
                                 text = peopleCount.toString(),
                                 modifier = Modifier
@@ -1273,6 +1707,7 @@ fun ParticipantsPopupButton(modifier: Modifier) {
                                         viewModel.onLimitChange(peopleCount.toString())
                                         showDialog = false // Zamknięcie popupu po wyborze liczby
                                         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onParticipantsSelected()
                                     }
                                     .padding(12.dp),
                                 fontSize = 18.sp,
@@ -1287,3 +1722,4 @@ fun ParticipantsPopupButton(modifier: Modifier) {
         }
     }
 }
+

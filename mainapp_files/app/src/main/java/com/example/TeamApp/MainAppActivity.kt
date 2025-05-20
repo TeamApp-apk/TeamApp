@@ -95,9 +95,9 @@ class MainAppActivity : AppCompatActivity() {
                 }
                 Log.d("LaunchedEffect", "${userViewModel.user}")
                 viewModel.fetchEvents()
-                delay(500)
+                delay(1000)
                 isLoading = false
-                delay(400)
+                delay(300)
                 showMainContent = true
 
             }
@@ -160,7 +160,6 @@ class MainAppActivity : AppCompatActivity() {
                                 ) { SearchScreen(navController) { isScrollingDown ->
                                     isBottomBarVisible = !isScrollingDown
                                 } }
-
 
                                 composable(
                                     route = "profile",
