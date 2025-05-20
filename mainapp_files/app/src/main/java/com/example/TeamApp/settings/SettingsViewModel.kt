@@ -35,6 +35,11 @@ class SettingsViewModel : ViewModel() {
     fun navigateToForgotPasswordActivity(navController: NavController) {
 
     }
+    fun navigateToTermsOfUse(navController: NavController) {
+        navController.navigate("termsOfUse"){
+            popUpTo("settings"){inclusive = false}
+        }
+    }
 
     fun navigateToPrivacySettings(navController: NavController) {
         navController.navigate("privacyPolicy"){

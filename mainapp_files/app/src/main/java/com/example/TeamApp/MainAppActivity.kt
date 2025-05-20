@@ -242,7 +242,7 @@ class MainAppActivity : AppCompatActivity() {
                                     exitTransition = { fadeOut(animationSpec = tween(300)) },
                                     popEnterTransition = { fadeIn(animationSpec = tween(300)) },
                                     popExitTransition = { fadeOut(animationSpec = tween(300)) }
-                                ) { TermsOfUse() }
+                                ) { TermsOfUse(navController) }
 
                                 composable(
                                     route = "privacyPolicy",

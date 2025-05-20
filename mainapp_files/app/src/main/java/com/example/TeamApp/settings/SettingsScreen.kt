@@ -150,7 +150,7 @@ fun SettingsScreenv2(navController: NavController) {
             Text(modifier = Modifier
                 .width(340.dp)
                 .height(25.dp)
-                .clickable { },
+                .clickable { viewModel.navigateToTermsOfUse(navController)},
 
                 text = "Regulamin aplikacji",
                 style = TextStyle(

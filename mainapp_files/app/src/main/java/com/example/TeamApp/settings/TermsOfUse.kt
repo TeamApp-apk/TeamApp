@@ -68,7 +68,7 @@ import com.example.TeamApp.excludedUI.CustomSnackbar
 
 
 @Composable
-fun TermsOfUse() {
+fun TermsOfUse(navController: NavController) {
     val gradientColors = listOf(
         Color(0xFFE8E8E8),
         Color(0xFF007BFF)
@@ -99,8 +99,7 @@ fun TermsOfUse() {
                     painter = painterResource(id = R.drawable.arrow_icon),
                     contentDescription = "arrow",
                     modifier = Modifier
-                        .clickable {
-
+                        .clickable {navController.popBackStack()
                         }
                         .size(24.dp)
                         .padding(1.dp)
@@ -141,10 +140,6 @@ fun TermsOfUse() {
         }
     }
 }
-@Composable
-@Preview(showBackground = false)
-fun TermsOfUsePreview(){
-    TermsOfUse()
-}
+
 
 
