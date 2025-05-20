@@ -77,11 +77,13 @@ fun EventItem(event: Event, onClick: () -> Unit) {
                         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
                         val senderId = lastMessage["userId"] as? String
                         val prefix = if (senderId == currentUserId) "Ty:" else "${lastMessage["userName"] ?: "Unknown"}:"
-                        val message = lastMessage["message"] as? String ?: "Brak wiadomości"
+                        val message = (lastMessage["message"] as? String ?: "Brak wiadomości").replace("\n"," ")
+
                         val totalMaxLength = 32 // Total length for prefix + message + ellipsis
                         val ellipsis = "..."
                         val prefixLength = prefix.length
                         val maxMessageLength = totalMaxLength - prefixLength - ellipsis.length - 1 // -1 for space
+
                         val truncatedMessage = if (message.length > maxMessageLength && maxMessageLength > 0) {
                             message.take(maxMessageLength) + ellipsis
                         } else {
