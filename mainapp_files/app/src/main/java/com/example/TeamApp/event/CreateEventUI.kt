@@ -211,11 +211,11 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
             viewModel.resetFields()
         }
     }
-    LaunchedEffect(Unit){
-        delay(700)
-        Log.d("CreateEventScreen", "Initializing map")
-        viewModel.initializeMapIfNeeded(context)
-    }
+//    LaunchedEffect(Unit){
+//        delay(700)
+//        Log.d("CreateEventScreen", "Initializing map")
+//        viewModel.initializeMapIfNeeded(context)
+//    }
 
     Surface( modifier = Modifier.fillMaxSize() ) {
         Box(modifier = Modifier
