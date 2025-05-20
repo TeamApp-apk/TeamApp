@@ -434,33 +434,45 @@ class LoginViewModel : ViewModel() {
         Log.d("USER","avatarURL: ${_user.value!!.avatar}")
     }
     fun saveUserData(name: String, birthDate: String, gender: String) {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        Log.d("SaveUserData", "Rozpoczęto saveUserData. UserId: $userId, Name: $name, BirthDate: $birthDate, Gender: $gender")
+
+        if (userId == null) {
+            Log.e("SaveUserData", "UserID jest null. Nie można zapisać danych.")
+            return
+        }
+
+        // Dodatkowa walidacja, czy dane nie są puste, zanim wyślesz je do Firestore
+        if (name.isBlank() || birthDate.isBlank() || gender.isBlank()) {
+            Log.e("SaveUserData", "Imię, data urodzenia lub płeć są puste. Przerywam zapis. Imię: '$name', DataUrodzenia: '$birthDate', Płeć: '$gender'")
+            // Tutaj możesz chcieć pokazać użytkownikowi komunikat o błędzie
+            return
+        }
+
         val db = FirebaseFirestore.getInstance()
         val userRef = db.collection("users").document(userId)
 
-        // Check if the document exists
-        userRef.get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    // Document exists, update name, birth date, and gender
-                    userRef.update(mapOf(
-                        "name" to name,
-                        "birthDay" to birthDate,
-                        "gender" to gender
-                    ))
-                        .addOnSuccessListener {
-                            Log.d("Firestore", "User data updated for user $userId")
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("Firestore", "Error updating user data: ${e.message}")
-                        }
-                } else {
-                    // Document does not exist, report error
-                    Log.e("Firestore", "User document not found for user ID: $userId")
-                }
+        val userData = mapOf(
+            "name" to name,
+            "birthDay" to birthDate,
+            "gender" to gender
+        )
+
+        Log.d("SaveUserData", "Próba zapisu/aktualizacji danych dla użytkownika: ${userRef.path} z danymi: $userData")
+
+        // Użyj set z SetOptions.merge()
+        // To zaktualizuje dokument, jeśli istnieje, lub utworzy go z tymi polami,
+        // scalając z istniejącymi danymi (np. email zapisanym wcześniej).
+        userRef.set(userData, com.google.firebase.firestore.SetOptions.merge())
+            .addOnSuccessListener {
+                Log.d("Firestore", "Dane użytkownika (name, birthDay, gender) zapisane/zaktualizowane pomyślnie dla userId: $userId")
+                // Rozważ aktualizację _user.value w UserViewModel tutaj, jeśli jest taka potrzeba,
+                // aby odzwierciedlić zmiany lokalnie bez ponownego pobierania z Firestore.
+                // Np. _user.value = _user.value?.copy(name = name, birthDay = birthDate, gender = gender)
+                // (Pamiętaj, że _user w LoginViewModel to inne _user niż w UserViewModel)
             }
             .addOnFailureListener { e ->
-                Log.e("Firestore", "Error fetching user document: ${e.message}")
+                Log.e("Firestore", "Błąd podczas zapisu/aktualizacji danych użytkownika (name, birthDay, gender) dla userId: $userId. Błąd: ${e.message}", e)
             }
     }
 }

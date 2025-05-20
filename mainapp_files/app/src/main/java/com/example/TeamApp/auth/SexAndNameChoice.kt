@@ -222,7 +222,7 @@ fun SexAndNameChoice (navController: NavController, userViewModel: UserViewModel
                 }
             }
 
-                val femaleStart = createGuidelineFromStart(0.55f)
+            val femaleStart = createGuidelineFromStart(0.55f)
             val femaleEnd = createGuidelineFromStart(0.85f)
             val femaleTop = createGuidelineFromTop(0.4f)
             val femaleBottom = createGuidelineFromTop(0.465f)
@@ -292,7 +292,7 @@ fun NameBox(
     onTextChanged: (String) -> Unit // Przekazujemy funkcję do obsługi zmiany tekstu
 ) {
     val focusManager = LocalFocusManager.current
-
+    Log.d("SexAndNameChoice", "NameBox: $textValue")
     TextField(
         modifier = modifier,
         label = { Text(text = labelValue) },
@@ -336,15 +336,15 @@ fun ButtonNext(modifier: Modifier, navController: NavController, userViewModel: 
     val user by userViewModel.user.observeAsState()
     Button(
         onClick = {
+            Log.d("SexAndNameChoice", "ButtonNext: onClick")
+            user?.name = name
+            user?.birthDay = birthDate
+            user?.gender = gender
+            viewModel.saveUserData(name, birthDate, gender)
             if (!isPreloaded) {
                 viewModel.setLoading(true)
                 viewModel.setOnClickExecuted(true)
             } else {
-                Log.d("SexAndNameChoice", "ButtonNext: onClick")
-                user?.name = name
-                user?.birthDay = birthDate
-                user?.gender = gender
-                viewModel.saveUserData(name, birthDate, gender)
                 navController.navigate("avatarSelection") {
                     popUpTo("sexName") {
                         inclusive = false
