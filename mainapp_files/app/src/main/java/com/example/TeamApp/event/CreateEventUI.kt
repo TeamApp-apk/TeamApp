@@ -204,8 +204,8 @@ fun CreateEventScreen(navController: NavController, userViewModel: UserViewModel
         }
         if (progress == 1.0f) {
             isPlaying = false
-            showTick = true // Pokazuje tick po zakończeniu animacji
-            delay(150  ) // Opcjonalne opóźnienie przed przywróceniem przycisku
+            showTick = true
+            delay(150  )
             showTick = false
             isLoading = false
             loadingComplete = false

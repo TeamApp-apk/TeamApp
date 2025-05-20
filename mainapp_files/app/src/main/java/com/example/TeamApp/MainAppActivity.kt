@@ -7,6 +7,8 @@ import ScrollDownChat
 import UserViewModel
 import android.os.Bundle
 import android.util.Log
+import coil.request.ImageRequest
+import coil.ImageLoader
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -36,6 +38,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import coil.imageLoader
+import coil.request.CachePolicy
+import com.android.volley.Request
 import com.example.TeamApp.auth.ForgotPasswordScreen
 import com.example.TeamApp.event.CreateEventScreen
 import com.example.TeamApp.event.CreateEventViewModel
@@ -95,6 +100,18 @@ class MainAppActivity : AppCompatActivity() {
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
                 firebaseUser?.email?.let { email ->
                     userViewModel.fetchUserFromFirestore(email)
+
+
+                    userViewModel.user.value?.avatar?.let { avatarUrl ->
+                        val imageLoader = context.imageLoader
+                        val request = ImageRequest.Builder(context)
+                            .data(avatarUrl)
+                            .memoryCachePolicy(CachePolicy.ENABLED) // It tells coil to cache the image in memory
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .build()
+                        imageLoader.enqueue(request)
+                        Log.d("Avatar", "Prefetching avatar to shared cache: $avatarUrl")
+                    }
                 }
                 Log.d("LaunchedEffect", "${userViewModel.user}")
                 viewModel.fetchEvents()

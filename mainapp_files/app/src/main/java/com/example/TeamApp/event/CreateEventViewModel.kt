@@ -206,6 +206,9 @@ class CreateEventViewModel : ViewModel() {
         _limit.value = ""
         _description.value = ""
         _dateTime.value = ""
+        _eventName.value = ""
+        _skillLevel.value = ""
+        _price.value = ""
     }
     //temporary here
     fun logout(navController: NavController) {
