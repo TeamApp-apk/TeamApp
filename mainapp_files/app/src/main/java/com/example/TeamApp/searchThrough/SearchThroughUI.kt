@@ -74,6 +74,8 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
     })
     val filtersOn by SearchViewModel.filtersOn.observeAsState(false)
 
+
+
     LaunchedEffect(isRefreshing) {
         if (isRefreshing) {
             viewModel.isDataFetched = false
@@ -117,6 +119,12 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
         if (activityList.isEmpty()) {
             showEmptyMessage = activityList.isEmpty()
         }
+    }
+
+    LaunchedEffect(Unit){
+        delay(700)
+        Log.d("CreateEventScreen", "Initializing map")
+        viewModel.initializeMapIfNeeded(context)
     }
 
     val gradientColors = listOf(

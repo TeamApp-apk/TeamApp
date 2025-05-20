@@ -82,6 +82,7 @@ class MainAppActivity : AppCompatActivity() {
 //                }
                 isBottomBarVisible = true
             }
+            //to do remain this screen to wait
             LaunchedEffect(Unit){
                 Log.d("LaunchedEffect", "LaunchedEffect called")
                 val firebaseUser = FirebaseAuth.getInstance().currentUser
@@ -90,9 +91,9 @@ class MainAppActivity : AppCompatActivity() {
                 }
                 Log.d("LaunchedEffect", "${userViewModel.user}")
                 viewModel.fetchEvents()
-                delay(500)
+                delay(1000)
                 isLoading = false
-                delay(400)
+                delay(300)
                 showMainContent = true
 
             }
@@ -136,7 +137,7 @@ class MainAppActivity : AppCompatActivity() {
                         ) {
                             AnimatedNavHost(
                                 navController = navController,
-                                startDestination = "createEvent"
+                                startDestination = "search"
                             ) {
                                 composable(
                                     route = "createEvent",
@@ -211,6 +212,8 @@ class MainAppActivity : AppCompatActivity() {
                                     val activityId = backStackEntry.arguments?.getString("activityId") ?: return@composable
                                     DetailsScreen(navController, activityId, userViewModel)
                                 }
+
+
 
                                 composable(
                                     route = "yourEvents",
