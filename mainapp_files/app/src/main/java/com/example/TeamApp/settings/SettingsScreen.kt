@@ -86,7 +86,7 @@ fun SettingsScreenv2(navController: NavController) {
                     contentDescription = "arrow",
                     modifier = Modifier
                         .clickable {
-
+                            navController.popBackStack()
                         }
                         .size(24.dp)
                         .padding(1.dp)
