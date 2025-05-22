@@ -32,7 +32,6 @@ fun OptionSelectorComponent(
             color = Color.Black,
 
         )
-
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp), // Spacing between buttons

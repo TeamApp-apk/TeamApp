@@ -25,7 +25,7 @@ class SearchThroughViewModel : ViewModel(){
     val selectedSports: LiveData<List<String>> = _selectedSports
 
 
-    val priceFilterOptionsList = listOf("Dowolna", "0zł", "do 20zł", "do 50zł") // As requested
+    val priceFilterOptionsList = listOf("Dowolna", "0zł", "<20zł", "<50zł") // As requested
     private val _selectedPriceOptionUi = MutableStateFlow(priceFilterOptionsList.first()) // Default to "Dowolna"
     val selectedPriceOptionUi: StateFlow<String> = _selectedPriceOptionUi.asStateFlow()
 

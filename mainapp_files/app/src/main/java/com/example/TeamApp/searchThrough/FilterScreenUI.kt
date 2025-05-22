@@ -83,7 +83,7 @@ fun FiltersScreen(navController: NavController) {
     ConstraintLayout(modifier = Modifier
         .fillMaxSize()
         .background(color = Color(0xFFF2F2F2))) {
-        val (topbar, filters, acceptButton, reset) = createRefs()
+        val (topbar, filters, acceptButton) = createRefs()
 
         TopAppBar(
             modifier = Modifier.constrainAs(topbar)
@@ -153,8 +153,8 @@ fun FiltersScreen(navController: NavController) {
                 //.background(color = Color(0xFF000000))
 
         ) {
-            val (sport, distanceSlider, sportPopupRef, priceOptionSelectorRef ) = createRefs()
-            val filtersTop = createGuidelineFromTop(0.07f)
+            val (sport, distanceSlider, sportPopupRef, priceOptionSelectorRef, reset ) = createRefs()
+            val filtersTop = createGuidelineFromTop(0.03f)
             val distanceSliderHeight = Dimension.value(screenHeightDp * 0.10f)
             val distanceValue by viewModel.distance.observeAsState(75)
             val verticalSpacing = screenHeightDp * 0.025f
@@ -186,28 +186,41 @@ fun FiltersScreen(navController: NavController) {
                 },
                 valueSuffix = " km" // Optional
             )
-
             val sportPopupHeight = Dimension.value(screenHeightDp * 0.1f)
+
+            val selectedLevelOptionFromVm by viewModel.selectedLevelOptionUi.collectAsState()
+            OptionSelectorComponent(
+                modifier = Modifier.constrainAs(sportPopupRef) {
+                    top.linkTo(distanceSlider.bottom)
+                    //height = sportPopupHeight
+                    width = Dimension.fillToConstraints
+                },
+                label = "Poziom",
+                options = viewModel.levelFilterOptionsList,
+                selectedOption = selectedLevelOptionFromVm,
+                onOptionSelected = { option -> viewModel.onLevelOptionUiSelected(option) }
+            )
+
+
             SportPopupButton(
                 modifier = Modifier
                     .constrainAs(sport) {
-                        top.linkTo(distanceSlider.bottom)
+                        top.linkTo(sportPopupRef.bottom, margin = verticalSpacing)
                         height = sportPopupHeight
                         width = Dimension.fillToConstraints
                     }
             )
-
-            OptionSelectorComponent(
-                modifier = Modifier.constrainAs(sportPopupRef) {
-                    top.linkTo(sport.bottom, margin = verticalSpacing)
-                    height = sportPopupHeight
-                    width = Dimension.fillToConstraints
-                },
-                label = "Poziom",
-                options = viewModel.priceFilterOptionsList,
-                selectedOption = selectedPriceOptionFromVm,
-                onOptionSelected = { option -> viewModel.onPriceOptionUiSelected(option) }
+            val resetHeight = Dimension.value(screenHeightDp * 0.05f)
+            ClickableResetTextComponent(
+                modifier = Modifier
+                    .constrainAs(reset) {
+                        top.linkTo(sport.bottom, margin = screenHeightDp * 0.01f)
+                        height =  resetHeight
+                    },
+                navController = navController,
+                viewModel
             )
+
 
 
 
@@ -215,9 +228,9 @@ fun FiltersScreen(navController: NavController) {
 
         val passStart = createGuidelineFromStart(0.1f)
         val passEnd = createGuidelineFromStart(0.9f)
-        val passTop = createGuidelineFromTop(0.86f)
-        val passBottom = createGuidelineFromTop(0.94f)
+        val passTop = createGuidelineFromTop(0.90f)
 
+        val AcceptButtonHeight = Dimension.value(screenHeightDp * 0.08f)
         AcceptButton(
             text = "Filtruj",
             onClick = {
@@ -227,33 +240,13 @@ fun FiltersScreen(navController: NavController) {
             modifier = Modifier
                 .constrainAs(acceptButton) {
                     top.linkTo(passTop)
-                    bottom.linkTo(passBottom)
                     start.linkTo(passStart)
                     end.linkTo(passEnd)
-                    height = Dimension.fillToConstraints
+                    height = AcceptButtonHeight
                     width = Dimension.fillToConstraints
                 }
         )
 
-        val resetStart = createGuidelineFromStart(0.35f)
-        val resetEnd = createGuidelineFromStart(0.65f)
-        val resetTop = createGuidelineFromTop(0.94f)
-        val resetBottom = createGuidelineFromTop(0.99f)
-
-        ClickableResetTextComponent(
-            modifier = Modifier
-                .constrainAs(reset) {
-                    top.linkTo(resetTop)
-                    bottom.linkTo(resetBottom)
-                    start.linkTo(resetStart)
-                    end.linkTo(resetEnd)
-                    height = Dimension.fillToConstraints
-                    width = Dimension.fillToConstraints
-
-                },
-            navController = navController,
-            viewModel
-        )
     }
 }
 @Composable
@@ -294,7 +287,7 @@ fun ClickableResetTextComponent(modifier: Modifier = Modifier, navController: Na
     val loginText = "Resetuj filtry"
     val annotatedString = buildAnnotatedString {
         pushStringAnnotation(tag = "Resetuj", annotation = loginText)
-        withStyle(style = SpanStyle(color = Color(0xffd46161), fontFamily =
+        withStyle(style = SpanStyle(color = Color(0xff4fc3f7), fontFamily =
         FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight(900) )
         ) {
             append(loginText)
@@ -304,9 +297,9 @@ fun ClickableResetTextComponent(modifier: Modifier = Modifier, navController: Na
 
     Box(
         modifier = modifier
-            .fillMaxWidth() // Make the box fill the available width
-            .padding(8.dp), // Optional padding for aesthetics
-        contentAlignment = Alignment.Center // Center the content (text) within the box
+            .fillMaxWidth(), // Make the box fill the available width
+
+        Alignment.CenterStart
     ) {
         ClickableText(
             text = annotatedString,
