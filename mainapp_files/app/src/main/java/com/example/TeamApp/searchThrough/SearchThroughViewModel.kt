@@ -7,6 +7,9 @@ import androidx.lifecycle.MutableLiveData
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.event.CreateEventViewModel
 import com.example.TeamApp.event.CreateEventViewModelProvider
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class SearchThroughViewModel : ViewModel(){
     val otherViewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
@@ -14,10 +17,32 @@ class SearchThroughViewModel : ViewModel(){
     private val _filteredEvents = MutableLiveData<List<Event>>()
     val filteredEvents: LiveData<List<Event>> = _filteredEvents
 
+
+
     val availableSports = otherViewModel.getAvailableSports()
 
     private val _selectedSports = MutableLiveData<List<String>>(availableSports.toList())
     val selectedSports: LiveData<List<String>> = _selectedSports
+
+
+    val priceFilterOptionsList = listOf("Dowolna", "0zł", "do 20zł", "do 50zł") // As requested
+    private val _selectedPriceOptionUi = MutableStateFlow(priceFilterOptionsList.first()) // Default to "Dowolna"
+    val selectedPriceOptionUi: StateFlow<String> = _selectedPriceOptionUi.asStateFlow()
+
+    val levelFilterOptionsList = listOf("Dowolny", "Początkujący", "Średniozaawansowany", "Zaawansowany", "Ekspert") // As requested
+    private val _selectedLevelOptionUi = MutableStateFlow(levelFilterOptionsList.first()) // Default to "Dowolna"
+    val selectedLevelOptionUi: StateFlow<String> = _selectedLevelOptionUi.asStateFlow()
+
+    fun onPriceOptionUiSelected(option: String) {
+        if (priceFilterOptionsList.contains(option)) { // Ensure valid option
+            _selectedPriceOptionUi.value = option
+        }
+    }
+    fun onLevelOptionUiSelected(option: String) {
+        if (levelFilterOptionsList.contains(option)) { // Ensure valid option
+            _selectedLevelOptionUi.value = option
+        }
+    }
 
     private val _sex = MutableLiveData("")
     val sex: LiveData<String> = _sex

@@ -67,7 +67,10 @@ import com.example.TeamApp.event.CreateEventViewModelProvider
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalConfiguration
+import com.yourpackage.composables.OptionSelectorComponent
+import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -150,14 +153,28 @@ fun FiltersScreen(navController: NavController) {
                 //.background(color = Color(0xFF000000))
 
         ) {
-            val (sport, genderButtons, ageSlider, distanceSlider ) = createRefs()
+            val (sport, distanceSlider, sportPopupRef, priceOptionSelectorRef ) = createRefs()
             val filtersTop = createGuidelineFromTop(0.07f)
             val distanceSliderHeight = Dimension.value(screenHeightDp * 0.10f)
             val distanceValue by viewModel.distance.observeAsState(75)
+            val verticalSpacing = screenHeightDp * 0.025f
+
+            val selectedPriceOptionFromVm by viewModel.selectedPriceOptionUi.collectAsState()
+            OptionSelectorComponent(
+                modifier = Modifier.constrainAs(priceOptionSelectorRef) {
+                    top.linkTo(filtersTop) // Position after DateFilter
+                    width = Dimension.fillToConstraints
+                    height = Dimension.wrapContent // Let FlowRow determine its height
+                },
+                label = "Cena",
+                options = viewModel.priceFilterOptionsList,
+                selectedOption = selectedPriceOptionFromVm,
+                onOptionSelected = { option -> viewModel.onPriceOptionUiSelected(option) }
+            )
 
             DistanceSlider(
                 modifier = Modifier.constrainAs(distanceSlider) {
-                    top.linkTo(filtersTop)
+                    top.linkTo(priceOptionSelectorRef.bottom, margin = verticalSpacing)
                     height = distanceSliderHeight
                     width = Dimension.fillToConstraints
                 },
@@ -179,6 +196,20 @@ fun FiltersScreen(navController: NavController) {
                         width = Dimension.fillToConstraints
                     }
             )
+
+            OptionSelectorComponent(
+                modifier = Modifier.constrainAs(sportPopupRef) {
+                    top.linkTo(sport.bottom, margin = verticalSpacing)
+                    height = sportPopupHeight
+                    width = Dimension.fillToConstraints
+                },
+                label = "Poziom",
+                options = viewModel.priceFilterOptionsList,
+                selectedOption = selectedPriceOptionFromVm,
+                onOptionSelected = { option -> viewModel.onPriceOptionUiSelected(option) }
+            )
+
+
 
         }
 
@@ -588,3 +619,5 @@ fun RangeSliderExample(modifier: Modifier = Modifier, viewModel: SearchThroughVi
         )
     }
 }
+
+
