@@ -65,7 +65,7 @@ fun ScrollDownChat(
                     textAlign = TextAlign.Center,
                     lineHeight = 25.sp,
                 ),
-                modifier = Modifier.constrainAs(titleRef) {
+                modifier = Modifier.fillMaxWidth().constrainAs(titleRef) {
 
                     top.linkTo(parent.top, margin = 60.dp)
 
