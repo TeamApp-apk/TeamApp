@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -65,31 +67,42 @@ import com.example.TeamApp.event.CreateEventViewModelProvider
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.*
+import androidx.compose.ui.platform.LocalConfiguration
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FiltersScreen(navController: NavController) {
     val viewModel: SearchThroughViewModel = SearchViewModelProvider.searchThroughViewModel
+    val configuration = LocalConfiguration.current
+    val screenHeightDp = configuration.screenHeightDp.dp
 
-    ConstraintLayout(modifier = Modifier.fillMaxSize()
+    ConstraintLayout(modifier = Modifier
+        .fillMaxSize()
         .background(color = Color(0xFFF2F2F2))) {
-        val (acceptButton, reset, sport, genderButtons, ageSlider, distanceSlider ) = createRefs()
+        val (topbar, filters, acceptButton, reset) = createRefs()
 
         TopAppBar(
+            modifier = Modifier.constrainAs(topbar)
+            {
+              top.linkTo(parent.top);
+              start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                height = Dimension.value(screenHeightDp * 0.11f)
+            },
             title = {
                 Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.CenterEnd // Align to the end
-
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(horizontal = 8.dp),
+                    contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
                         text = "Filtruj wydarzenia",
                         style = TextStyle(
                             fontSize = 24.sp,
                             fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                            fontWeight = FontWeight(900),
+                            fontWeight = FontWeight.W900,
                             color = Color(0xFF003366),
                             textAlign = TextAlign.End,
                         ),
@@ -98,98 +111,76 @@ fun FiltersScreen(navController: NavController) {
                 }
             },
             navigationIcon = {
-                IconButton(modifier = Modifier.padding(8.dp), onClick = { navController.popBackStack() }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrowleft),
-                        contentDescription = "Back Icon"
-                    )
+                Box(
+                    modifier = Modifier.fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(
+                        onClick = { navController.popBackStack() }
 
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.arrowleft),
+                            contentDescription = "Back Icon",
+
+                            //tint = Color(0xFF003366)
+                        )
+                    }
                 }
             },
-            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.White)
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.White
+            )
         )
 
+        val compStart = createGuidelineFromStart(0.05f)
+        val compEnd = createGuidelineFromStart(0.95f)
 
-
-
-        //mozna tworzyc guideline nie od poczatku ekranu tylko od innych obiektow
-        //np top.linkTo(reset.bottom, margin = 16.dp)
-        val sportStart = createGuidelineFromStart(0.1f)
-        val sportEnd = createGuidelineFromStart(0.9f)
-        val sportTop = createGuidelineFromTop(0.46f)
-        val sportBottom = createGuidelineFromTop(0.54f)
-
-        SportPopupButton(
+        ConstraintLayout(
             modifier = Modifier
-                .constrainAs(sport) {
-                    top.linkTo(sportTop)
-                    bottom.linkTo(sportBottom)
-                    start.linkTo(sportStart)
-                    end.linkTo(sportEnd)
-                    height = Dimension.fillToConstraints
+                .constrainAs(filters) {
+                    top.linkTo(topbar.bottom)
+                    start.linkTo(compStart)
+                    end.linkTo(compEnd)
+                    bottom.linkTo(parent.bottom);
                     width = Dimension.fillToConstraints
+                    height = Dimension.fillToConstraints
                 }
-        )
+                //.fillMaxSize()
+                //.background(color = Color(0xFF000000))
 
-
-        val genderButtonsTop = createGuidelineFromTop(0.15f)
-        val genderButtonsBottom = createGuidelineFromTop(0.25f)
-        Row(
-            modifier = Modifier
-                .constrainAs(genderButtons) {
-                    top.linkTo(genderButtonsTop)
-                    bottom.linkTo(genderButtonsBottom)
-                    start.linkTo(sportStart)
-                    end.linkTo(sportEnd)
-                }
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Płeć",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                ),
-                modifier = Modifier.padding(end = 8.dp) // Optional padding for spacing
+            val (sport, genderButtons, ageSlider, distanceSlider ) = createRefs()
+            val filtersTop = createGuidelineFromTop(0.07f)
+            val distanceSliderHeight = Dimension.value(screenHeightDp * 0.10f)
+            val distanceValue by viewModel.distance.observeAsState(75)
+
+            DistanceSlider(
+                modifier = Modifier.constrainAs(distanceSlider) {
+                    top.linkTo(filtersTop)
+                    height = distanceSliderHeight
+                    width = Dimension.fillToConstraints
+                },
+                label = "Odległość", // Pass your desired label
+                currentValue = distanceValue,
+                range = 0..150, // Or your desired range
+                onValueChange = { newDistance ->
+                    viewModel.onDistanceChange(newDistance)
+                },
+                valueSuffix = " km" // Optional
             )
 
-            GenderButtonWithLabel("mężczyźni", viewModel)
-            GenderButtonWithLabel("mieszane", viewModel)
-            GenderButtonWithLabel("kobiety", viewModel)
+            val sportPopupHeight = Dimension.value(screenHeightDp * 0.1f)
+            SportPopupButton(
+                modifier = Modifier
+                    .constrainAs(sport) {
+                        top.linkTo(distanceSlider.bottom)
+                        height = sportPopupHeight
+                        width = Dimension.fillToConstraints
+                    }
+            )
+
         }
-
-        val ageSliderTop = createGuidelineFromTop(0.28f)
-        val ageSliderBottom = createGuidelineFromTop(0.33f)
-
-        RangeSliderExample(
-            modifier = Modifier.constrainAs(ageSlider) {
-                top.linkTo(ageSliderTop)
-                bottom.linkTo(ageSliderBottom)
-                start.linkTo(sportStart)
-                end.linkTo(sportEnd)
-                width = Dimension.fillToConstraints
-            },
-            viewModel,
-        )
-
-        val distanceSliderTop = createGuidelineFromTop(0.36f)
-        val distanceSliderBottom = createGuidelineFromTop(0.46f)
-
-        DistanceSlider(
-            modifier = Modifier.constrainAs(distanceSlider) {
-                top.linkTo(distanceSliderTop)
-                bottom.linkTo(distanceSliderBottom)
-                start.linkTo(sportStart)
-                end.linkTo(sportEnd)
-                width = Dimension.fillToConstraints
-            },
-            onValueChange = { distance ->
-                viewModel.onDistanceChange(distance.toInt())
-            },
-        )
 
         val passStart = createGuidelineFromStart(0.1f)
         val passEnd = createGuidelineFromStart(0.9f)
@@ -501,52 +492,59 @@ fun GenderButtonWithLabel(label: String, viewModel: SearchThroughViewModel) {
 @Composable
 fun DistanceSlider(
     modifier: Modifier = Modifier,
+    label: String, // Text for the label (e.g., "Odległość" or "Age range")
+    currentValue: Int, // The current value of the slider, typically from a ViewModel
     range: IntRange = 0..150,
-    onValueChange: (Float) -> Unit,
+    onValueChange: (Int) -> Unit, // Callback when the slider value changes
+    valueSuffix: String = "" // Optional suffix like "km" or "lat"
 ) {
-    val viewModel: SearchThroughViewModel = SearchViewModelProvider.searchThroughViewModel
-    val distance by viewModel.distance.observeAsState(75)
-    var sliderValue = distance
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start // Adjust spacing as needed
+    Column(
+        modifier = modifier.fillMaxWidth()
     ) {
-
-        // Distance label
+        // Label Text (e.g., "Odległość" or "Age range")
         Text(
-            text = "Odległość:",
+            text = label,
             fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            modifier = Modifier.align(Alignment.CenterVertically) // Align vertically in the row
-        )
-
-        // Distance value text
-        Text(
-            text = sliderValue.toInt().toString(),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 8.dp) // Add padding for spacing
-        )
-
-        // Slider
-        Slider(
-            value = sliderValue.toFloat(),
-            onValueChange = { newValue ->
-                sliderValue = newValue.toInt() // Update the local slider value
-                onValueChange(newValue) // Notify value change
-            },
-            valueRange = range.first.toFloat()..range.last.toFloat(),
+            fontSize = 15.sp, // Adjusted for prominence like "Gender" or "Age range"
+            color = Color.Black,
             modifier = Modifier
-                .weight(1f) // Allow the slider to fill remaining space
-                .padding(start = 8.dp, end = 8.dp), // Padding around the slider
-            colors = SliderDefaults.colors(
-                thumbColor = Color(0xff4fc3f7),
-                activeTrackColor = Color(0xff4fc3f7)
-            )
+                .fillMaxWidth()
         )
+
+        // Row for Slider and its current value display
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween // Pushes slider and value text apart
+        ) {
+            // Slider
+            Slider(
+                value = currentValue.toFloat(),
+                onValueChange = { newValue ->
+                    onValueChange(newValue.toInt()) // Notify value change with Int
+                },
+                valueRange = range.first.toFloat()..range.last.toFloat(),
+                modifier = Modifier
+                    .weight(1f) // Allow the slider to fill available space
+                    .padding(end = 16.dp), // Space between slider and value text
+                colors = SliderDefaults.colors(
+                    thumbColor = Color(0xff4fc3f7), // Blue thumb
+                    activeTrackColor = Color(0xff4fc3f7), // Blue active track
+                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant // Default inactive track
+                )
+            )
+
+            // Distance value text, aligned to the right
+            Text(
+                text = "$currentValue$valueSuffix",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal, // Or FontWeight.Bold if preferred
+                color = Color.DarkGray,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .widthIn(min = 40.dp) // Give some minimum space for the number
+            )
+        }
     }
 }
 
