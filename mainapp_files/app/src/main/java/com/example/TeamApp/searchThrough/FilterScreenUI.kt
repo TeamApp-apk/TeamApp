@@ -614,3 +614,4 @@ fun RangeSliderExample(modifier: Modifier = Modifier, viewModel: SearchThroughVi
 }
 
 
+

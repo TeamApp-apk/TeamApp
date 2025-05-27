@@ -115,4 +115,15 @@ class SearchThroughViewModel : ViewModel(){
         otherViewModel.fetchFilteredEvents(selectedSports)
     }
 
+    private val _city = MutableLiveData<String>("Warszawa")
+    val city: LiveData<String> get()= _city
+    fun getAvailableCities():List<String>{
+        return listOf("Warszawa", "Kraków", "Tarnów", "Gdańsk", "Wrocław")
+    }
+    fun updateCurrentCity(newCity: String) {
+        _city.value = newCity
+        Log.d("SearchViewModel", "City updated to: $newCity")
+    }
+
+
 }
