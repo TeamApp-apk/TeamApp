@@ -70,6 +70,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalConfiguration
 import com.yourpackage.composables.OptionSelectorComponent
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.roundToInt
 
 
@@ -153,11 +156,12 @@ fun FiltersScreen(navController: NavController) {
                 //.background(color = Color(0xFF000000))
 
         ) {
-            val (sport, distanceSlider, sportPopupRef, priceOptionSelectorRef, reset ) = createRefs()
+            val (sport, distanceSlider, sportPopupRef, priceOptionSelectorRef, reset, sportAndDateRowRef ) = createRefs()
             val filtersTop = createGuidelineFromTop(0.03f)
             val distanceSliderHeight = Dimension.value(screenHeightDp * 0.10f)
             val distanceValue by viewModel.distance.observeAsState(75)
             val verticalSpacing = screenHeightDp * 0.025f
+            val horizontalSpacingForRowItems = 8.dp
 
             val selectedPriceOptionFromVm by viewModel.selectedPriceOptionUi.collectAsState()
             OptionSelectorComponent(
@@ -201,20 +205,44 @@ fun FiltersScreen(navController: NavController) {
                 onOptionSelected = { option -> viewModel.onLevelOptionUiSelected(option) }
             )
 
+            val sportAndDateHeight = Dimension.value(screenHeightDp * 0.08f)
 
-            SportPopupButton(
+            Row(
                 modifier = Modifier
-                    .constrainAs(sport) {
+                    .constrainAs(sportAndDateRowRef) {
                         top.linkTo(sportPopupRef.bottom, margin = verticalSpacing)
-                        height = sportPopupHeight
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
                         width = Dimension.fillToConstraints
+                        height = sportAndDateHeight
                     }
-            )
+                    .fillMaxWidth(), // Ensure the Row itself takes full width
+                horizontalArrangement = Arrangement.spacedBy(horizontalSpacingForRowItems),
+                verticalAlignment = Alignment.CenterVertically // Align items vertically in the row
+            ) {
+                // SportPopupButton on the left
+                SportPopupButton(
+                    modifier = Modifier
+                        .weight(0.7f) // Takes available space, distributing equally if other item also has weight
+                    // .height(sportPopupHeight) // heightIn is used inside SportPopupButton, so fixed height might not be needed or could conflict
+                    // If a fixed height is desired, ensure it's compatible with heightIn
+                        .fillMaxHeight()
+                )
+
+                // DateRangePickerComponent on the right
+                DateRangePickerComponent(
+                    modifier = Modifier
+                        .weight(1f) // Takes available space
+                        .fillMaxHeight(),
+                    viewModel = viewModel
+                )
+            }
+
             val resetHeight = Dimension.value(screenHeightDp * 0.05f)
             ClickableResetTextComponent(
                 modifier = Modifier
                     .constrainAs(reset) {
-                        top.linkTo(sport.bottom, margin = screenHeightDp * 0.01f)
+                        top.linkTo(sportAndDateRowRef.bottom, margin = screenHeightDp * 0.01f)
                         height =  resetHeight
                     },
                 navController = navController,
@@ -613,5 +641,234 @@ fun RangeSliderExample(modifier: Modifier = Modifier, viewModel: SearchThroughVi
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DateRangePickerComponent(
+    modifier: Modifier = Modifier,
+    viewModel: SearchThroughViewModel
+) {
+    val hapticFeedback = LocalHapticFeedback.current
+    var showDialog by remember { mutableStateOf(false) }
+
+    val startDateMillis by viewModel.selectedStartDateMillis.collectAsState()
+    val endDateMillis by viewModel.selectedEndDateMillis.collectAsState()
+
+    // This state is for the DateRangePicker. It's initialized with values from the ViewModel.
+    val datePickerState = rememberDateRangePickerState(
+        initialSelectedStartDateMillis = startDateMillis,
+        initialSelectedEndDateMillis = endDateMillis,
+        // yearRange can be specified if needed, e.g., (2023..2025)
+        // selectableDates = // You can add custom logic for selectable dates if needed
+    )
+
+    val dateFormatter = remember { SimpleDateFormat("dd/MM/yy", Locale.getDefault()) }
+
+    val displayStartDate = startDateMillis?.let { dateFormatter.format(Date(it)) } ?: "Start"
+    val displayEndDate = endDateMillis?.let { dateFormatter.format(Date(it)) } ?: "End"
+    val selectedDateText = if (startDateMillis != null || endDateMillis != null) {
+        // Show full range if both are selected, or just one if only one is selected
+        val startStr = startDateMillis?.let { dateFormatter.format(Date(it)) }
+        val endStr = endDateMillis?.let { dateFormatter.format(Date(it)) }
+        when {
+            startStr != null && endStr != null -> "$startStr - $endStr"
+            startStr != null -> "Od: $startStr"
+            endStr != null -> "Do: $endStr"
+            else -> "Zakres Dat" // Should not happen if logic is correct
+        }
+    } else {
+        "Zakres Dat"
+    }
+
+    val mySelectedDayColor = Color(0xff4fc3f7) // Your primary selection color (e.g., light blue)
+    val myOnSelectedDayColor = Color.Black // Text color on your primary selection color
+    val mySelectedRangeColor = Color(0xff4fc3f7).copy(alpha = 0.2f) // Lighter/subtler for the range background
+    val myOnSelectedRangeColor = Color.Black // Text color for dates within the range
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White, shape = RoundedCornerShape(16.dp))
+            .clickable {
+                // Sync DatePickerState with ViewModel state before showing dialog
+                datePickerState.setSelection(
+                    startDateMillis = startDateMillis,
+                    endDateMillis = endDateMillis
+                )
+                showDialog = true
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
+            .heightIn(min = 56.dp) // Consistent height
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = selectedDateText,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+                    fontWeight = if (startDateMillis != null || endDateMillis != null) FontWeight.Normal else FontWeight.Medium,
+                    color = if (startDateMillis != null || endDateMillis != null) Color.Black else Color.Gray,
+                    textAlign = TextAlign.Center
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+
+    if (showDialog) {
+
+        val localDatePickerColorScheme = MaterialTheme.colorScheme.copy(
+            primary = mySelectedDayColor, // This will be used for focus indicators if they default to primary
+            onPrimary = myOnSelectedDayColor,
+            // You might also want to set surfaceVariant if it's used for text field backgrounds/outlines
+            // surfaceVariant = Color.LightGray.copy(alpha = 0.5f)
+        )
+
+        DatePickerDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        viewModel.onDateRangeSelected(
+                            datePickerState.selectedStartDateMillis,
+                            datePickerState.selectedEndDateMillis
+                        )
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color(0xff4fc3f7))
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color(0xff4fc3f7))
+                ) {
+                    Text("Anuluj")
+                }
+            },
+            colors = DatePickerDefaults.colors(
+                containerColor = Color.White, // Background of the dialog
+
+                // Selected start/end day colors (calendar grid)
+                selectedDayContainerColor = mySelectedDayColor,
+                selectedDayContentColor = myOnSelectedDayColor,
+
+                // Colors for dates within the selected range (calendar grid)
+                dayInSelectionRangeContainerColor = mySelectedRangeColor,
+                dayInSelectionRangeContentColor = myOnSelectedRangeColor,
+
+                // Current date ("today") colors (calendar grid)
+                todayContentColor = mySelectedDayColor, // Color for "today's" date text
+                todayDateBorderColor = Color.Transparent, // No border for today unless you want one (e.g., mySelectedDayColor.copy(alpha=0.5f))
+
+                // Headline colors (the "Start Date - End Date" display at the top, which becomes interactive for manual input)
+                // The text color for the dates in the headline.
+                // When a date part is active for input, its background should be highlighted using selectedDayContainerColor.
+                headlineContentColor = Color.Black, // Default text color for headline parts.
+
+                // Year selection colors
+                selectedYearContainerColor = mySelectedDayColor.copy(alpha = 0.3f), // Background for selected year
+                selectedYearContentColor = myOnSelectedDayColor, // Text color for selected year
+                currentYearContentColor = mySelectedDayColor, // Text color for the current year in the year list
+
+                // You can also theme the subhead (e.g., "January 2024" above the calendar)
+                // subheadContentColor = Color.Black,
+                // selectedSubheadContentColor = mySelectedDayColor, // If you want selected month/year in subhead to be colored
+
+                // And navigation arrows
+                // navigationContentColor = mySelectedDayColor
+            )
+        ) {
+            DateRangePicker(
+                state = datePickerState,
+                modifier = Modifier.weight(1f), // Makes the picker expand within the dialog
+                title = {
+                    Text(
+                        text = "Wybierz zakres dat",
+                        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 12.dp, bottom = 12.dp)
+                    )
+                },
+                headline = { // Displays the selected dates in the headline part of the picker
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 24.dp, top = 0.dp, end = 12.dp, bottom = 0.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val headlineDateFormatter = remember { SimpleDateFormat("MMM d", Locale.getDefault()) }
+                        Text(
+                            text = datePickerState.selectedStartDateMillis?.let { headlineDateFormatter.format(Date(it)) } ?: "Początek",
+                            style = MaterialTheme.typography.labelLarge, // Adjusted style for brevity
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = " - ",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        Text(
+                            text = datePickerState.selectedEndDateMillis?.let { headlineDateFormatter.format(Date(it)) } ?: "Koniec",
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                },
+                colors = DatePickerDefaults.colors(
+                    containerColor = Color.White, // Background of the dialog
+
+                    // Selected start/end day colors (calendar grid)
+                    selectedDayContainerColor = mySelectedDayColor,
+                    selectedDayContentColor = myOnSelectedDayColor,
+
+                    // Colors for dates within the selected range (calendar grid)
+                    dayInSelectionRangeContainerColor = mySelectedRangeColor,
+                    dayInSelectionRangeContentColor = myOnSelectedRangeColor,
+
+                    // Current date ("today") colors (calendar grid)
+                    todayContentColor = mySelectedDayColor, // Color for "today's" date text
+                    todayDateBorderColor = Color.Transparent, // No border for today unless you want one (e.g., mySelectedDayColor.copy(alpha=0.5f))
+
+                    // Headline colors (the "Start Date - End Date" display at the top, which becomes interactive for manual input)
+                    // The text color for the dates in the headline.
+                    // When a date part is active for input, its background should be highlighted using selectedDayContainerColor.
+                    headlineContentColor = Color.Black, // Default text color for headline parts.
+
+                    // Year selection colors
+                    selectedYearContainerColor = mySelectedDayColor.copy(alpha = 0.3f), // Background for selected year
+                    selectedYearContentColor = myOnSelectedDayColor, // Text color for selected year
+                    currentYearContentColor = mySelectedDayColor, // Text color for the current year in the year list
+
+                    // You can also theme the subhead (e.g., "January 2024" above the calendar)
+                    // subheadContentColor = Color.Black,
+                    // selectedSubheadContentColor = mySelectedDayColor, // If you want selected month/year in subhead to be colored
+
+                    // And navigation arrows
+                    // navigationContentColor = mySelectedDayColor
+                ),
+                showModeToggle = true // Allows users to switch between calendar and text input modes
+            )
+        }
+    }
+}
 
 

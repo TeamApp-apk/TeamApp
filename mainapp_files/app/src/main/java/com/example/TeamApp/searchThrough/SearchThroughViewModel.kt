@@ -126,4 +126,17 @@ class SearchThroughViewModel : ViewModel(){
     }
 
 
+    private val _selectedStartDateMillis = MutableStateFlow<Long?>(null)
+    val selectedStartDateMillis: StateFlow<Long?> = _selectedStartDateMillis.asStateFlow()
+
+    private val _selectedEndDateMillis = MutableStateFlow<Long?>(null)
+    val selectedEndDateMillis: StateFlow<Long?> = _selectedEndDateMillis.asStateFlow()
+
+    fun onDateRangeSelected(startDate: Long?, endDate: Long?) {
+        _selectedStartDateMillis.value = startDate
+        _selectedEndDateMillis.value = endDate
+        Log.d("SearchThroughViewModel", "Date range selected: Start: $startDate, End: $endDate")
+    }
+
+
 }
