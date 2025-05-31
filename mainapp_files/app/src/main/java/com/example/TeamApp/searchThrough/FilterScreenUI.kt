@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -65,31 +67,48 @@ import com.example.TeamApp.event.CreateEventViewModelProvider
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.*
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalConfiguration
+import com.yourpackage.composables.OptionSelectorComponent
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FiltersScreen(navController: NavController) {
     val viewModel: SearchThroughViewModel = SearchViewModelProvider.searchThroughViewModel
+    val configuration = LocalConfiguration.current
+    val screenHeightDp = configuration.screenHeightDp.dp
 
-    ConstraintLayout(modifier = Modifier.fillMaxSize()
+    ConstraintLayout(modifier = Modifier
+        .fillMaxSize()
         .background(color = Color(0xFFF2F2F2))) {
-        val (acceptButton, reset, sport, genderButtons, ageSlider, distanceSlider ) = createRefs()
+        val (topbar, filters, acceptButton) = createRefs()
 
         TopAppBar(
+            modifier = Modifier.constrainAs(topbar)
+            {
+              top.linkTo(parent.top);
+              start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                height = Dimension.value(screenHeightDp * 0.11f)
+            },
             title = {
                 Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.CenterEnd // Align to the end
-
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(horizontal = 8.dp),
+                    contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
                         text = "Filtruj wydarzenia",
                         style = TextStyle(
                             fontSize = 24.sp,
                             fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                            fontWeight = FontWeight(900),
+                            fontWeight = FontWeight.W900,
                             color = Color(0xFF003366),
                             textAlign = TextAlign.End,
                         ),
@@ -98,104 +117,148 @@ fun FiltersScreen(navController: NavController) {
                 }
             },
             navigationIcon = {
-                IconButton(modifier = Modifier.padding(8.dp), onClick = { navController.popBackStack() }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrowleft),
-                        contentDescription = "Back Icon"
-                    )
+                Box(
+                    modifier = Modifier.fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(
+                        onClick = { navController.popBackStack() }
 
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.arrowleft),
+                            contentDescription = "Back Icon",
+
+                            //tint = Color(0xFF003366)
+                        )
+                    }
                 }
             },
-            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.White)
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.White
+            )
         )
 
+        val compStart = createGuidelineFromStart(0.05f)
+        val compEnd = createGuidelineFromStart(0.95f)
 
-
-
-        //mozna tworzyc guideline nie od poczatku ekranu tylko od innych obiektow
-        //np top.linkTo(reset.bottom, margin = 16.dp)
-        val sportStart = createGuidelineFromStart(0.1f)
-        val sportEnd = createGuidelineFromStart(0.9f)
-        val sportTop = createGuidelineFromTop(0.46f)
-        val sportBottom = createGuidelineFromTop(0.54f)
-
-        SportPopupButton(
+        ConstraintLayout(
             modifier = Modifier
-                .constrainAs(sport) {
-                    top.linkTo(sportTop)
-                    bottom.linkTo(sportBottom)
-                    start.linkTo(sportStart)
-                    end.linkTo(sportEnd)
-                    height = Dimension.fillToConstraints
+                .constrainAs(filters) {
+                    top.linkTo(topbar.bottom)
+                    start.linkTo(compStart)
+                    end.linkTo(compEnd)
+                    bottom.linkTo(parent.bottom);
                     width = Dimension.fillToConstraints
+                    height = Dimension.fillToConstraints
                 }
-        )
+                //.fillMaxSize()
+                //.background(color = Color(0xFF000000))
 
-
-        val genderButtonsTop = createGuidelineFromTop(0.15f)
-        val genderButtonsBottom = createGuidelineFromTop(0.25f)
-        Row(
-            modifier = Modifier
-                .constrainAs(genderButtons) {
-                    top.linkTo(genderButtonsTop)
-                    bottom.linkTo(genderButtonsBottom)
-                    start.linkTo(sportStart)
-                    end.linkTo(sportEnd)
-                }
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Płeć",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                ),
-                modifier = Modifier.padding(end = 8.dp) // Optional padding for spacing
+            val (sport, distanceSlider, sportPopupRef, priceOptionSelectorRef, reset, sportAndDateRowRef ) = createRefs()
+            val filtersTop = createGuidelineFromTop(0.03f)
+            val distanceSliderHeight = Dimension.value(screenHeightDp * 0.10f)
+            val distanceValue by viewModel.distance.observeAsState(75)
+            val verticalSpacing = screenHeightDp * 0.025f
+            val horizontalSpacingForRowItems = 8.dp
+
+            val selectedPriceOptionFromVm by viewModel.selectedPriceOptionUi.collectAsState()
+            OptionSelectorComponent(
+                modifier = Modifier.constrainAs(priceOptionSelectorRef) {
+                    top.linkTo(filtersTop) // Position after DateFilter
+                    width = Dimension.fillToConstraints
+                    height = Dimension.wrapContent // Let FlowRow determine its height
+                },
+                label = "Cena",
+                options = viewModel.priceFilterOptionsList,
+                selectedOption = selectedPriceOptionFromVm,
+                onOptionSelected = { option -> viewModel.onPriceOptionUiSelected(option) }
             )
 
-            GenderButtonWithLabel("mężczyźni", viewModel)
-            GenderButtonWithLabel("mieszane", viewModel)
-            GenderButtonWithLabel("kobiety", viewModel)
+            DistanceSlider(
+                modifier = Modifier.constrainAs(distanceSlider) {
+                    top.linkTo(priceOptionSelectorRef.bottom, margin = verticalSpacing)
+                    height = distanceSliderHeight
+                    width = Dimension.fillToConstraints
+                },
+                label = "Odległość", // Pass your desired label
+                currentValue = distanceValue,
+                range = 0..150, // Or your desired range
+                onValueChange = { newDistance ->
+                    viewModel.onDistanceChange(newDistance)
+                },
+                valueSuffix = " km" // Optional
+            )
+            val sportPopupHeight = Dimension.value(screenHeightDp * 0.1f)
+
+            val selectedLevelOptionFromVm by viewModel.selectedLevelOptionUi.collectAsState()
+            OptionSelectorComponent(
+                modifier = Modifier.constrainAs(sportPopupRef) {
+                    top.linkTo(distanceSlider.bottom)
+                    //height = sportPopupHeight
+                    width = Dimension.fillToConstraints
+                },
+                label = "Poziom",
+                options = viewModel.levelFilterOptionsList,
+                selectedOption = selectedLevelOptionFromVm,
+                onOptionSelected = { option -> viewModel.onLevelOptionUiSelected(option) }
+            )
+
+            val sportAndDateHeight = Dimension.value(screenHeightDp * 0.08f)
+
+            Row(
+                modifier = Modifier
+                    .constrainAs(sportAndDateRowRef) {
+                        top.linkTo(sportPopupRef.bottom, margin = verticalSpacing)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                        height = sportAndDateHeight
+                    }
+                    .fillMaxWidth(), // Ensure the Row itself takes full width
+                horizontalArrangement = Arrangement.spacedBy(horizontalSpacingForRowItems),
+                verticalAlignment = Alignment.CenterVertically // Align items vertically in the row
+            ) {
+                // SportPopupButton on the left
+                SportPopupButton(
+                    modifier = Modifier
+                        .weight(0.7f) // Takes available space, distributing equally if other item also has weight
+                    // .height(sportPopupHeight) // heightIn is used inside SportPopupButton, so fixed height might not be needed or could conflict
+                    // If a fixed height is desired, ensure it's compatible with heightIn
+                        .fillMaxHeight()
+                )
+
+                // DateRangePickerComponent on the right
+                DateRangePickerComponent(
+                    modifier = Modifier
+                        .weight(1f) // Takes available space
+                        .fillMaxHeight(),
+                    viewModel = viewModel
+                )
+            }
+
+            val resetHeight = Dimension.value(screenHeightDp * 0.05f)
+            ClickableResetTextComponent(
+                modifier = Modifier
+                    .constrainAs(reset) {
+                        top.linkTo(sportAndDateRowRef.bottom, margin = screenHeightDp * 0.01f)
+                        height =  resetHeight
+                    },
+                navController = navController,
+                viewModel
+            )
+
+
+
+
         }
-
-        val ageSliderTop = createGuidelineFromTop(0.28f)
-        val ageSliderBottom = createGuidelineFromTop(0.33f)
-
-        RangeSliderExample(
-            modifier = Modifier.constrainAs(ageSlider) {
-                top.linkTo(ageSliderTop)
-                bottom.linkTo(ageSliderBottom)
-                start.linkTo(sportStart)
-                end.linkTo(sportEnd)
-                width = Dimension.fillToConstraints
-            },
-            viewModel,
-        )
-
-        val distanceSliderTop = createGuidelineFromTop(0.36f)
-        val distanceSliderBottom = createGuidelineFromTop(0.46f)
-
-        DistanceSlider(
-            modifier = Modifier.constrainAs(distanceSlider) {
-                top.linkTo(distanceSliderTop)
-                bottom.linkTo(distanceSliderBottom)
-                start.linkTo(sportStart)
-                end.linkTo(sportEnd)
-                width = Dimension.fillToConstraints
-            },
-            onValueChange = { distance ->
-                viewModel.onDistanceChange(distance.toInt())
-            },
-        )
 
         val passStart = createGuidelineFromStart(0.1f)
         val passEnd = createGuidelineFromStart(0.9f)
-        val passTop = createGuidelineFromTop(0.86f)
-        val passBottom = createGuidelineFromTop(0.94f)
+        val passTop = createGuidelineFromTop(0.90f)
 
+        val AcceptButtonHeight = Dimension.value(screenHeightDp * 0.08f)
         AcceptButton(
             text = "Filtruj",
             onClick = {
@@ -205,33 +268,13 @@ fun FiltersScreen(navController: NavController) {
             modifier = Modifier
                 .constrainAs(acceptButton) {
                     top.linkTo(passTop)
-                    bottom.linkTo(passBottom)
                     start.linkTo(passStart)
                     end.linkTo(passEnd)
-                    height = Dimension.fillToConstraints
+                    height = AcceptButtonHeight
                     width = Dimension.fillToConstraints
                 }
         )
 
-        val resetStart = createGuidelineFromStart(0.35f)
-        val resetEnd = createGuidelineFromStart(0.65f)
-        val resetTop = createGuidelineFromTop(0.94f)
-        val resetBottom = createGuidelineFromTop(0.99f)
-
-        ClickableResetTextComponent(
-            modifier = Modifier
-                .constrainAs(reset) {
-                    top.linkTo(resetTop)
-                    bottom.linkTo(resetBottom)
-                    start.linkTo(resetStart)
-                    end.linkTo(resetEnd)
-                    height = Dimension.fillToConstraints
-                    width = Dimension.fillToConstraints
-
-                },
-            navController = navController,
-            viewModel
-        )
     }
 }
 @Composable
@@ -272,7 +315,7 @@ fun ClickableResetTextComponent(modifier: Modifier = Modifier, navController: Na
     val loginText = "Resetuj filtry"
     val annotatedString = buildAnnotatedString {
         pushStringAnnotation(tag = "Resetuj", annotation = loginText)
-        withStyle(style = SpanStyle(color = Color(0xffd46161), fontFamily =
+        withStyle(style = SpanStyle(color = Color(0xff4fc3f7), fontFamily =
         FontFamily(Font(R.font.proximanovabold)), fontWeight = FontWeight(900) )
         ) {
             append(loginText)
@@ -282,9 +325,9 @@ fun ClickableResetTextComponent(modifier: Modifier = Modifier, navController: Na
 
     Box(
         modifier = modifier
-            .fillMaxWidth() // Make the box fill the available width
-            .padding(8.dp), // Optional padding for aesthetics
-        contentAlignment = Alignment.Center // Center the content (text) within the box
+            .fillMaxWidth(), // Make the box fill the available width
+
+        Alignment.CenterStart
     ) {
         ClickableText(
             text = annotatedString,
@@ -501,52 +544,59 @@ fun GenderButtonWithLabel(label: String, viewModel: SearchThroughViewModel) {
 @Composable
 fun DistanceSlider(
     modifier: Modifier = Modifier,
+    label: String, // Text for the label (e.g., "Odległość" or "Age range")
+    currentValue: Int, // The current value of the slider, typically from a ViewModel
     range: IntRange = 0..150,
-    onValueChange: (Float) -> Unit,
+    onValueChange: (Int) -> Unit, // Callback when the slider value changes
+    valueSuffix: String = "" // Optional suffix like "km" or "lat"
 ) {
-    val viewModel: SearchThroughViewModel = SearchViewModelProvider.searchThroughViewModel
-    val distance by viewModel.distance.observeAsState(75)
-    var sliderValue = distance
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start // Adjust spacing as needed
+    Column(
+        modifier = modifier.fillMaxWidth()
     ) {
-
-        // Distance label
+        // Label Text (e.g., "Odległość" or "Age range")
         Text(
-            text = "Odległość:",
+            text = label,
             fontWeight = FontWeight.Bold,
-            fontSize = 16.sp,
-            modifier = Modifier.align(Alignment.CenterVertically) // Align vertically in the row
-        )
-
-        // Distance value text
-        Text(
-            text = sliderValue.toInt().toString(),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 8.dp) // Add padding for spacing
-        )
-
-        // Slider
-        Slider(
-            value = sliderValue.toFloat(),
-            onValueChange = { newValue ->
-                sliderValue = newValue.toInt() // Update the local slider value
-                onValueChange(newValue) // Notify value change
-            },
-            valueRange = range.first.toFloat()..range.last.toFloat(),
+            fontSize = 15.sp, // Adjusted for prominence like "Gender" or "Age range"
+            color = Color.Black,
             modifier = Modifier
-                .weight(1f) // Allow the slider to fill remaining space
-                .padding(start = 8.dp, end = 8.dp), // Padding around the slider
-            colors = SliderDefaults.colors(
-                thumbColor = Color(0xff4fc3f7),
-                activeTrackColor = Color(0xff4fc3f7)
-            )
+                .fillMaxWidth()
         )
+
+        // Row for Slider and its current value display
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween // Pushes slider and value text apart
+        ) {
+            // Slider
+            Slider(
+                value = currentValue.toFloat(),
+                onValueChange = { newValue ->
+                    onValueChange(newValue.toInt()) // Notify value change with Int
+                },
+                valueRange = range.first.toFloat()..range.last.toFloat(),
+                modifier = Modifier
+                    .weight(1f) // Allow the slider to fill available space
+                    .padding(end = 16.dp), // Space between slider and value text
+                colors = SliderDefaults.colors(
+                    thumbColor = Color(0xff4fc3f7), // Blue thumb
+                    activeTrackColor = Color(0xff4fc3f7), // Blue active track
+                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant // Default inactive track
+                )
+            )
+
+            // Distance value text, aligned to the right
+            Text(
+                text = "$currentValue$valueSuffix",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Normal, // Or FontWeight.Bold if preferred
+                color = Color.DarkGray,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .widthIn(min = 40.dp) // Give some minimum space for the number
+            )
+        }
     }
 }
 
@@ -590,3 +640,235 @@ fun RangeSliderExample(modifier: Modifier = Modifier, viewModel: SearchThroughVi
         )
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DateRangePickerComponent(
+    modifier: Modifier = Modifier,
+    viewModel: SearchThroughViewModel
+) {
+    val hapticFeedback = LocalHapticFeedback.current
+    var showDialog by remember { mutableStateOf(false) }
+
+    val startDateMillis by viewModel.selectedStartDateMillis.collectAsState()
+    val endDateMillis by viewModel.selectedEndDateMillis.collectAsState()
+
+    // This state is for the DateRangePicker. It's initialized with values from the ViewModel.
+    val datePickerState = rememberDateRangePickerState(
+        initialSelectedStartDateMillis = startDateMillis,
+        initialSelectedEndDateMillis = endDateMillis,
+        // yearRange can be specified if needed, e.g., (2023..2025)
+        // selectableDates = // You can add custom logic for selectable dates if needed
+    )
+
+    val dateFormatter = remember { SimpleDateFormat("dd/MM/yy", Locale.getDefault()) }
+
+    val displayStartDate = startDateMillis?.let { dateFormatter.format(Date(it)) } ?: "Start"
+    val displayEndDate = endDateMillis?.let { dateFormatter.format(Date(it)) } ?: "End"
+    val selectedDateText = if (startDateMillis != null || endDateMillis != null) {
+        // Show full range if both are selected, or just one if only one is selected
+        val startStr = startDateMillis?.let { dateFormatter.format(Date(it)) }
+        val endStr = endDateMillis?.let { dateFormatter.format(Date(it)) }
+        when {
+            startStr != null && endStr != null -> "$startStr - $endStr"
+            startStr != null -> "Od: $startStr"
+            endStr != null -> "Do: $endStr"
+            else -> "Zakres Dat" // Should not happen if logic is correct
+        }
+    } else {
+        "Zakres Dat"
+    }
+
+    val mySelectedDayColor = Color(0xff4fc3f7) // Your primary selection color (e.g., light blue)
+    val myOnSelectedDayColor = Color.Black // Text color on your primary selection color
+    val mySelectedRangeColor = Color(0xff4fc3f7).copy(alpha = 0.2f) // Lighter/subtler for the range background
+    val myOnSelectedRangeColor = Color.Black // Text color for dates within the range
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White, shape = RoundedCornerShape(16.dp))
+            .clickable {
+                // Sync DatePickerState with ViewModel state before showing dialog
+                datePickerState.setSelection(
+                    startDateMillis = startDateMillis,
+                    endDateMillis = endDateMillis
+                )
+                showDialog = true
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
+            .heightIn(min = 56.dp) // Consistent height
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = selectedDateText,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily(Font(R.font.proximanovaregular)),
+                    fontWeight = if (startDateMillis != null || endDateMillis != null) FontWeight.Normal else FontWeight.Medium,
+                    color = if (startDateMillis != null || endDateMillis != null) Color.Black else Color.Gray,
+                    textAlign = TextAlign.Center
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+
+    if (showDialog) {
+
+        val localDatePickerColorScheme = MaterialTheme.colorScheme.copy(
+            primary = mySelectedDayColor, // This will be used for focus indicators if they default to primary
+            onPrimary = myOnSelectedDayColor,
+            // You might also want to set surfaceVariant if it's used for text field backgrounds/outlines
+            // surfaceVariant = Color.LightGray.copy(alpha = 0.5f)
+        )
+
+        DatePickerDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        viewModel.onDateRangeSelected(
+                            datePickerState.selectedStartDateMillis,
+                            datePickerState.selectedEndDateMillis
+                        )
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color(0xff4fc3f7))
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color(0xff4fc3f7))
+                ) {
+                    Text("Anuluj")
+                }
+            },
+            colors = DatePickerDefaults.colors(
+                containerColor = Color.White, // Background of the dialog
+
+                // Selected start/end day colors (calendar grid)
+                selectedDayContainerColor = mySelectedDayColor,
+                selectedDayContentColor = myOnSelectedDayColor,
+
+                // Colors for dates within the selected range (calendar grid)
+                dayInSelectionRangeContainerColor = mySelectedRangeColor,
+                dayInSelectionRangeContentColor = myOnSelectedRangeColor,
+
+                // Current date ("today") colors (calendar grid)
+                todayContentColor = mySelectedDayColor, // Color for "today's" date text
+                todayDateBorderColor = Color.Transparent, // No border for today unless you want one (e.g., mySelectedDayColor.copy(alpha=0.5f))
+
+                // Headline colors (the "Start Date - End Date" display at the top, which becomes interactive for manual input)
+                // The text color for the dates in the headline.
+                // When a date part is active for input, its background should be highlighted using selectedDayContainerColor.
+                headlineContentColor = Color.Black, // Default text color for headline parts.
+
+                // Year selection colors
+                selectedYearContainerColor = mySelectedDayColor.copy(alpha = 0.3f), // Background for selected year
+                selectedYearContentColor = myOnSelectedDayColor, // Text color for selected year
+                currentYearContentColor = mySelectedDayColor, // Text color for the current year in the year list
+
+                // You can also theme the subhead (e.g., "January 2024" above the calendar)
+                // subheadContentColor = Color.Black,
+                // selectedSubheadContentColor = mySelectedDayColor, // If you want selected month/year in subhead to be colored
+
+                // And navigation arrows
+                // navigationContentColor = mySelectedDayColor
+            )
+        ) {
+            DateRangePicker(
+                state = datePickerState,
+                modifier = Modifier.weight(1f), // Makes the picker expand within the dialog
+                title = {
+                    Text(
+                        text = "Wybierz zakres dat",
+                        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 12.dp, bottom = 12.dp)
+                    )
+                },
+                headline = { // Displays the selected dates in the headline part of the picker
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 24.dp, top = 0.dp, end = 12.dp, bottom = 0.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val headlineDateFormatter = remember { SimpleDateFormat("MMM d", Locale.getDefault()) }
+                        Text(
+                            text = datePickerState.selectedStartDateMillis?.let { headlineDateFormatter.format(Date(it)) } ?: "Początek",
+                            style = MaterialTheme.typography.labelLarge, // Adjusted style for brevity
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = " - ",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        Text(
+                            text = datePickerState.selectedEndDateMillis?.let { headlineDateFormatter.format(Date(it)) } ?: "Koniec",
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                },
+                colors = DatePickerDefaults.colors(
+                    containerColor = Color.White, // Background of the dialog
+
+                    // Selected start/end day colors (calendar grid)
+                    selectedDayContainerColor = mySelectedDayColor,
+                    selectedDayContentColor = myOnSelectedDayColor,
+
+                    // Colors for dates within the selected range (calendar grid)
+                    dayInSelectionRangeContainerColor = mySelectedRangeColor,
+                    dayInSelectionRangeContentColor = myOnSelectedRangeColor,
+
+                    // Current date ("today") colors (calendar grid)
+                    todayContentColor = mySelectedDayColor, // Color for "today's" date text
+                    todayDateBorderColor = Color.Transparent, // No border for today unless you want one (e.g., mySelectedDayColor.copy(alpha=0.5f))
+
+                    // Headline colors (the "Start Date - End Date" display at the top, which becomes interactive for manual input)
+                    // The text color for the dates in the headline.
+                    // When a date part is active for input, its background should be highlighted using selectedDayContainerColor.
+                    headlineContentColor = Color.Black, // Default text color for headline parts.
+
+                    // Year selection colors
+                    selectedYearContainerColor = mySelectedDayColor.copy(alpha = 0.3f), // Background for selected year
+                    selectedYearContentColor = myOnSelectedDayColor, // Text color for selected year
+                    currentYearContentColor = mySelectedDayColor, // Text color for the current year in the year list
+
+                    // You can also theme the subhead (e.g., "January 2024" above the calendar)
+                    // subheadContentColor = Color.Black,
+                    // selectedSubheadContentColor = mySelectedDayColor, // If you want selected month/year in subhead to be colored
+
+                    // And navigation arrows
+                    // navigationContentColor = mySelectedDayColor
+                ),
+                showModeToggle = true // Allows users to switch between calendar and text input modes
+            )
+        }
+    }
+}
+
+

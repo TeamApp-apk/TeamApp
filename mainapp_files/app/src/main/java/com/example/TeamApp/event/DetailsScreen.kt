@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -80,6 +82,9 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
     val cachedMapFragment = viewModel.mapFragment
     val context: Context = LocalContext.current
 
+    val configuration = LocalConfiguration.current
+    val screenHeightDp = configuration.screenHeightDp.dp
+
     LaunchedEffect(Unit) {
         Log.d("DetailsScreen", " user : $user")
     }
@@ -88,21 +93,71 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
     ConstraintLayout(modifier = Modifier.fillMaxSize()
         .background(color = Color(0xFFF2F2F2))) {
         // Map as the background
-        val mapStart = createGuidelineFromStart(0f)
-        val mapEnd = createGuidelineFromStart(1f)
-        val mapTop = createGuidelineFromTop(0.115f)
-        val mapBottom = createGuidelineFromTop(0.373f)
+
         val (topAppBar, map, lazyColumn) = createRefs()
 
+        val mapScale = 0.338f
+        val mapHeight = Dimension.value(screenHeightDp * mapScale)
+        val lazyColumnMargin = screenHeightDp * (mapScale - 0.02f)
+
+        TopAppBar(
+            modifier = Modifier.constrainAs(topAppBar)
+            {
+                top.linkTo(parent.top);
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                height = Dimension.value(screenHeightDp * 0.11f)
+            },
+            title = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(horizontal = 8.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Text(
+                        text = "Szczegóły wydarzenia",
+                        style = TextStyle(
+                            fontSize = 24.sp,
+                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
+                            fontWeight = FontWeight.W900,
+                            color = Color(0xFF003366),
+                            textAlign = TextAlign.End,
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            navigationIcon = {
+                Box(
+                    modifier = Modifier.fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    IconButton(
+                        onClick = { navController.popBackStack() }
+
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.arrowleft),
+                            contentDescription = "Back Icon",
+
+                            //tint = Color(0xFF003366)
+                        )
+                    }
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.White
+            )
+        )
         if (locationID != null) {
 
             Box(modifier = Modifier.constrainAs(map) {
-                top.linkTo(mapTop)
-                bottom.linkTo(mapBottom)
-                start.linkTo(mapStart)
-                end.linkTo(mapEnd)
-                height = Dimension.fillToConstraints
+                top.linkTo(topAppBar.bottom)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
                 width = Dimension.fillToConstraints
+                height = mapHeight
             })
             {
                 TomTomMapView(
@@ -115,68 +170,17 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                 )
             }
         }
-        // TopAppBar fixed at the top of the screen
-        val barStart = createGuidelineFromStart(0f)
-        val barEnd = createGuidelineFromStart(1f)
-        val barTop = createGuidelineFromTop(0f)
-        val barBottom = createGuidelineFromTop(0.115f)
-
-        TopAppBar(
-            title = {
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.CenterEnd // Align to the end
-
-                ) {
-                    Text(
-                        text = "Szczegóły wydarzenia",
-                        style = TextStyle(
-                            fontSize = 24.sp,
-                            fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                            fontWeight = FontWeight(900),
-                            color = Color(0xFF003366),
-                            textAlign = TextAlign.End,
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            navigationIcon = {
-                IconButton(modifier = Modifier.padding(8.dp), onClick = { navController.popBackStack() }) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.arrowleft),
-                        contentDescription = "Back"
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = Color.White),
-            modifier = Modifier
-                .constrainAs(topAppBar) {
-                    top.linkTo(barTop)
-                    bottom.linkTo(barBottom)
-                    start.linkTo(barStart)
-                    end.linkTo(barEnd)
-                    height = Dimension.fillToConstraints
-                    width = Dimension.fillToConstraints
-                }
-        )
-
-        val lazyStart = createGuidelineFromStart(0f)
-        val lazyEnd = createGuidelineFromStart(1f)
-        val lazyTop = createGuidelineFromTop(0.36f)
-        val lazyBottom = createGuidelineFromTop(1f)
 
             LazyColumn(
                 modifier = Modifier
                     //.padding(16.dp)
                     .fillMaxSize()
-                    .background(Color.White, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .background(Color.White, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     .constrainAs(lazyColumn) {
-                        top.linkTo(lazyTop)
-                        bottom.linkTo(lazyBottom)
-                        start.linkTo(lazyStart)
-                        end.linkTo(lazyEnd)
+                        top.linkTo(map.top, margin = lazyColumnMargin)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
                         height = Dimension.fillToConstraints
                         width = Dimension.fillToConstraints
                     }

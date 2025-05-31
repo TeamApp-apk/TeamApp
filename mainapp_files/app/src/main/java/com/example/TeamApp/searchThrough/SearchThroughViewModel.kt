@@ -7,6 +7,9 @@ import androidx.lifecycle.MutableLiveData
 import com.example.TeamApp.data.Event
 import com.example.TeamApp.event.CreateEventViewModel
 import com.example.TeamApp.event.CreateEventViewModelProvider
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class SearchThroughViewModel : ViewModel(){
     val otherViewModel: CreateEventViewModel = CreateEventViewModelProvider.createEventViewModel
@@ -14,10 +17,32 @@ class SearchThroughViewModel : ViewModel(){
     private val _filteredEvents = MutableLiveData<List<Event>>()
     val filteredEvents: LiveData<List<Event>> = _filteredEvents
 
+
+
     val availableSports = otherViewModel.getAvailableSports()
 
     private val _selectedSports = MutableLiveData<List<String>>(availableSports.toList())
     val selectedSports: LiveData<List<String>> = _selectedSports
+
+
+    val priceFilterOptionsList = listOf("Dowolna", "0zł", "<20zł", "<50zł") // As requested
+    private val _selectedPriceOptionUi = MutableStateFlow(priceFilterOptionsList.first()) // Default to "Dowolna"
+    val selectedPriceOptionUi: StateFlow<String> = _selectedPriceOptionUi.asStateFlow()
+
+    val levelFilterOptionsList = listOf("Dowolny", "Początkujący", "Średniozaawansowany", "Zaawansowany", "Ekspert") // As requested
+    private val _selectedLevelOptionUi = MutableStateFlow(levelFilterOptionsList.first()) // Default to "Dowolna"
+    val selectedLevelOptionUi: StateFlow<String> = _selectedLevelOptionUi.asStateFlow()
+
+    fun onPriceOptionUiSelected(option: String) {
+        if (priceFilterOptionsList.contains(option)) { // Ensure valid option
+            _selectedPriceOptionUi.value = option
+        }
+    }
+    fun onLevelOptionUiSelected(option: String) {
+        if (levelFilterOptionsList.contains(option)) { // Ensure valid option
+            _selectedLevelOptionUi.value = option
+        }
+    }
 
     private val _sex = MutableLiveData("")
     val sex: LiveData<String> = _sex
@@ -89,5 +114,29 @@ class SearchThroughViewModel : ViewModel(){
         val selectedSports = _selectedSports.value ?: listOf()
         otherViewModel.fetchFilteredEvents(selectedSports)
     }
+
+    private val _city = MutableLiveData<String>("Warszawa")
+    val city: LiveData<String> get()= _city
+    fun getAvailableCities():List<String>{
+        return listOf("Warszawa", "Kraków", "Tarnów", "Gdańsk", "Wrocław")
+    }
+    fun updateCurrentCity(newCity: String) {
+        _city.value = newCity
+        Log.d("SearchViewModel", "City updated to: $newCity")
+    }
+
+
+    private val _selectedStartDateMillis = MutableStateFlow<Long?>(null)
+    val selectedStartDateMillis: StateFlow<Long?> = _selectedStartDateMillis.asStateFlow()
+
+    private val _selectedEndDateMillis = MutableStateFlow<Long?>(null)
+    val selectedEndDateMillis: StateFlow<Long?> = _selectedEndDateMillis.asStateFlow()
+
+    fun onDateRangeSelected(startDate: Long?, endDate: Long?) {
+        _selectedStartDateMillis.value = startDate
+        _selectedEndDateMillis.value = endDate
+        Log.d("SearchThroughViewModel", "Date range selected: Start: $startDate, End: $endDate")
+    }
+
 
 }
