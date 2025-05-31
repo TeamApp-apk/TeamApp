@@ -29,7 +29,7 @@ class SearchThroughViewModel : ViewModel(){
     private val _selectedPriceOptionUi = MutableStateFlow(priceFilterOptionsList.first()) // Default to "Dowolna"
     val selectedPriceOptionUi: StateFlow<String> = _selectedPriceOptionUi.asStateFlow()
 
-    val levelFilterOptionsList = listOf("Dowolny", "Początkujący", "Średniozaawansowany", "Zaawansowany", "Ekspert") // As requested
+    val levelFilterOptionsList = listOf("Dowolny", "Rekreacyjny", "Rekreacyjny/Średni", "Średni", "Zaawansowany", "Profesjonalny") // As requested
     private val _selectedLevelOptionUi = MutableStateFlow(levelFilterOptionsList.first()) // Default to "Dowolna"
     val selectedLevelOptionUi: StateFlow<String> = _selectedLevelOptionUi.asStateFlow()
 
@@ -98,6 +98,7 @@ class SearchThroughViewModel : ViewModel(){
         _selectedEndDateMillis.value = null // Reset end date
         _filtersOn.value = false
         // otherViewModel.isDataFetched = false // This might be handled within fetchEvents or based on your app logic
+        otherViewModel.isDataFetched = false
         otherViewModel.fetchEvents() // Fetch all events without filters
         Log.d("SearchThroughViewModel", "Filters Reset")
     }
