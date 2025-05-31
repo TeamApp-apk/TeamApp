@@ -514,32 +514,6 @@ fun SportPopupButton(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun GenderButtonWithLabel(label: String, viewModel: SearchThroughViewModel) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        IconButton(
-            onClick = { viewModel.onSexChange(label)},
-            modifier = Modifier
-                .size(50.dp)
-                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp)) // Placeholder border for icon
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.usersicon),
-                contentDescription = label,
-                tint = Color.Gray
-            )
-        }
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            color = Color.Black,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
 
 @Composable
 fun DistanceSlider(
@@ -600,46 +574,6 @@ fun DistanceSlider(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RangeSliderExample(modifier: Modifier = Modifier, viewModel: SearchThroughViewModel) {
-    val minAge by viewModel.minAge.observeAsState(0)
-    val maxAge by viewModel.maxAge.observeAsState(100)
-
-    val sliderPosition = minAge.toFloat()..maxAge.toFloat()
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-    ) {
-        Text(
-            text = "Wiek: ${sliderPosition.start.toInt()} - ${sliderPosition.endInclusive.toInt()}",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            textAlign = TextAlign.Center
-        )
-
-        RangeSlider(
-            value = sliderPosition,
-            onValueChange = { val newMin = it.start.toInt()
-                val newMax = it.endInclusive.toInt()
-                viewModel.onMinAgeChange(it.start.toInt())
-                viewModel.onMaxAgeChange(it.endInclusive.toInt())
-                            },
-            valueRange = 0f..100f,
-            onValueChangeFinished = {
-
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = SliderDefaults.colors(
-                thumbColor = Color(0xff4fc3f7),
-                activeTrackColor = Color(0xff4fc3f7)
-            )
-        )
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

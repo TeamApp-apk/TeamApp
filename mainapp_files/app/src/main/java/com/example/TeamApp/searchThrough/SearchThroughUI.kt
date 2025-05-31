@@ -102,7 +102,8 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
 
                 val selectedSports = SearchViewModel.selectedSports.value ?: listOf()
                 Log.d("SearchScreen", "Fetching filtered events with sports: $selectedSports")
-                viewModel.fetchFilteredEvents(selectedSports)
+                //viewModel.fetchFilteredEvents(selectedSports)
+                SearchViewModel.onFilterAccept()
             } else {
 
                 Log.d("SearchScreen", "Fetching all events")

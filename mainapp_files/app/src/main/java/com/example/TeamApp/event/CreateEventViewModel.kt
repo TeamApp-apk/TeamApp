@@ -33,8 +33,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.util.Calendar
 import java.util.Properties
+import com.google.firebase.firestore.Query
+import java.util.Date
+import java.util.Locale
+
 
 class CreateEventViewModel : ViewModel() {
     private val _sport = MutableLiveData<String>()
@@ -167,33 +173,115 @@ class CreateEventViewModel : ViewModel() {
 
     }
 
-    fun fetchFilteredEvents(selectedSports: List<String>) {
-        Log.d("CreateEventViewModel", "fetchFilteredEvents: Fetching events with selected sports")
+    fun fetchFilteredEvents(
+        sports: List<String>?,
+        maxDistance: Int?, // Skipped for now
+        priceOption: String?,
+        levelOption: String?,
+        startDateMillis: Long?,
+        endDateMillis: Long?,
+        city: String? // Skipped for now
+    ) {
+        Log.d(
+            "CreateEventViewModel",
+            "Fetching filtered events. Sports: $sports, Price: $priceOption, Level: $levelOption, StartDate: $startDateMillis, EndDate: $endDateMillis"
+        )
 
-        if (selectedSports.isEmpty()) {
-            Log.d("CreateEventViewModel", "Selected sports list is empty, fetching all events.")
-            fetchEvents() // Fetch all events or handle the empty case as needed
-            return
+        val db = Firebase.firestore // Using ktx extension for conciseness
+        var query: Query = db.collection("events")
+
+        if (!sports.isNullOrEmpty()) {
+            query = query.whereIn("activityName", sports)
+        } else {
+            Log.d("CreateEventViewModel", "No sports selected, not applying sports filter to query.")
         }
 
-        val db = Firebase.firestore
-        db.collection("events")
-            .whereIn("activityName", selectedSports) // Assuming "sport" is a field in your Firestore event documents
-            .get()
-            .addOnSuccessListener { result ->
-                activityList.clear()
-                for (document in result) {
-                    val event = document.toObject(Event::class.java)
-                    activityList.add(event)
+        if (priceOption != null && priceOption != "Dowolna") {
+            when (priceOption) {
+                "0zł" -> query = query.whereEqualTo("price", "0zł")
+                else -> Log.d("CreateEventViewModel", "Price option '$priceOption' requires client-side filtering or numeric storage.")
+            }
+        }
+
+        if (levelOption != null && levelOption != "Dowolny") {
+            query = query.whereEqualTo("skillLevel", levelOption)
+        }
+
+        query.get()
+            .addOnSuccessListener { result -> // No explicit type needed here usually, but good practice if error persists
+                val fetchedEvents = mutableListOf<Event>()
+                for (documentSnapshot in result.documents) { // Iterate over DocumentSnapshot
+                    try {
+                        val event = documentSnapshot.toObject(Event::class.java)
+                        if (event != null) { // Check for null if conversion can fail
+                            fetchedEvents.add(event)
+                        } else {
+                            Log.w("CreateEventViewModel", "Failed to convert document to Event: ${documentSnapshot.id}")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("CreateEventViewModel", "Error converting document ${documentSnapshot.id} to Event", e)
+                    }
                 }
-                if (activityList.isNotEmpty()) {
-                    Log.d("CreateEventViewModel", "Filtered events found")
+                Log.d("CreateEventViewModel", "Fetched ${fetchedEvents.size} events from Firestore based on server-side filters.")
+
+                var clientFilteredEvents = fetchedEvents
+
+                if (priceOption != null && priceOption != "Dowolna" && priceOption != "0zł") {
+                    clientFilteredEvents = clientFilteredEvents.filter { event ->
+                        val eventPrice = event.price?.replace(Regex("[^0-9]"), "")?.toIntOrNull() // More robust parsing
+                        if (eventPrice == null && priceOption != "0zł") return@filter false
+
+                        when (priceOption) {
+                            "<20zł" -> eventPrice != null && eventPrice < 20
+                            "<50zł" -> eventPrice != null && eventPrice < 50
+                            else -> true
+                        }
+                    }.toMutableList()
+                    Log.d("CreateEventViewModel", "After client-side price filter ('$priceOption'): ${clientFilteredEvents.size} events.")
+                }
+
+                if (startDateMillis != null || endDateMillis != null) {
+                    val sdf = SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()) // Correct usage of Locale.getDefault()
+
+                    clientFilteredEvents = clientFilteredEvents.filter { event ->
+                        try {
+                            val eventDateString = event.date.split(" ")[0]
+                            val eventDateCalendar = Calendar.getInstance().apply { // Correct usage of Calendar
+                                time = sdf.parse(eventDateString) ?: return@filter false
+                                set(Calendar.HOUR_OF_DAY, 0)
+                                set(Calendar.MINUTE, 0)
+                                set(Calendar.SECOND, 0)
+                                set(Calendar.MILLISECOND, 0)
+                            }
+                            val eventTime = eventDateCalendar.timeInMillis
+
+                            val startCheck = startDateMillis == null || eventTime >= startDateMillis
+                            val endCheck = endDateMillis == null || eventTime <= endDateMillis
+
+                            startCheck && endCheck
+                        } catch (e: Exception) {
+                            Log.e("CreateEventViewModel", "Error parsing event date: ${event.date}", e)
+                            false
+                        }
+                    }.toMutableList()
+                    Log.d("CreateEventViewModel", "After client-side date filter: ${clientFilteredEvents.size} events.")
+                }
+
+                activityList.clear()
+                activityList.addAll(clientFilteredEvents)
+
+                if (clientFilteredEvents.isNotEmpty()) {
+                    Log.d("CreateEventViewModel", "Final filtered events count: ${clientFilteredEvents.size}")
                 } else {
-                    Log.d("CreateEventViewModel", "No events matched the selected sports")
+                    Log.d("CreateEventViewModel", "No events matched all filter criteria.")
                 }
             }
-            .addOnFailureListener { e ->
-                Log.w("CreateEventViewModel", "Error fetching filtered events", e)
+            .addOnFailureListener { e: Exception -> // Explicitly type 'e' as Exception
+                Log.w("CreateEventViewModel", "Error fetching events with query", e)
+                // Example if activityList is a MutableLiveData:
+                // _activityList.value = emptyList()
+                // If activityList is the direct mutable list:
+                activityList.clear()
             }
     }
 

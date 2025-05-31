@@ -44,47 +44,15 @@ class SearchThroughViewModel : ViewModel(){
         }
     }
 
-    private val _sex = MutableLiveData("")
-    val sex: LiveData<String> = _sex
-
     private val _distance = MutableLiveData<Int>(75)
     val distance: LiveData<Int> = _distance
-
-    private val _minAge = MutableLiveData<Int>(0)
-    val minAge: LiveData<Int> = _minAge
-
-    private val _maxAge = MutableLiveData<Int>(100)
-    val maxAge: LiveData<Int> = _maxAge
 
     private val _filtersOn = MutableLiveData(false)
     val filtersOn: LiveData<Boolean> = _filtersOn
 
-    fun onSexChange(newValue: String) {
-        _sex.value = newValue
-    }
 
     fun onDistanceChange(newValue: Int) {
         _distance.value = newValue
-    }
-
-    fun onMinAgeChange(newValue: Int) {
-        _minAge.value = newValue
-    }
-
-    fun onMaxAgeChange(newValue: Int) {
-        _maxAge.value = newValue
-    }
-
-    fun onFilterReset()
-    {
-        _sex.value = ""
-        _distance.value = 75
-        _minAge.value = 0
-        _maxAge.value = 100
-        _filtersOn.value = false
-        Log.d("SearchThrough", "OnFilterReset ${_minAge.value}")
-        otherViewModel.isDataFetched = false
-        otherViewModel.fetchEvents()
     }
 
     fun toggleAllSports(selected: Boolean) {
@@ -108,12 +76,32 @@ class SearchThroughViewModel : ViewModel(){
     fun onFilterAccept()
     {
         _filtersOn.value = true
-        val size = selectedSports.value?.size
-        val size_ = _selectedSports.value?.size
-        Log.d("SearchThroughViewModel", "size: $size, size_: $size_ filtersOn = ${_filtersOn.value}")
         val selectedSports = _selectedSports.value ?: listOf()
-        otherViewModel.fetchFilteredEvents(selectedSports)
+        otherViewModel.fetchFilteredEvents(
+            sports = selectedSports,
+            maxDistance = _distance.value,
+            priceOption = _selectedPriceOptionUi.value,
+            levelOption = _selectedLevelOptionUi.value,
+            startDateMillis = _selectedStartDateMillis.value,
+            endDateMillis = _selectedEndDateMillis.value,
+            city = _city.value
+        )
     }
+
+    fun onFilterReset()
+    {
+        _distance.value = 75
+        toggleAllSports(true) // Resets sports to all selected
+        _selectedPriceOptionUi.value = priceFilterOptionsList.first() // Reset price to "Dowolna"
+        _selectedLevelOptionUi.value = levelFilterOptionsList.first() // Reset level to "Dowolny"
+        _selectedStartDateMillis.value = null // Reset start date
+        _selectedEndDateMillis.value = null // Reset end date
+        _filtersOn.value = false
+        // otherViewModel.isDataFetched = false // This might be handled within fetchEvents or based on your app logic
+        otherViewModel.fetchEvents() // Fetch all events without filters
+        Log.d("SearchThroughViewModel", "Filters Reset")
+    }
+
 
     private val _city = MutableLiveData<String>("Warszawa")
     val city: LiveData<String> get()= _city
