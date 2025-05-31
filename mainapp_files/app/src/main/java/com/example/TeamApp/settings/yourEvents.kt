@@ -117,6 +117,7 @@ fun YourEventsScreen(navController: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(5.dp)
+
             ) {
                 IconButton(
                     onClick = { navController.popBackStack() },
@@ -127,6 +128,7 @@ fun YourEventsScreen(navController: NavController) {
                         contentDescription = "Back Icon"
                     )
                 }
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center){
                 Text(
                     text = "Twoje wydarzenia",
                     style = TextStyle(
@@ -135,10 +137,11 @@ fun YourEventsScreen(navController: NavController) {
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF003366),
                         textAlign = TextAlign.Center,
-                    ),
-                    modifier = Modifier.weight(1f)
+                    )
+
                 )
-                Spacer(modifier = Modifier.width(26.dp))
+            }
+
             }
 
 
