@@ -80,6 +80,10 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
     val activityList = remember { viewModel.activityList }
     val newlyCreatedEvent = viewModel.newlyCreatedEvent
     val context = LocalContext.current
+
+    val configuration = LocalConfiguration.current
+    val screenHeightDp = configuration.screenHeightDp.dp
+
     var isRefreshing by remember { mutableStateOf(false) }
     val pullRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = {
         isRefreshing = true
@@ -145,8 +149,6 @@ fun SearchScreen(navController: NavController, onScroll: (isScrollingDown: Boole
         Color(0xFF007BFF),
     )
 
-        val configuration = LocalConfiguration.current
-        val screenHeightDp = configuration.screenHeightDp.dp
     Column(modifier = Modifier.fillMaxSize()) {
         CustomAppTopBar(
             navController = navController,
