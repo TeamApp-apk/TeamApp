@@ -381,6 +381,20 @@ class CreateEventViewModel : ViewModel() {
         return Event.sportIcons.keys.toList()
     }
 
+    private val _eventDetailsCurrentParticipants = MutableLiveData<Int?>()
+    val eventDetailsCurrentParticipants: LiveData<Int?> = _eventDetailsCurrentParticipants
+
+    // When an event is fetched or selected for details, initialize this
+    fun setSelectedEventForDetails(event: Event?) {
+        _eventDetailsCurrentParticipants.value = event?.currentParticipants
+        // You might also set other LiveData here if you have a general
+        // _selectedEventDetails = MutableLiveData<Event?>()
+    }
+
+    // Call this from DetailsScreen after successfully joining/leaving
+    fun updateLocalParticipantCount(newCount: Int) {
+        _eventDetailsCurrentParticipants.value = newCount
+    }
 
 
 }

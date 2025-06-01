@@ -98,12 +98,31 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
 
     val configuration = LocalConfiguration.current
     val screenHeightDp = configuration.screenHeightDp.dp
+    val currentEventDetails = event
+    val iconTintColor = Color(0xff4fc3f7)
+
+
+    val eventInitialDetails by remember(activityId) {
+        mutableStateOf(viewModel.getEventById(activityId))
+    }
+
+    // Observe the current participants count from the ViewModel
+    val currentParticipantsCount by viewModel.eventDetailsCurrentParticipants.observeAsState()
+
+    // Initialize the ViewModel's participant count when the screen loads or event changes
+    LaunchedEffect(eventInitialDetails) {
+        viewModel.setSelectedEventForDetails(eventInitialDetails)
+    }
+
 
     LaunchedEffect(user, event) { // Observe user and event for isJoined state
         Log.d("DetailsScreen", "User: $user, Event: $event")
     }
-    var isJoined by remember {
-        mutableStateOf(user?.let { currentUser -> event?.participants?.contains(currentUser.userID) } ?: false)
+    var isJoined by remember(user, eventInitialDetails, currentParticipantsCount) {
+        // Recalculate isJoined based on initial participants list if needed,
+        // though primarily it's for button state.
+        // The actual participant list for checking might need to come from eventInitialDetails.participants
+        mutableStateOf(user?.let { currentUser -> eventInitialDetails?.participants?.contains(currentUser.userID) } ?: false)
     }
 
 
@@ -170,7 +189,7 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                 containerColor = Color.White
             )
         )
-        if (locationID != null && event != null) { // Ensure event is not null for TomTomMapView
+        if (locationID != null && currentEventDetails != null) {
             Box(modifier = Modifier.constrainAs(map) {
                 top.linkTo(topAppBar.bottom)
                 start.linkTo(parent.start)
@@ -183,98 +202,87 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                     locationID = locationID,
                     selectedAddress = locationQuery,
                     cachedMapFragment = cachedMapFragment,
-                    event = event!!, // Safe due to outer null check
+                    event = currentEventDetails, // Pass the stable currentEventDetails
                 )
             }
         } else {
-            // Placeholder or empty box if map can't be shown
-            Box(modifier = Modifier.constrainAs(map) {
-                top.linkTo(topAppBar.bottom)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                width = Dimension.fillToConstraints
-                height = mapHeight
-            })
+            Box(modifier = Modifier.constrainAs(map) { /* Placeholder */ })
         }
-
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                 .constrainAs(lazyColumn) {
-                    // Link top of LazyColumn to map.top with a margin to achieve the overlap effect
                     top.linkTo(map.top, margin = lazyColumnTopMarginFromMapTop)
                     bottom.linkTo(parent.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                    height = Dimension.fillToConstraints // Make LazyColumn scrollable within its constraints
+                    height = Dimension.fillToConstraints
                     width = Dimension.fillToConstraints
                 }
         ) {
-            // Spacer to push content below the rounded corners / map overlap
-            item { Spacer(modifier = Modifier.height(30.dp)) } // Adjust this height for visual spacing
+            // Reduced spacer height
+            item { Spacer(modifier = Modifier.height(15.dp)) }
 
-            event?.let { currentEvent -> // Use let for safe access to currentEvent
+            currentEventDetails?.let { eventData ->
                 item {
-                    val titleToDisplay = if (!currentEvent.eventName.isNullOrBlank()) {
-                        currentEvent.eventName
+                    val titleToDisplay = if (!eventData.eventName.isNullOrBlank()) {
+                        eventData.eventName
                     } else {
-                        currentEvent.activityName // Fallback to activityName
+                        eventData.activityName
                     }
-
                     Text(
                         text = titleToDisplay,
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp) // Reduced vertical padding
                     )
-                    Divider(modifier = Modifier.padding(horizontal = 16.dp))
+                    // Divider removed
                 }
 
                 item {
-                    Column() {
+                    Column { // Removed extra padding from this Column
                         Text(
                             text = "Opis wydarzenia",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                                .padding(top = 16.dp)
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp) // Adjusted padding
                         )
                         DescriptionTextField(
-                            label = "", // Label isn't really needed here as we have the title above
+                            label = "",
                             isEditable = false,
-                            text = currentEvent.description
+                            text = eventData.description,
+                            modifier = Modifier.padding(top = 0.dp) // Ensure no extra top padding from here
                         )
                     }
                 }
 
                 item {
-                    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
+                    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)) {
                         Text(
                             text = "Szczegóły",
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        DetailItem(icon = Icons.Filled.LocationOn, label = "Lokalizacja:", value = currentEvent.location)
-                        // Date Formatting
+                        DetailItem(icon = Icons.Filled.LocationOn, label = "Lokalizacja:", value = eventData.location, iconColor = iconTintColor)
                         val formattedDate = try {
                             val formatterFrom = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("pl"))
                             val formatterTo = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy HH:mm", Locale("pl"))
-                            LocalDateTime.parse(currentEvent.date, formatterFrom).format(formatterTo)
+                            LocalDateTime.parse(eventData.date, formatterFrom).format(formatterTo)
                         } catch (e: Exception) {
-                            currentEvent.date // Fallback to original string if parsing fails
+                            eventData.date
                         }
-                        DetailItem(icon = Icons.Filled.CalendarToday, label = "Data:", value = formattedDate)
-                        DetailItem(icon = Icons.Filled.EuroSymbol, label = "Cena:", value = currentEvent.price ?: "Nie podano")
-                        DetailItem(icon = Icons.Filled.Star, label = "Poziom:", value = currentEvent.skillLevel ?: "Nie podano")
+                        DetailItem(icon = Icons.Filled.CalendarToday, label = "Data:", value = formattedDate, iconColor = iconTintColor)
+                        DetailItem(icon = Icons.Filled.EuroSymbol, label = "Cena:", value = (eventData.price ?: "Nie podano") + if (!eventData.price.isNullOrBlank() && eventData.price != "Nie podano" && !eventData.price.endsWith("zł")) " zł" else "", iconColor = iconTintColor)
+                        DetailItem(icon = Icons.Filled.Star, label = "Poziom:", value = eventData.skillLevel ?: "Nie podano", iconColor = iconTintColor)
                         DetailItem(
                             icon = Icons.Filled.Person,
                             label = "Uczestnicy:",
-                            value = "${currentEvent.currentParticipants} / ${currentEvent.maxParticipants}"
+                            value = "${currentParticipantsCount ?: eventData.currentParticipants} / ${eventData.maxParticipants}",
+                            iconColor = iconTintColor
                         )
                     }
-                    Divider(modifier = Modifier.padding(horizontal = 16.dp))
+                    // Divider removed
                 }
-
 
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -283,20 +291,20 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 8.dp) // Increased bottom padding
+                            .padding(bottom = 8.dp)
                     ) {
-                        Icon( // Changed Image to Icon for consistency if using Material Icons
+                        Icon(
                             painter = painterResource(id = if (isJoined) R.drawable.joinstatuson else R.drawable.joinstatusoff),
                             contentDescription = "Join status",
-                            modifier = Modifier.size(32.dp), // Adjusted size
-                            tint = if (isJoined) Color(0xFF4CAF50) else Color.Gray // Example tint
+                            modifier = Modifier.size(32.dp),
+                            tint = if (isJoined) iconTintColor else Color.Gray // Using iconTintColor
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
                             text = if (isJoined) "Dołączono" else "Nie dołączono",
                             style = TextStyle(
-                                fontSize = 20.sp, // Slightly smaller for balance
-                                fontFamily = FontFamily(Font(R.font.robotoblackitalic)), // Ensure this font is available
+                                fontSize = 20.sp,
+                                fontFamily = FontFamily(Font(R.font.robotoblackitalic)),
                                 fontWeight = FontWeight.ExtraBold,
                                 color = Color(0xFF003366),
                             )
@@ -307,54 +315,50 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
                 item {
                     Column(
                         modifier = Modifier
-                            .padding(horizontal = 24.dp, vertical = 16.dp) // Added vertical padding
-                            .navigationBarsPadding() // Handles system navigation bar
+                            .padding(horizontal = 24.dp, vertical = 16.dp)
+                            .navigationBarsPadding()
                     ) {
                         EventButton(
                             text = if (isJoined) "OPUŚĆ" else "DOŁĄCZ",
-                            onClick = { /* ... Your existing join/leave logic ... */
+                            onClick = {
                                 val db = FirebaseFirestore.getInstance()
                                 val eventRef = db.collection("events").document(activityId)
                                 val userRef = user?.let { db.collection("users").document(it.userID) }
-
-                                val currentIsJoined = isJoined // Use a stable value for the transaction
+                                val currentIsJoined = isJoined
 
                                 if (!currentIsJoined) {
                                     if (user != null) {
-                                        currentEvent.participants.add(user!!.userID)
-                                        eventRef.update("participants", currentEvent.participants)
-                                        eventRef.update("currentParticipants", currentEvent.participants.size)
+                                        eventData.participants.add(user!!.userID) // Use eventData
+                                        eventRef.update("participants", eventData.participants)
+                                        eventRef.update("currentParticipants", eventData.participants.size)
+                                            .addOnSuccessListener {
+                                                viewModel.updateLocalParticipantCount(eventData.participants.size) // Update ViewModel LiveData
+                                            }
                                         userRef?.update("attendedEvents", FieldValue.arrayUnion(eventRef.id))
                                     }
                                 } else {
                                     if (user != null) {
-                                        currentEvent.participants.remove(user!!.userID)
-                                        eventRef.update("participants", currentEvent.participants)
-                                        eventRef.update("currentParticipants", currentEvent.participants.size)
+                                        eventData.participants.remove(user!!.userID) // Use eventData
+                                        eventRef.update("participants", eventData.participants)
+                                        eventRef.update("currentParticipants", eventData.participants.size)
+                                            .addOnSuccessListener {
+                                                viewModel.updateLocalParticipantCount(eventData.participants.size) // Update ViewModel LiveData
+                                            }
                                         userRef?.update("attendedEvents", FieldValue.arrayRemove(eventRef.id))
                                     }
                                 }
-                                isJoined = !currentIsJoined // Update UI state
+                                isJoined = !currentIsJoined
                             }
                         )
-                        Spacer(modifier = Modifier.height(10.dp)) // Space between buttons
+                        Spacer(modifier = Modifier.height(10.dp))
                         EventButton(
                             text = "CZAT",
-                            onClick = {
-                                if (isJoined) {
-                                    navController.navigate("chat/$activityId")
-                                } else {
-                                    Log.d("DetailsScreen", "User is not a participant, cannot access chat.")
-                                    // TODO: Show a Toast or Snackbar to the user
-                                }
-                            }
+                            onClick = { /* ... */ }
                         )
                     }
                 }
-            } ?: item { // Fallback if event is null
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp), contentAlignment = Alignment.Center) {
+            } ?: item {
+                Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
                     Text("Nie można załadować szczegółów wydarzenia.")
                 }
             }
@@ -363,9 +367,9 @@ fun DetailsScreen(navController: NavController, activityId: String, userViewMode
 }
 
 @Composable
-fun DetailItem(icon: ImageVector, label: String, value: String) {
+fun DetailItem(icon: ImageVector, label: String, value: String, iconColor: Color) { // Added iconColor parameter
     Row(
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top, // Changed to Top for better alignment with multi-line text
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 6.dp)
@@ -373,8 +377,8 @@ fun DetailItem(icon: ImageVector, label: String, value: String) {
         Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = MaterialTheme.colorScheme.primary, // Use theme color
-            modifier = Modifier.size(20.dp)
+            tint = iconColor, // Use passed iconColor
+            modifier = Modifier.size(20.dp).padding(top = 2.dp) // Add slight top padding to align with text baseline
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
@@ -386,8 +390,8 @@ fun DetailItem(icon: ImageVector, label: String, value: String) {
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Black,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2 // Allow value to wrap slightly if long
+            // Removed maxLines and TextOverflow to allow full text wrapping for location
+            modifier = Modifier.weight(1f) // Allow text to take remaining space and wrap
         )
     }
 }
