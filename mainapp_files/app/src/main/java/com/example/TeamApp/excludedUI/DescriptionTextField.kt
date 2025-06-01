@@ -63,7 +63,7 @@ fun DescriptionTextField(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(bottom = 8.dp)
     ) {
         if (isEditable) {
             // ... (Editable BasicTextField part remains the same)
