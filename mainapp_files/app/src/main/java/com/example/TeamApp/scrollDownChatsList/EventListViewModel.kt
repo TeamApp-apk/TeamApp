@@ -10,9 +10,9 @@ import com.google.firebase.firestore.ListenerRegistration
 
 
 class EventListViewModel : ViewModel() {
-    private val repository = EventRepository()
-    private var listenerRegistration: ListenerRegistration? = null
+    private val repository = EventRepository.getInstance()
 
+    private var listenerRegistration: ListenerRegistration? = null
     private var _userEvents = mutableStateOf<List<Event>>(emptyList())
     val userEvents: State<List<Event>> = _userEvents
 
@@ -25,7 +25,6 @@ class EventListViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        listenerRegistration?.remove()  // Odłącz listener przy zamknięciu
+        listenerRegistration?.remove()
     }
 }
-
