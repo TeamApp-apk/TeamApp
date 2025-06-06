@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -64,8 +66,15 @@ import com.example.compose.primaryLight
 import com.example.compose.secondaryLight
 import com.example.ui.theme.fontFamily
 import com.example.TeamApp.excludedUI.CustomSnackbar
+import com.example.TeamApp.scrollDownChatsList.EventListViewModelProvider
+import com.example.TeamApp.scrollDownChatsList.EventRepository
+import com.google.firebase.Timestamp
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun YourEventsScreen(navController: NavController) {
@@ -73,24 +82,42 @@ fun YourEventsScreen(navController: NavController) {
         Color(0xFFE8E8E8),
         Color(0xFF007BFF)
     )
+    val viewModel = EventListViewModelProvider.eventListViewModel
+    val events by viewModel.userEvents
+    val polishFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy, HH:mm", Locale("pl"))
+
+    val sortedEvents = events.sortedByDescending { event ->
+        try {
+            LocalDateTime.parse(event.date, polishFormatter)
+        } catch (e: Exception) {
+            LocalDateTime.MIN
+        }
+    }
+
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(brush = Brush.linearGradient(colors = gradientColors))
             .padding(start = 6.dp, end = 6.dp, top = 28.dp, bottom = 72.dp)
-
     ) {
+
         Column(
             modifier = Modifier
-                .align(Alignment.Center) // Center the Column within the Box
+                .align(Alignment.Center)
                 .fillMaxSize()
-                .background(color = Color(0xFFFFFFFF), shape = RoundedCornerShape(size = 16.dp))
-                .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 10.dp),
+                .background(color = Color.White, shape = RoundedCornerShape(16.dp))
+                .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 5.dp).fillMaxWidth()
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp)
+
             ) {
                 IconButton(
                     onClick = { navController.popBackStack() },
@@ -101,21 +128,36 @@ fun YourEventsScreen(navController: NavController) {
                         contentDescription = "Back Icon"
                     )
                 }
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center){
                 Text(
                     text = "Twoje wydarzenia",
                     style = TextStyle(
                         fontSize = 24.sp,
                         fontFamily = FontFamily(Font(R.font.proximanovabold)),
-                        fontWeight = FontWeight(900),
+                        fontWeight = FontWeight.Bold,
                         color = Color(0xFF003366),
-                        textAlign = TextAlign.End,
+                        textAlign = TextAlign.Center,
                     )
-                )
 
+                )
+            }
+
+            }
+
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(sortedEvents) { event ->
+
+                    EventItem(event = event) {
+                        navController.navigate("details/${event.id}")
+
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
             }
         }
     }
 }
-
-
-
